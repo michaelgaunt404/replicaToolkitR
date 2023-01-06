@@ -58,7 +58,7 @@ query_network_trip_using_bbox = function(
   ,file_destination
   ,query_network = T
   ,max_record = 1000){
-
+  gauntlet::glue_collapse()
   #init_error_logging_and_setup
   {
     query_start = clean_datetime()
@@ -68,31 +68,41 @@ query_network_trip_using_bbox = function(
     dir.create(folder)
     log_file = here(file_destination
                     ,str_glue("data_{query_start}/log_file.txt"))
-    logger = logger("DEBUG"
-                    ,appenders = file_appender(log_file))
+    logger = logger("DEBUG", appenders = file_appender(log_file))
+
     info(logger, "Query started")
     message(str_glue('Query started at {query_start}\nFile path to log file {log_file}'))
+    # print("yolo")
+    # blob = bounding_box_points
+
+    # test = glue_collapse('{names(blob)} _ {blob}')
+    print(bounding_box_points[[2]])
     info(logger
          ,str_glue("{make_space()}\nLogging Query Inputs
-                   Bounding Box\n{glue_collapse('{names(bounding_box_points)} _ {bounding_box_points}')}
-                   Links Provided\n{glue_collapse('{sort(query_links)}')}
-                   Cutsomer Name: {customer_name}
-                   Schema Table: {trip_table}"))
+         Bounding Box\n{paste0(str_glue('{names(bounding_box_points)} _ {bounding_box_points}'), collapse = '\n')}
+         Links Provided\n{paste0(str_glue('{sort(query_links)}'),collapse = '\n')}
+         Cutsomer Name: {customer_name}
+         Schema Table: {trip_table}"))
 
     bounding_box_message = str_glue("(startLat > {bounding_box_points[[2]]} AND startLat < {bounding_box_points[[4]]}) AND
                                 (endLat > {bounding_box_points[[2]]} AND endLat < {bounding_box_points[[4]]}) AND
                                 (startLon > {bounding_box_points[[1]]} AND startLon < {bounding_box_points[[3]]}) AND
                                 (endLon > {bounding_box_points[[1]]} AND endLon < {bounding_box_points[[3]]})")
-  }
 
-  if (!any(is.na(query_links))){
-    message("No NAs detected in links input.... Good")
-    links_pro = paste0("'", query_links, "'", collapse = ", ")
-    links_where_statement = str_glue("where highway in ({links_pro})")
-  } else {
-    message("NAs detected, all highway links will be queried.")
-    warn(logger, "NAs detected, all highway links will be queried.")
-    links_where_statement = ""
+    print(bounding_box_message)
+
+
+    if (!any(is.na(query_links))){
+      message("No NAs detected in links input.... Good")
+      links_pro = paste0("'", query_links, "'", collapse = ", ")
+      links_where_statement = str_glue("where highway in ({links_pro})")
+    } else {
+      message("NAs detected, all highway links will be queried.")
+      warn(logger, "NAs detected, all highway links will be queried.")
+      links_where_statement = ""
+    }
+
+    message("Passed links location")
   }
 
   #query strings
@@ -142,6 +152,7 @@ from
       str_glue("{make_space()}\nNon-empty data returned, Good\nQuery continued...\nIn total {sum(highway_counts$count)} links\n{str_glue('-{highway_counts$count} ({100*dgt2(highway_counts$count/sum({highway_counts$count}))})% {highway_counts$highway}') %>%
                 paste0(collapse = '\n')}") %>%
         log_and_info(., logger)
+
       log_and_warn(
         str_glue("{make_space()}\nThe following link types were requested but not found in bounding box
                  {glue_collapse('{query_links[-which(highway_counts$highway %in% query_links)]}')}")
