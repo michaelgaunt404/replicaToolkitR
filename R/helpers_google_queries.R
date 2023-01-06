@@ -58,8 +58,8 @@ query_network_trip_using_bbox = function(
   ,file_destination
   ,query_network = T
   ,max_record = 1000){
-  gauntlet::glue_collapse()
-  #init_error_logging_and_setup
+
+    #init_error_logging_and_setup
   {
     query_start = clean_datetime()
     folder = here(file_destination
@@ -72,11 +72,7 @@ query_network_trip_using_bbox = function(
 
     info(logger, "Query started")
     message(str_glue('Query started at {query_start}\nFile path to log file {log_file}'))
-    # print("yolo")
-    # blob = bounding_box_points
 
-    # test = glue_collapse('{names(blob)} _ {blob}')
-    print(bounding_box_points[[2]])
     info(logger
          ,str_glue("{make_space()}\nLogging Query Inputs
          Bounding Box\n{paste0(str_glue('{names(bounding_box_points)} _ {bounding_box_points}'), collapse = '\n')}
@@ -88,9 +84,6 @@ query_network_trip_using_bbox = function(
                                 (endLat > {bounding_box_points[[2]]} AND endLat < {bounding_box_points[[4]]}) AND
                                 (startLon > {bounding_box_points[[1]]} AND startLon < {bounding_box_points[[3]]}) AND
                                 (endLon > {bounding_box_points[[1]]} AND endLon < {bounding_box_points[[3]]})")
-
-    print(bounding_box_message)
-
 
     if (!any(is.na(query_links))){
       message("No NAs detected in links input.... Good")
@@ -155,10 +148,13 @@ from
 
       log_and_warn(
         str_glue("{make_space()}\nThe following link types were requested but not found in bounding box
-                 {glue_collapse('{query_links[-which(highway_counts$highway %in% query_links)]}')}")
+                 {str_glue('{query_links[-which(highway_counts$highway %in% query_links)]}') %>% paste0(collapse = '\n')}")
         ,logger)
     }
   }
+
+
+
 
   #query google
   {
@@ -281,7 +277,11 @@ on (table_left.network_link_ids_unnested = table_right.stableEdgeId);")
 
       info(logger,str_glue("table_trip_first_link_pro: {replica_temp_tbl_name(table_trip_first_link_pro)}"))
 
-      temp_query = str_glue("select mode, vehicle_type, origin_bgrp, destination_bgrp, count(*) as count
+      temp_query = str_glue("select mode
+      ,vehicle_type
+      ,origin_bgrp
+      ,destination_bgrp
+      ,count(*) as count
       from (select distinct activity_id, mode, vehicle_type, origin_bgrp, destination_bgrp
             from {replica_temp_tbl_name(table_ordered_trip_links)})
       group by mode, vehicle_type, origin_bgrp, destination_bgrp;")
