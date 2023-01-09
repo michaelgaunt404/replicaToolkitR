@@ -176,7 +176,7 @@ from
     }
 
     #prefilters trips so that we only get commercial vehicles
-    #just makes queires run a little bit faster
+    #just makes queries run a little bit faster
     {
       message(str_glue("{make_space()}\nCreating trip subset table now...."))
 
