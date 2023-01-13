@@ -14,9 +14,9 @@ make_network_centroid_layer(
 \arguments{
 \item{location}{character string pointing to top level location where data acquired from google was saved to.}
 
-\item{folder}{character string of name where data was automatically saved to from google data download.}
+\item{folder}{character string of name where data was automatically saved to from Google data download.}
 
-\item{auto_save}{boolean (T/F - default F) inicating if you want the GIS layer to be saved. Default just creates an object without saving.}
+\item{auto_save}{boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.}
 
 \item{network_object}{network object containing links. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.}
 }
@@ -25,7 +25,7 @@ GIS layer of network with CRS 4326
 }
 \description{
 HTML packages used in creating interactive, client-side visualizations are not compatible with links.
-This function converts GIS links to points by extracing the centroids.
+This function converts GIS links to points by extracting the centroids.
 }
 \examples{
 data('replica_queried_network_links')
