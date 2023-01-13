@@ -1,51 +1,11 @@
-#' Extract project name, dataset, and tablename from google big query object.
-#'
-#' When BQuery objects (tables) are made using bq_project_query() they are given temporary dataset and table names.
-#' This function extracts all of a table's identifying elements and glues them into a singular string.
-#' This string can be used in subsequent queires.
-#'
-#' Function is helpful when making mulitstepped queries where temporary tables are created and subsequently interacted with.
-#'
-#' @param object
-#'
-#' @return a character string
-#' @export
-#'
-#' @examples
-#'
-#' temp = list(username = "replica_fake_name"
-#',dataset = "replica_temp_dataset"
-#',table = "replica_temp_table")
-#'
-#'replica_temp_tbl_name(temp)
-replica_temp_tbl_name = function(object) {
-  str_glue("{object[[1]]}.{object[[2]]}.{object[[3]]}")
-}
 
 
-#' @title Easily query and download Replica trip and network data using the extent of a map layer.
-#'
-#' @description This function takes a bounding box and google big query inputs and returns data back to you.
-#' Function currently only works for data using block groups as it is hardcoded in some of the queries. Changes can be made to the query such that other polygon shapes can be used.
-#'
-#' This function creates a log file that records inputs, the query sent to Google, and IDs for each Google table that is created in the multi-step query. All of this information can be accessed at later points in time. Table IDs in log file can be used for auditing purposes or copy and pasted and used in the Google Big Query console GUI.
-#'
-#'
-#' @param bounding_box_points bounding box object detailing extent of road network that you whish to query trips with. This should be made using sf::st_bbox().
-#' @param query_links vector of character strings detailing which type of network links to use in the query. These will be used 1) to depict any network link volume graphics with 2) to filter trips with. For the latter, any trip that uses these road within the study area will be including in any reporting.
-#' @param customer_name character string indicating google account that will be billed
-#' @param trip_table character string indicating which trip table should be queired - location, year, quarter, day, etc should match network_table. Please include entire table name as well '[customer_name].[trip_table]'
-#' @param network_table character string indicating which trip table should be queired - location, year, quarter, day, etc should match trip_table. Please include entire table name as well '[customer_name].[network_table]'
-#' @param file_destination character string indicating a directory where you want log files and data to be saved to. A new folder containg function outputs will be made there named using the convention 'data_[sys.datetime]'
-#' @param query_network boolean (T/F) indicating if the network should be downloaded at function runtime. Default is 'T'. It can be beneficial to wait and see how many links will be downloaded before netowrk is downloaded, it can also be downloaded latter as log files record big query table IDs.
-#' @param max_record integer indicating max number of records will be written out for each data acquired by google - default is 1000, use Inf if you do not want to limit download. Useful if you want to check the data out first before downloading large amounts of data. Google tables are still made in full so they can be manually acquired without rerunning this function - see log files.
-#'
-#' @return does not return any objects in R. Function creates a log file and data to folder destination in CSV format.
-#' @export
-#'
-#' @examples
-#'
-#' #none
+library(tidyverse)
+library(gauntlet)
+library(bigrquery)
+library(log4r)
+library(here)
+library(sf)
 
 query_network_trip_using_bbox = function(
   bb_network_layer
@@ -64,16 +24,16 @@ query_network_trip_using_bbox = function(
   ,max_record = 1000){
 
   #commented out inputs
-  # {
-  #   # bb_network_layer = "data/req_dev/study_area_network.shp"
-  #   # bb_sa_layer = "data/req_dev/study_area_polys_union.shp"
-  #   # network_table = "replica-customer.northwest.northwest_2021_Q4_network_segments"
-  #   # trip_table = "replica-customer.northwest.northwest_2021_Q4_thursday_trip"
-  #   # customer_name = "replica-customer"
-  #   # file_destination = "data/req_dev"
-  #   # query_links = c('motorway','motorway_link'
-  #   #                 ,'primary','primary_link')
-  # }
+  {
+    # bb_network_layer = "data/req_dev/study_area_network.shp"
+    # bb_sa_layer = "data/req_dev/study_area_polys_union.shp"
+    # network_table = "replica-customer.northwest.northwest_2021_Q4_network_segments"
+    # trip_table = "replica-customer.northwest.northwest_2021_Q4_thursday_trip"
+    # customer_name = "replica-customer"
+    # file_destination = "data/req_dev"
+    # query_links = c('motorway','motorway_link'
+    #                 ,'primary','primary_link')
+  }
 
   #init_error_logging_and_setup
   {
@@ -86,8 +46,7 @@ query_network_trip_using_bbox = function(
     log4r::info(logger, "Query started")
     message(str_glue('Query started at {query_start}\nFile path to log file:\n{log_file}'))
 
-    log4r::info(logger,
-                stringr::str_glue("{make_space()}\nLogging Query Inputs\nPath to network boundary file: {bb_network_layer}\nPath to study area boundary file: {bb_sa_layer}\nCutsomer Name: {customer_name}\nSchema Table: {trip_table}\nLinks Provided:{make_space('-', n = 10)}\n{paste0(str_glue('{sort(query_links)}'),collapse = '\n')}{make_space('-', n = 10)}"))
+    log4r::info(logger, qs_log_inputs())
 
     if (!any(is.na(query_links))){
       message("No NAs detected in links input.... Good")
@@ -139,16 +98,7 @@ query_network_trip_using_bbox = function(
 
       table_network = bq_project_query(
         customer_name
-        # ,qs_table_network()
-        ,str_glue("select * from (
-select *,
-ST_INTERSECTS(
-ST_GEOGFROMTEXT('{list_wkt_objects[[1]]}')
-,geometry) as flag_contains
-from `{network_table}`
-where highway in ({links_pro})
-)
-where flag_contains = TRUE")
+        ,qs_table_network()
       )
 
       temp_query = str_glue("SELECT highway, count(*) as count
@@ -189,20 +139,12 @@ where flag_contains = TRUE")
 
       info(logger,str_glue("table_network: {replica_temp_tbl_name(table_network)}"))
 
-      check_network_links_TF = F
-      while (check_network_links_TF == F) {
-        check_network_links  = readline("Would you like to continue the function exectuion? (Y/N) ")
-        check_network_links_TF = (check_network_links %in% c("y", "n", "Y", "N"))
-        if (!check_network_links_TF){
-          message("Not a valid input... try again")
-        }
-      }
+      check_continuation = readline(prompt = "Would you like to coninute function exectuion (T/F)? ") == "T"
 
-      if (check_network_links %in% c("n", "N")) {
+      if (!check_continuation){
         warn(logger, "You have elected to terminate function run..." )
-        stopifnot("You have elected to terminate function run..." = F)
+        stopifnot("You have elected to terminate function run..." = check_continuation)
       }
-
 
     }
 
@@ -218,16 +160,7 @@ where flag_contains = TRUE")
 
       table_sa_poly_index = bq_project_query(
         "replica-customer"
-        # ,qs_table_sa_poly_index()
-        ,str_glue("select * from (
-select *,
-ST_INTERSECTS(
-ST_GEOGFROMTEXT('{list_wkt_objects[[2]]}')
-,surface_point) as flag_contains
-from `Geos.bgrp`
-)
-where flag_contains = TRUE")
-      )
+        ,qs_table_sa_poly_index())
 
       info(logger, str_glue("table_sa_poly_index: {replica_temp_tbl_name(table_sa_poly_index)}"))
     }
@@ -241,15 +174,7 @@ where flag_contains = TRUE")
 
       table_trip_subset = bq_project_query(
         customer_name
-        # ,qs_table_trip_subset()
-        ,str_glue("select distinct activity_id, network_link_ids
-from
-(select *
-from `{trip_table}`
-where mode = 'COMMERCIAL'
-), unnest(network_link_ids) as network_link_ids
-;")
-      )
+        ,qs_table_trip_subset())
 
       info(logger, str_glue("table_trip_subset: {replica_temp_tbl_name(table_trip_subset)}"))
     }
@@ -262,13 +187,7 @@ where mode = 'COMMERCIAL'
 
       table_trip_network_match = bq_project_query(
         customer_name
-        # ,qs_table_trip_network_match()
-        ,str_glue("select distinct activity_id
-from {replica_temp_tbl_name(table_trip_subset)}
-where
-1 = 1
-and network_link_ids in (select stableEdgeId from {replica_temp_tbl_name(table_network)});")
-      )
+        ,qs_table_trip_network_match())
 
       info(logger,str_glue("table_trip_network_match: {replica_temp_tbl_name(table_trip_network_match)}"))
     }
@@ -281,29 +200,7 @@ and network_link_ids in (select stableEdgeId from {replica_temp_tbl_name(table_n
 
       table_trips_thru_zone = bq_project_query(
         customer_name
-        # ,qs_table_trips_thru_zone()
-        ,str_glue("select *
-,case
-when origin_bgrp in (select raw_id from {replica_temp_tbl_name(table_sa_poly_index)}) then origin_bgrp
-else 'out of study area'
-END as origin_poly
-,case
-when destination_bgrp in (select raw_id from {replica_temp_tbl_name(table_sa_poly_index)}) then destination_bgrp
-else 'out of study area'
-END as destination_poly
-,case
-when origin_bgrp in (select raw_id from {replica_temp_tbl_name(table_sa_poly_index)}) then 'internal'
-else 'external'
-END as flag_sa_origin
-,case
-when destination_bgrp in (select raw_id from {replica_temp_tbl_name(table_sa_poly_index)}) then 'internal'
-else 'external'
-END as flag_sa_destination
-from (select *
-from `{trip_table}`
-where 1 = 1
-and activity_id in (select activity_id from {replica_temp_tbl_name(table_trip_network_match)}))")
-        )
+        ,qs_table_trips_thru_zone())
 
       info(logger,str_glue("table_trips_thru_zone: {replica_temp_tbl_name(table_trips_thru_zone)}"))
 
@@ -316,62 +213,29 @@ and activity_id in (select activity_id from {replica_temp_tbl_name(table_trip_ne
 
       table_simple_origin_destination = bq_project_query(
         customer_name
-        # ,qs_table_simple_origin_destination()
-        ,str_glue("select mode
-      ,vehicle_type
-      ,origin_poly, flag_sa_origin
-      ,destination_poly, flag_sa_destination
-      ,count(*) as count
-      from {replica_temp_tbl_name(table_trips_thru_zone)}
-      group by mode, vehicle_type
-           ,origin_poly, flag_sa_origin
-      ,destination_poly, flag_sa_destination;"))
+        ,qs_table_simple_origin_destination())
 
       info(logger,str_glue("table_simple_origin_destination: {replica_temp_tbl_name(table_simple_origin_destination)}"))
 
       table_ordered_trip_links = bq_project_query(
         customer_name
-        # ,qs_table_ordered_trip_links()
-        ,str_glue("select
-    activity_id, mode, vehicle_type
-    ,origin_bgrp, origin_poly, flag_sa_origin
-    ,destination_bgrp, destination_poly, flag_sa_destination
-    ,network_link_ids_unnested
-    ,ROW_NUMBER ()
-    OVER (PARTITION BY activity_id) AS index
-    from {replica_temp_tbl_name(table_trips_thru_zone)}
-                          ,unnest(network_link_ids) as network_link_ids_unnested;"))
+        ,qs_table_ordered_trip_links())
 
       info(logger,str_glue("table_ordered_trip_links: {replica_temp_tbl_name(table_ordered_trip_links)}"))
 
       table_trip_first_link = bq_project_query(
         customer_name
-        # ,qs_table_trip_first_link()
-        ,str_glue("select
-  mode, vehicle_type
-  ,origin_bgrp, origin_poly, flag_sa_origin, network_link_ids_unnested
-  , count(*) as count
-  from {replica_temp_tbl_name(table_ordered_trip_links)}
-  where 1 = 1
-  and index = 1
-  group by mode, vehicle_type,origin_bgrp, origin_poly, flag_sa_origin, network_link_ids_unnested;"))
+        ,qs_table_trip_first_link())
 
       table_trip_first_link_pro = bq_project_query(
         customer_name
-        # ,qs_table_trip_first_link_pro()
-        ,str_glue("select
-table_left.*
-,table_right.*
-from {replica_temp_tbl_name(table_trip_first_link)} table_left
-left join (select stableEdgeId,startLat,startLon,endLat,endLon
-from {network_table}
-where stableEdgeId in (select network_link_ids_unnested from {replica_temp_tbl_name(table_trip_first_link)})) table_right
-on (table_left.network_link_ids_unnested = table_right.stableEdgeId);"))
+        ,qs_table_trip_first_link_pro())
 
       info(logger,str_glue("table_trip_first_link_pro: {replica_temp_tbl_name(table_trip_first_link_pro)}"))
 
       message(str_glue("Origin and Destination aggreations complete....{make_space()}"))
     }
+
 
     #network_links
     {
@@ -379,19 +243,7 @@ on (table_left.network_link_ids_unnested = table_right.stableEdgeId);"))
 
       table_agg_by_link = bq_project_query(
         customer_name
-        # ,qs_table_agg_by_link()
-        ,  str_glue("select
-mode, vehicle_type
-,origin_poly, flag_sa_origin
-,flag_sa_destination
-,network_link_ids_unnested
-,count(*) as count
-from {replica_temp_tbl_name(table_ordered_trip_links)}
-group by
-mode, vehicle_type
-,origin_poly, flag_sa_origin
-,flag_sa_destination
-,network_link_ids_unnested"))
+        ,qs_table_agg_by_link())
 
       info(logger,str_glue("table_agg_by_link: {replica_temp_tbl_name(table_agg_by_link)}"))
 
@@ -436,11 +288,7 @@ mode, vehicle_type
       {
         table_agg_by_link_subset = bq_project_query(
           customer_name
-          # ,qs_table_agg_by_link_subset()
-          ,  str_glue("select *
-from {replica_temp_tbl_name(table_agg_by_link)}
-where network_link_ids_unnested in
-         (select distinct stableEdgeId from {replica_temp_tbl_name(table_network)})"))
+          ,qs_table_agg_by_link_subset())
 
         table_agg_by_link_sum_subset = bq_project_query(
           customer_name
@@ -459,27 +307,14 @@ where network_link_ids_unnested in
                  ,percent_rm = cumsum(percent))
 
         #message here to reduce the size of the network!
-        log_and_info(
-          str_glue("{make_space()}\nUser supplied inputs resulted in {gauntlet::pretty_num(sum(summary_table_link_counts$count))} records in link aggregation table....\nSee the following table:{make_space('-', 30)}\n{paste0(capture.output(summary_table_link_counts), collapse = '\n')}{make_space('-', 30)}\nBy default, links with less than 5 counts on them are removed\n---this would result in downloading {summary_table_link_counts[[3, 6]]} records....\n---An ideal number of records is ~500,000")
-          , logger)
-        message(str_glue("If your selection has resulted in too many records, you can............
-         1) Decrease the study area layer resulting in less originating polys
-         2) Decrease the size of the network layer supplied to the function
-         3) Reduce the number of link types queired by the function by changing query_links input"))
+        log_and_info(mes_network_size(), logger)
+        message(mes_network_size_option())
 
         #input here needed for whether to continue or not
         #TODO:here
-        #or if they should have the option to change the threshold
-
-        table_agg_by_link_subset_limited = bq_project_query(
-          customer_name
-          ,str_glue("select *
-                    from {replica_temp_tbl_name(table_agg_by_link_subset)}
-                    where count >= 5"))
-        }
+      }
 
       info(logger,str_glue("table_agg_by_link_subset: {replica_temp_tbl_name(table_agg_by_link_subset)}"))
-      info(logger,str_glue("table_agg_by_link_subset_limited: {replica_temp_tbl_name(table_agg_by_link_subset_limited)}"))
 
       message(str_glue("Link aggreations complete....{make_space()}"))
     }
@@ -488,8 +323,6 @@ where network_link_ids_unnested in
 
   #data_download
   {
-    message("Starting data download now.....")
-
     here(folder, "replica_sa_poly_index.csv") %>%
       write.csv(bq_table_download(table_sa_poly_index, n_max = max_record), .)
 
@@ -497,8 +330,8 @@ where network_link_ids_unnested in
       write.csv(bq_table_download(table_trip_first_link_pro, n_max = max_record), .)
 
     #this one is good
-    here(folder, "table_agg_by_link_subset_limited.csv") %>%
-      write.csv(bq_table_download(table_agg_by_link_subset_limited, n_max = max_record), .)
+    here(folder, "replica_trip_agg_by_link_subset.csv") %>%
+      write.csv(bq_table_download(table_agg_by_link_subset, n_max = max_record), .)
 
     here(folder, "replica_trip_origin_destination.csv") %>%
       write.csv(bq_table_download(table_simple_origin_destination, n_max = max_record), .)
@@ -512,7 +345,3 @@ where network_link_ids_unnested in
 
   }
 }
-
-
-
-
