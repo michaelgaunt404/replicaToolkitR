@@ -1,0 +1,176 @@
+---
+title: "Title"
+subtitle: "Subtitle"
+author: "Name"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float:
+      collapsed: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  cache = FALSE, cache.lazy = FALSE, autodep = TRUE, warning = FALSE, 
+  message = FALSE, echo = TRUE, dpi = 180,
+  fig.width = 8, fig.height = 5, echo = FALSE
+  )
+```
+
+<!--#general comments===========================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# This is [[insert description here - what it does/solve]]
+#
+# By: mike gaunt, michael.gaunt@wsp.com
+#
+# README: [[insert brief readme here]]
+#-------- [[insert brief readme here]]
+#
+# *please use 80 character margins
+# *please go to https://pkgs.rstudio.com/flexdashboard/articles/layouts.html
+# to explore the different layouts available for the flexdashboard framework
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!--#library set-up=============================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#content in this section should be removed if in production - ok for dev -->
+```{r}
+library(here)
+```
+
+<!--#source helpers/utilities===================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#content in this section should be removed if in production - ok for dev -->
+```{r}
+here("data/code/dc_hotspot_first_links.R") %>% 
+source()
+```
+
+<!--#source data================================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#content in this section should be removed if in production - ok for dev 
+#area to upload data with and to perform initial munging
+#please add test data here so that others may use/unit test these scripts -->
+
+
+<!--#SECTION NAME===============================================================
+#use this header to make demarcations/section in code [delete this line]
+#short description -->
+
+# Header
+
+## Intro 
+
+This document is a case study of how the data acquired from the Replica data platform was used to perfrom a freight analysis in the DC area. 
+
+Work Summary 
+
++ point 1
++ point 2
+  - `point2.1`
+  - point2.2
++ point 2
+
+Work Outcomes 
+
++ point 1
++ point 2
+  - `point2.1`
+  - point2.2
++ point 2
+
+## Analysis Workflow
+
+### Required Data Input 
+
+Replica data projects require two specific GIS polygons in order to query the data. 
+
+The first required polygon is the **Network Boundary Polygon**. This polygon layer serves two roles, first, it defines the extent of the network that is queried. Any network link within this boundary will be queried and obtained for the purposes of said analysis. Second, the the network is used to query trips within the region, any trip that travels on at least one of the links that fall within this extent will be queried. 
+
+The below map was used to define the extent of the network query. It is a collection of block groups in Rhode Island.
+
+```{r}
+mapview(base_geo)
+```
+
+**Note:** Again, trips originating or terminating outside of this poly will be queried and included in network volumes
+
+The second required polygon is the **Study Area Polygon**, this layer defines which polygons (blockgroups or TAZs) are within the analysis's study area. These polys are assigned an _internal_ designation and and polys outside this poly will be assigned as _external_. These designations help focus the analysis and are used to determine the trip 
+
+While trips terminating or originating in _extneral_
+Polygons outside the study area polygon will be considered “external” and lumped together for simplicity 
+NOTE: trips from or to external polygons will still be accounted for in OD diagrams or on network links
+which can be the same as the _Network Boundary Polygon_
+
+### Queryied Data
+
+
+
+#### Header
+
+<details>
+<summary>Click to Expand</summary>
+
+Example of expandable box. 
+
+```{r}
+Sys.Date()
+```
+
+</details>      
+
+Example of inline code: ``r Sys.Date()``       
+
+Example of flex displays. 
+
+:::: {style="display: flex;"}
+
+::: {}
+
+```{r fig.height = 2, fig.width=4}
+plot(mtcars[,c(1:3)])
+```
+
+:::
+
+::: {}
+
+```{r fig.height = 2}
+plot(mtcars[,c(4:6)])
+```
+
+:::
+
+::::
+
+### {-}
+
+### Section 
+
++ point 1
++ point 2
+  - `point2.1`
+  - point2.2
++ point 2
+
+
+### Tab {.tabset}
+
+#### Tab 1
+
+#### Tab 2
+
+### {-}
+
+
+
+<!--end-->
+
+
+
+
+
+

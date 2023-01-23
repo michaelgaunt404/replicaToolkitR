@@ -1,0 +1,73 @@
+INFO  [2023-01-17 09:20:37] Query started
+INFO  [2023-01-17 09:20:37] 
+++++++++++++++++++++++++++++++++++++++++++++++++++
+Logging Query Inputs
+Path to network boundary file: data/req_dev/study_area_network.shp
+Path to study area boundary file: data/req_dev/study_area_network.shp
+Cutsomer Name: replica-customer
+Schema Table: replica-customer.northwest.northwest_2021_Q4_thursday_trip
+Links Provided:
+----------
+corridor
+highway
+motorway
+motorway_link
+primary
+primary_link
+road
+secondary
+secondary_link
+trunk
+trunk_link
+----------
+INFO  [2023-01-17 09:20:37] Bounding box checks pass.... GOOD
+INFO  [2023-01-17 09:20:37] Bounding box checks pass.... GOOD
+INFO  [2023-01-17 09:20:37] Starting Google query now
+INFO  [2023-01-17 09:20:50] Replica project and dataset are: replica-customer._d48ded622e745d9120443120b79c81a0aee797b2
+INFO  [2023-01-17 09:20:52] 
+++++++++++++++++++++++++++++++++++++++++++++++++++
+Non-empty data returned, Good
+Query continued...
+In total 25869 links
+-72 (0)% trunk_link
+-294 (1)% primary_link
+-360 (1)% secondary_link
+-375 (1)% motorway
+-406 (2)% trunk
+-632 (2)% motorway_link
+-7382 (29)% primary
+-16348 (63)% secondary
+WARN  [2023-01-17 09:20:52] 
+++++++++++++++++++++++++++++++++++++++++++++++++++
+The following link types were requested but not found in bounding box
+                 
+INFO  [2023-01-17 09:20:52] table_network: replica-customer._d48ded622e745d9120443120b79c81a0aee797b2.anonev_UcNk97__dKxf0p1jL9IS6JN_Tw7Sxthn_BLYQPW_XXw
+INFO  [2023-01-17 09:21:11] table_sa_poly_index: replica-customer._d48ded622e745d9120443120b79c81a0aee797b2.anonbe99dd271fb339f33bb1224931d56d544cd885db22b881f229dac77d421a1218
+INFO  [2023-01-17 09:21:29] table_trip_subset: replica-customer._d48ded622e745d9120443120b79c81a0aee797b2.anonev_R99q4TaiiivCborGy_LPLZfkphwwN2fBWGaHmC3IwKE
+INFO  [2023-01-17 09:21:32] table_trip_network_match: replica-customer._d48ded622e745d9120443120b79c81a0aee797b2.anon4ecde623754d4bda33a1ef31ed61c2ee1bd69377aecc09369886be7daae4342f
+INFO  [2023-01-17 09:22:11] table_trips_thru_zone: replica-customer._d48ded622e745d9120443120b79c81a0aee797b2.anonev_SGMu1vYKlX0Zv18uc6wfZq4I_4ym8ttGd3bUQQT9tr8
+INFO  [2023-01-17 09:22:14] table_simple_origin_destination: replica-customer._d48ded622e745d9120443120b79c81a0aee797b2.anond8960a5f5bef933ba322b903831a7da921a8877dcdb1393c42aceed6347a63c4
+INFO  [2023-01-17 09:22:38] table_ordered_trip_links: replica-customer._d48ded622e745d9120443120b79c81a0aee797b2.anone645aad8ed327113dccb2fcfb546e8947f822d4b25b2b4ffcb614cb9a6db6af8
+INFO  [2023-01-17 09:22:43] table_trip_first_link_pro: replica-customer._d48ded622e745d9120443120b79c81a0aee797b2.anonev__WatW_X36y5QY2aZA1y9GAq3rkT_oUFMBAmmrrGQtuQ
+INFO  [2023-01-17 09:22:53] table_agg_by_link: replica-customer._d48ded622e745d9120443120b79c81a0aee797b2.anonfe5271d67f4a2107049e4c5e12126f3c156b06d6f67e88f50751951d18a918c1
+INFO  [2023-01-17 09:22:59] 
+++++++++++++++++++++++++++++++++++++++++++++++++++
+User supplied inputs resulted in 1M records in link aggregation table....
+See the following table:
+------------------------------
+# A tibble: 7 x 7
+  flag_link      count percent count_cum percent_cum count_rm percent_rm
+  <fct>          <int>   <dbl>     <int>       <dbl>    <int>      <dbl>
+1 11 or greater 117171    10.9   1077044       100     117171       10.9
+2 6-10 count    103711     9.6    959873        89.1   220882       20.5
+3 5 count        42611     4      856162        79.5   263493       24.5
+4 4 count        63560     5.9    813551        75.5   327053       30.4
+5 3 count        98296     9.1    749991        69.6   425349       39.5
+6 2 count       180330    16.7    651695        60.5   605679       56.2
+7 1 count       471365    43.8    471365        43.8  1077044      100  
+------------------------------
+By default, links with less than 5 counts on them are removed
+---this would result in downloading 263493 records....
+---An ideal number of records is ~500,000
+INFO  [2023-01-17 09:23:02] table_agg_by_link_subset: replica-customer._d48ded622e745d9120443120b79c81a0aee797b2.anon6a2c0c23af082980705d9af6b3c475011cf48a3c19f2653e20899d57a9e909cd
+INFO  [2023-01-17 09:23:02] table_agg_by_link_subset_limited: replica-customer._d48ded622e745d9120443120b79c81a0aee797b2.anonf52815282a16e9abfda805df4d1c97c47962a0104152e928580cd3e72530931b

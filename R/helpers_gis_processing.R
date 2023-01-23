@@ -161,3 +161,112 @@ get_tigris_polys_from_replica_index = function(
 
   return(block_groups_sub)
 }
+
+
+
+aggregate_network_links = function(location, folder, auto_save = F
+                                   ,network_object = NULL){
+  #TODO:make this compatible with other polygon types
+
+  # location = "data/req_dev"
+  # folder = "data_20230117_092037"
+  # network_object = NULL
+  # auto_save = F
+
+  if (is.null(network_object)){
+    message("Aggregations will be made using file and location...")
+    network_links = here::here(location, folder, "table_agg_by_link_subset_limited.csv") %>%
+      data.table::fread()
+  } else {
+    message("Aggregations will be made using supplied network object...")
+    network_links = network_object
+  }
+
+  #perfrom aggregations
+  {
+    message(str_glue("{make_space()}\nStarting aggreagtion by link and study area destination flag...."))
+
+    agg_link_flag = network_links %>%
+      count_percent_zscore_dt(
+        grp_c = c('network_link_ids_unnested', 'flag_sa_destination')
+        ,grp_p = c('network_link_ids_unnested')
+        ,col = 'count', rnd = 2)
+
+    message("Aggregation complete....")
+
+    message(str_glue("{make_space()}\nStarting aggreagtion by link and vehicle type...."))
+
+    agg_link_vehicle_type = network_links %>%
+      count_percent_zscore_dt(
+        grp_c = c('network_link_ids_unnested', 'vehicle_type')
+        ,grp_p = c('network_link_ids_unnested')
+        ,col = 'count', rnd = 2) %>%
+      .[,`:=`(count_nrm_prank = dgt2(percent_rank(count))
+              ,count_nrm_mmax = dgt2(normalize_min_max(count)))
+        ,by = .(vehicle_type)] %>%
+      .[,`:=`(ttl_count_link = sum(count)), by = .(network_link_ids_unnested)] %>%
+      .[,`:=`(ttl_count_link_nrm_mmax =  dgt2(normalize_min_max(ttl_count_link)))] %>%
+      data.frame() %>%
+      mutate(label = str_glue(
+        "Link No.: {network_link_ids_unnested}
+    <br>Total Link Volume: {ttl_count_link}
+    <br>Volume Min-Max norm.: {100*ttl_count_link_nrm_mmax}%
+    <hr>
+    Metrics Adj for Vehicle Type
+    <br>Link Volume: {count} ({100*dgt2(percent)}% of total)
+    <br>Volume Min-Max norm.: {100*count_nrm_mmax}%")) %>%
+      data.table()
+
+    message("Aggregation complete....")
+
+    message(str_glue("{make_space()}\nStarting aggreagtion by link, vehicle type, and originating poly...."))
+
+    agg_link_vehicle_type_origin = network_links %>%
+      count_percent_zscore_dt(
+        grp_c = c('origin_poly', 'network_link_ids_unnested', 'vehicle_type')
+        ,grp_p = c('origin_poly', 'network_link_ids_unnested')
+        ,col = 'count', rnd = 2) %>%
+      .[order(origin_poly, network_link_ids_unnested)] %>%
+      .[,`:=`(count_nrm_prank = dgt2(percent_rank(count))
+              ,count_nrm_mmax = dgt2(normalize_min_max(count)))
+        ,by = .(origin_poly, vehicle_type)] %>%
+      .[,`:=`(ttl_count_orgin = sum(count)), by = .(origin_poly)] %>%
+      .[,`:=`(ttl_count_orgin_type = sum(count)), by = .(origin_poly, vehicle_type)] %>%
+      # .[,`:=`(ttl_count_orgin_type_other = ttl_count_orgin-ttl_count_orgin_type
+      #         ,ttl_count_orgin_type_per = ttl_count_orgin_type/ttl_count_orgin)] %>%
+      data.frame() %>%
+      mutate(label = str_glue(
+        "Origin: {origin_poly}
+    <br>Total Trips from Origin: {ttl_count_orgin}
+    <br>By Vehicle Type: {vehicle_type} ttl_count_orgin_type (100*{ttl_count_orgin_type/ttl_count_orgin}%)
+    <hr>
+    Link Metrics (for vehicle type and origin):
+    <br>Link Volume: {count}
+    <br>Volume Min-Max norm.: {100*count_nrm_mmax}%")) %>%
+      data.table()
+
+    message("Aggregation complete....")
+  }
+
+  #save out
+  {
+    list_objects = list(agg_link_flag = agg_link_flag
+                        ,agg_link_vehicle_type = agg_link_vehicle_type
+                        ,agg_link_vehicle_type_origin = agg_link_vehicle_type_origin)
+
+    if (auto_save) {
+      message("You elected to automatically save the returned list object!")
+      file = here::here(location, folder, "aggregated_network_links.rds")
+      message(str_glue("It is saved at this location:\n{file}"))
+      saveRDS(list_objects,file)
+    } else {
+      message("You did not elect to automatically save the returned list object!")
+    }
+  }
+
+  return(list_objects)
+
+}
+
+
+

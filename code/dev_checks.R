@@ -1,6 +1,7 @@
 
 
 library(mapview)
+library(data.table)
 
 # table_agg_by_link_subset = bq_table_download(table_agg_by_link_subset)
 
@@ -69,16 +70,49 @@ od_agg %>%
             ,count_diff_max_pct = max(count_diff/count_from_first_links))
 
 
+#main header====================================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#main header====================================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#aggregation functions===========================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#these functions emulate link aggregations functions that were first used in zz_replica
+# count_percent_zscore_dt = function(data, grp_c = ..., grp_p = ..., grp_z = ...,
+#                                    col, prefix = NULL, rnd = NULL, cntr_scl = FALSE){
+#
+#   tmp = data %>%
+#     data.table::data.table() %>%
+#     .[,.(count = sum(.SD)), .SDcols = col, by = grp_c] %>%
+#     .[,`:=`(percent = (count/sum(count)) %>%
+#               { if (!is.null(rnd)) round(., rnd) else .}), by = grp_p] %>%
+#     { if (cntr_scl) (.) %>%
+#         .[,`:=`(zscore = as.vector(scale(count))), by = grp_z]
+#       else .}
+#
+#   if (is.null(prefix)){
+#     tmp = tmp
+#   } else {
+#     newname1 = str_glue("{prefix}_count")
+#     newname2 = str_glue("{prefix}_percent")
+#     rename(tmp, !!newname1 := count, !!newname2 := percent)
+#   }
+#
+#   return(tmp)
+#
+# }
 
+# normalize_min_max <- function(x, na.rm = TRUE) {
+#   return((x - min(x)) /(max(x)-min(x)))
+# }
 
-
-
-
-
-
-
+test = aggregate_network_links(
+  location = "data/req_dev"
+  ,folder = "data_20230117_092037"
+  ,network_object = NULL
+  ,auto_save = F
+)
 
 
 
