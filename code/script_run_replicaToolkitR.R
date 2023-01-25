@@ -26,7 +26,6 @@ replicaToolkitR::get_tigris_polys_from_replica_index(
   ,auto_save = T
 )
 
-
 aggregate_network_links(
   location = "data/req_dev"
   ,folder = "data_20230117_092037"
