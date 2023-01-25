@@ -1,0 +1,47 @@
+---
+title: "dddd"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+library(replicaToolkitR)
+library(sf)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r, fig.width=2, fig.height=2, echo = FALSE}
+data("study_area_network")
+
+mapview::mapview(study_area_network)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+data("replica_trip_origin_links_gpkg")
+
+# data("replica_trip_origin_links")
+
+replica_trip_origin_links_gpkg  %>%  head()
+
+# replica_trip_origin_links  %>%  head()
+
+# replica_trip_origin_links_fltrd = replica_trip_origin_links %>%  
+#   st_as_sf(coords = c("startLon", "startLat"), crs = 4326) %>% 
+#   st_filter(study_area_seattle_network) %>%  
+#   st_transform(crs = 32610)
+```
+

@@ -1,79 +1,22 @@
 ---
-title: "Title"
-subtitle: "Subtitle"
-author: "Name"
-date: "`r Sys.Date()`"
-output: 
-  html_document:
-    toc: TRUE
-    toc_float:
-      collapsed: true
+title: "KDE and Hotspot Workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{KDE and Hotspot Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
+```{r, include = FALSE}
 knitr::opts_chunk$set(
-  cache = FALSE, cache.lazy = FALSE, autodep = TRUE, warning = FALSE, 
-  message = FALSE, echo = TRUE, dpi = 180,
-  fig.width = 8, fig.height = 5
-  )
+  collapse = TRUE,
+  comment = "#>"
+)
 ```
 
-<!--#general comments===========================================================
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#
-# This is [[insert description here - what it does/solve]]
-#
-# By: mike gaunt, michael.gaunt@wsp.com
-#
-# README: [[insert brief readme here]]
-#-------- [[insert brief readme here]]
-#
-# *please use 80 character margins
-# *please go to https://pkgs.rstudio.com/flexdashboard/articles/layouts.html
-# to explore the different layouts available for the flexdashboard framework
-#
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-
-<!--#library set-up=============================================================
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#content in this section should be removed if in production - ok for dev -->
-
-<!--#source helpers/utilities===================================================
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#content in this section should be removed if in production - ok for dev -->
-
-<!--#source data================================================================
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#content in this section should be removed if in production - ok for dev 
-#area to upload data with and to perform initial munging
-#please add test data here so that others may use/unit test these scripts -->
-
-```{r}
-location = "data/req_dev"
-folder = 'data_20230117_092037'
-
-crs  = 32610
+```{r setup}
+library(replicaToolkitR)
 ```
-
-
-```{r}
-# study_area_network = read_sf(here(location, 'study_area_network.shp'))
-# 
-# replica_trip_origin_links_file = here(location, folder, "replica_trip_origin_links.gpkg")
-# replica_trip_origin_links = read_sf(replica_trip_origin_links_file)
-# 
-# replica_trip_origin_links_fltrd = replica_trip_origin_links %>%  
-#   st_filter(study_area_network) %>%  
-#   st_transform(crs = 32610)
-```
- 
-
-
-<!--#SECTION NAME===============================================================
-#use this header to make demarcations/section in code [delete this line]
-#short description -->
-
-
 
 ## Intro 
 
@@ -283,12 +226,4 @@ For a more detailed analysis, one should consider:
 + the neighbor distance used in the  gistar calculations 
   - this impacts whether a cell will statistically varies from its neighbors 
   - altering this will impact the size and shape of hot and cold spots
-
-
-<!--end-->
-
-
-
-
-
 
