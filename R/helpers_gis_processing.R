@@ -16,9 +16,9 @@
 #'
 #' head(replica_queried_network)
 #'
-#'make_network_layer(
-#'  network_object = replica_queried_network
-#'  ,auto_save = F
+#' make_network_link_layer(
+#'   network_object = replica_queried_network
+#'   ,auto_save = F
 #')
 make_network_link_layer = function(location, folder, auto_save = F, network_object = NULL){
   if (is.null(network_object)){
@@ -63,6 +63,8 @@ make_network_link_layer = function(location, folder, auto_save = F, network_obje
 #'   ,network_object = replica_queried_network_links
 #'   ,auto_save = F
 #' )
+#'
+#'
 make_network_centroid_layer = function(location, folder, auto_save = F, network_object = NULL){
 
   if (is.null(network_object)){
@@ -81,6 +83,24 @@ make_network_centroid_layer = function(location, folder, auto_save = F, network_
 
   return(replica_queried_network_cntds)
 }
+
+
+
+# data('replica_queried_network')
+#
+# temp_network = make_network_link_layer(
+#   network_object = replica_queried_network
+#   ,auto_save = F
+# )
+#
+# temp_centroids = make_network_centroid_layer(
+#   network_object = head(temp_network))
+#
+# temp_centroids
+#
+# sf_object = network_object
+# temp = sf_object %>%
+#   mutate(merge_id = row_number())
 
 
 #' Convert tabular first link file to gis layer.
