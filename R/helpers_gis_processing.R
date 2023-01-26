@@ -127,19 +127,19 @@ make_network_centroid_layer = function(location, folder, auto_save = F, network_
 #'   ,network_object = replica_queried_network_links
 #'   ,auto_save = F
 #' )
-make_trip_origin_point_layer = function(location, folder, auto_save = F, network_object = NULL){
+make_trip_origin_point_layer = function(location, folder, auto_save = F, first_links_object = NULL){
 
   # location = "data/req_dev"
   # folder = 'data_20230117_092037'
 
-  if (is.null(network_object)){
+  if (is.null(first_links_object)){
     message("Trip origin link centroids made using file and location...")
     replica_trip_origin_links = here::here(location, folder, "replica_trip_origin_links.csv") %>%
       data.table::fread()
     replica_trip_origin_links = sf::st_as_sf(replica_trip_origin_links, coords = c('startLon', 'startLat'), crs = 4326)
   } else {
     message("Trip origin link centroids made using suplied network object...")
-    replica_trip_origin_links = replica_trip_origin_links
+    replica_trip_origin_links = sf::st_as_sf(first_links_object, coords = c('startLon', 'startLat'), crs = 4326)
   }
 
   if (auto_save) {
@@ -189,7 +189,7 @@ get_tigris_polys_from_replica_index = function(
   }
 
   block_groups = tigris::block_groups(state = states, year = year) %>%
-    st_transform(4326)
+    sf::st_transform(4326)
 
   block_groups_sub = block_groups %>%
     mutate(flag_blkgrps = 1) %>%
@@ -206,22 +206,22 @@ get_tigris_polys_from_replica_index = function(
     ))
 
   check_match = block_groups_sub %>%
-    st_drop_geometry() %>%
+    sf::st_drop_geometry() %>%
     filter(flag_index == 1) %>%
     count(flag_blkgrps, flag_index) %>%
     mutate(percent = paste0(100*(n/sum(n)), "%")) %>%
     capture.output() %>%
     paste0(collapse = "\n")
 
-  str_glue("{make_space('-')}\n1 - 1 combinations indicate good matches") %>%  message()
-  str_glue("Anything else indicates bad poly matches") %>%  message()
-  str_glue("The following query resulted in the following matches...\n{check_match}") %>%  message()
+  stringr::str_glue("{make_space('-')}\n1 - 1 combinations indicate good matches") %>%  message()
+  stringr::str_glue("Anything else indicates bad poly matches") %>%  message()
+  stringr::str_glue("The following query resulted in the following matches...\n{check_match}") %>%  message()
 
   block_groups_sub = block_groups_sub %>%
     filter(flag_poly_merge == "Both Tirgris and Replica") %>%
     select(!c(flag_blkgrps, flag_index, flag_poly_merge))
 
-  str_glue("Replica query acquired {nrow(replica_queried_network)} polygons\nPolygon query returning {nrow(block_groups_sub)} polygons\n{100*nrow(block_groups_sub)/nrow(replica_queried_network)}% match{make_space('-')}") %>%  message()
+  stringr::str_glue("Replica query acquired {nrow(replica_queried_network)} polygons\nPolygon query returning {nrow(block_groups_sub)} polygons\n{100*nrow(block_groups_sub)/nrow(replica_queried_network)}% match{make_space('-')}") %>%  message()
 
   if (auto_save) {
     sf::write_sf(block_groups_sub, here::here(location, folder, "acquired_sa_polys.gpkg"))

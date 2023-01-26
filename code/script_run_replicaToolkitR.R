@@ -19,11 +19,12 @@ query_network_trip_using_bbox(
                    "trunk_link", "primary", "primary_link", "secondary", "secondary_link")
 )
 
-replicaToolkitR::get_tigris_polys_from_replica_index(
-  location = "data/req_dev"
-  ,folder = "data_20230117_092037"
+data("replica_sa_poly_index")
+
+get_tigris_polys_from_replica_index(
+  network_object = replica_sa_poly_index
   ,states = "WA"
-  ,auto_save = T
+  ,auto_save = F
 )
 
 aggregate_network_links(
