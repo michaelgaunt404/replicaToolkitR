@@ -1,6 +1,7 @@
 ---
 title: "KDE and Hotspot Workflow"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{KDE and Hotspot Workflow}
   %\VignetteEngine{knitr::rmarkdown}
@@ -10,11 +11,13 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE, 
+  message = FALSE
 )
 ```
 
-```{r setup}
+```{r setup, message = FALSE}
 library(replicaToolkitR)
 ```
 
@@ -32,7 +35,7 @@ The goal of this document is not to present a complete analysis but to showcase 
 
 Here are the packages you'll need for this vignette. 
 
-```{r}
+```{r message = FALSE, warning=FALSE}
 library(here)
 library(tidyverse)
 
@@ -58,17 +61,16 @@ data("study_area_network")
 mapview(study_area_network)
 ```
 
----
-**Note:** Any trip travelling though this zone is queried via `replicaToolkitR`. This is done to account for all vehicles traveling on study area network links. The full list of trips queried all listed below:  
-+ `internal-to-internal`: study area to study area trips
-+ `internal-to-external`: study area to external trips
-+ `external-to-internal`: external to study area trips 
-+ `external-to-external`: external to external trips (through trips)
+> **Note:** Any trip travelling though this zone is queried via `replicaToolkitR`. This is done to account for all vehicles traveling on study area network links. The full list of trips queried all listed below:   
+> 
+> + `internal-to-internal`: study area to study area trips
+> + `internal-to-external`: study area to external trips
+> + `external-to-internal`: external to study area trips 
+> + `external-to-external`: external to external trips (through trips)
+> 
+> `replicaToolkitR`, however; filters for trips that only originate within the study area polygon when displaying or aggregating anything regarding trip origins.   
 
-`replicaToolkitR`, however; filters for trips that only originate within the study area polygon when displaying or aggregating anything regarding trip origins. 
----
-
-The below map details trip origins as counts aggregated by each trips first network link. Links in this case are displayed as points determined by starting coordinates. Normally, this data would be loaded from the `replica_trip_origin_links.gpkg` file the user creates when quering google but in this instance it is loaded from the package.
+The below map details trip origins as counts aggregated by each trips first network link. Links in this case are displayed as points determined by starting coordinates. Normally, this data would be loaded from the `replica_trip_origin_links.gpkg` file the user creates when quering Google but in this instance it is loaded from the package.
 
 ```{r}
 data("replica_trip_origin_links_gpkg")
@@ -94,9 +96,9 @@ The `SpatialKDE` and `sfhotspot` packages are used to perform the KDE analysis. 
 First, create a grid that covers the spread of my data. In this case, a cell size of 200 meters was chosen as it is roughly the size of a city blocks in Seattle and a good unit for this analysis. 
 
 ```{r}
-# grid_sm = create_grid_hexagonal(
-#   replica_trip_origin_links_fltrd
-#   ,cell_size = 200)
+grid_sm = create_grid_hexagonal(
+  replica_trip_origin_links_fltrd
+  ,cell_size = 200)
 ```
 
 The water around the city is then removed using the `tigris` package. 
@@ -104,29 +106,29 @@ The water around the city is then removed using the `tigris` package.
 This is an important step, as it make the distinction between a location that does not generate any trips and one incapable of generating trips - i.e. freight trips cannot start in the middle of Lake Washington. 
 
 ```{r}
-# grid_sm_water_removed = tigris::erase_water(grid_sm) %>%  
-#   st_cast("POLYGON")
+grid_sm_water_removed = tigris::erase_water(grid_sm) %>%
+  st_cast("POLYGON")
 ```
 
 Both grids are displayed in the below map. The grid with removed water features is seen in the right panel:
 
 ```{r, fig.width=4, fig.height=3, echo = FALSE}
-# grid_sm_water_removed_4326 = grid_sm_water_removed %>%  st_transform(4326)
-# 
-# grid_sm %>% 
-#   st_transform(4326) %>% 
-#   leaflet() %>%  
-#   addMapPane("left", zIndex = 0) %>%
-#   addMapPane("right", zIndex = 0) %>%
-#   addTiles(group = "base", layerId = "baseid",
-#            options = pathOptions(pane = "right")) %>%
-#   addProviderTiles(providers$OpenStreetMap, group="carto", layerId = "cartoid",
-#                    options = pathOptions(pane = "left")) %>%
-#   addPolygons(weight = 1, options = pathOptions(pane = "left")) %>%  
-#   addPolygons(data = grid_sm_water_removed_4326, weight = 1, options = pathOptions(pane = "right")) %>%
-#   addSidebyside(layerId = "sidecontrols",
-#                 rightId = "baseid",
-#                 leftId = "baseid")
+grid_sm_water_removed_4326 = grid_sm_water_removed %>%  st_transform(4326)
+
+grid_sm %>%
+  st_transform(4326) %>%
+  leaflet() %>%
+  addMapPane("left", zIndex = 0) %>%
+  addMapPane("right", zIndex = 0) %>%
+  addTiles(group = "base", layerId = "baseid",
+           options = pathOptions(pane = "right")) %>%
+  addProviderTiles(providers$OpenStreetMap, group="carto", layerId = "cartoid",
+                   options = pathOptions(pane = "left")) %>%
+  addPolygons(weight = 1, options = pathOptions(pane = "left")) %>%
+  addPolygons(data = grid_sm_water_removed_4326, weight = 1, options = pathOptions(pane = "right")) %>%
+  addSidebyside(layerId = "sidecontrols",
+                rightId = "baseid",
+                leftId = "baseid")
 ```
 
 As you can see it is not perfect; Green Lake, Union Bay and other water features have not been removed. In addition, this idea can be extended to other locations incapable of generating trips such as parks, universities, airport tarmac, etc. 
@@ -138,52 +140,52 @@ The R package `mapedit` provides functions that allow the user to easily draw an
 The below code runs the `**hotspot_kde()**` function for different vehicle types in the data and using the different grids previously created. The `**purrr::pmap()**` function allows us to iterate over multiple arguments simultaneously resulting in a list object (and saves us a bunch of key strokes!).
 
 ```{r}
-# hotspot_obeject = list(
-#   list("MEDIUM_COMMERCIAL", "MEDIUM_COMMERCIAL", "HEAVY_COMMERCIAL", "HEAVY_COMMERCIAL")
-#   ,list(grid_sm_water_removed, grid_sm, grid_sm_water_removed, grid_sm)
-# ) %>%  
-#   pmap(~{
-#     temp_hotspot = replica_trip_origin_links_fltrd %>%  
-#       filter(vehicle_type == .x) %>% 
-#       hotspot_kde(
-#         data = .
-#         ,grid = .y
-#         ,weights = count 
-#         ,bandwidth = 800) %>%  
-#       mutate(kde_norm = gauntlet::normalize_min_max(kde)) %>% 
-#       mutate(label = str_glue("KDE (Min-Max Norm): {dgt2(kde_norm)}<br>KDE (raw): {dgt2(kde)}<br>TTL Trips: {sum}")) %>%
-#       st_transform(crs = 4326)
-#   })
+hotspot_obeject = list(
+  list("MEDIUM_COMMERCIAL", "MEDIUM_COMMERCIAL", "HEAVY_COMMERCIAL", "HEAVY_COMMERCIAL")
+  ,list(grid_sm_water_removed, grid_sm, grid_sm_water_removed, grid_sm)
+) %>%
+  pmap(~{
+    temp_hotspot = replica_trip_origin_links_fltrd %>%
+      filter(vehicle_type == .x) %>%
+      hotspot_kde(
+        data = .
+        ,grid = .y
+        ,weights = count
+        ,bandwidth = 800) %>%
+      mutate(kde_norm = gauntlet::normalize_min_max(kde)) %>%
+      mutate(label = str_glue("KDE (Min-Max Norm): {dgt2(kde_norm)}<br>KDE (raw): {dgt2(kde)}<br>TTL Trips: {sum}")) %>%
+      st_transform(crs = 4326)
+  })
 ```
 
 The resulting 2D kernel density estimates for trip origins of heavy (left panel) and medium (right panel) duty vehicles are displayed below: 
 ```{r, fig.width=4, fig.height=3, echo = FALSE}
-# pal_rm <- colorNumeric(
-#   palette = "magma",
-#   domain = hotspot_obeject[[3]]$kde_norm)
-# 
-# pal_nrm <- colorNumeric(
-#   palette = "magma",
-#   domain = hotspot_obeject[[1]]$kde_norm)
-# 
-# leaflet() %>% 
-#   addMapPane("left", zIndex = 0) %>%
-#   addMapPane("right", zIndex = 0) %>%
-#   addTiles(group = "base", layerId = "baseid",
-#            options = pathOptions(pane = "right")) %>%
-#   addProviderTiles(providers$OpenStreetMap, group="carto", layerId = "cartoid",
-#                    options = pathOptions(pane = "left")) %>%
-#   addPolygons(data = hotspot_obeject[[3]], weight = 1#, fillOpacity = 1
-#               ,color  = ~pal_rm(hotspot_obeject[[3]]$kde_norm), options = pathOptions(pane = "left")
-#               ,label = hotspot_obeject[[3]]$label %>%
-#                     map(htmltools::HTML)) %>%  
-#   addPolygons(data = hotspot_obeject[[1]], weight = 1
-#               ,color  = ~pal_nrm(hotspot_obeject[[1]]$kde_norm), options = pathOptions(pane = "right")
-#               ,label = hotspot_obeject[[1]]$label %>%
-#                     map(htmltools::HTML)) %>% 
-#   addSidebyside(layerId = "sidecontrols",
-#                 rightId = "baseid",
-#                 leftId = "baseid")
+pal_rm <- colorNumeric(
+  palette = "magma",
+  domain = hotspot_obeject[[3]]$kde_norm)
+
+pal_nrm <- colorNumeric(
+  palette = "magma",
+  domain = hotspot_obeject[[1]]$kde_norm)
+
+leaflet() %>%
+  addMapPane("left", zIndex = 0) %>%
+  addMapPane("right", zIndex = 0) %>%
+  addTiles(group = "base", layerId = "baseid",
+           options = pathOptions(pane = "right")) %>%
+  addProviderTiles(providers$OpenStreetMap, group="carto", layerId = "cartoid",
+                   options = pathOptions(pane = "left")) %>%
+  addPolygons(data = hotspot_obeject[[3]], weight = 1#, fillOpacity = 1
+              ,color  = ~pal_rm(hotspot_obeject[[3]]$kde_norm), options = pathOptions(pane = "left")
+              ,label = hotspot_obeject[[3]]$label %>%
+                    map(htmltools::HTML)) %>%
+  addPolygons(data = hotspot_obeject[[1]], weight = 1
+              ,color  = ~pal_nrm(hotspot_obeject[[1]]$kde_norm), options = pathOptions(pane = "right")
+              ,label = hotspot_obeject[[1]]$label %>%
+                    map(htmltools::HTML)) %>%
+  addSidebyside(layerId = "sidecontrols",
+                rightId = "baseid",
+                leftId = "baseid")
 ```
 
 The results are pretty interesting - their is a rather dramatic difference between where heavy and medium duty trucks go in Seattle. Heavy duty trucks stick to the ports, where medium duty tricks are more distributed through out Seattle (they're smaller and can get around easier, makes sense!).
@@ -191,22 +193,22 @@ The results are pretty interesting - their is a rather dramatic difference betwe
 This analysis can be extended by using *hotspot_gistar()* function, which allows us to easily calculate the gi-star Z-score statistic used in identifying clusters of point locations. The theory behind this statistic will not be covered here but should be reviewed before implementing it. 
 
 ```{r}
-# temp_hotspot = replica_trip_origin_links_fltrd %>%  
-#       filter(vehicle_type == "MEDIUM_COMMERCIAL") %>% 
-#       hotspot_gistar(
-#         data = .
-#         ,grid = grid_sm_water_removed
-#         ,weights = count 
-#         ,bandwidth = 800) 
+temp_hotspot = replica_trip_origin_links_fltrd %>%
+      filter(vehicle_type == "MEDIUM_COMMERCIAL") %>%
+      hotspot_gistar(
+        data = .
+        ,grid = grid_sm_water_removed
+        ,weights = count
+        ,bandwidth = 800)
 ```
 
 The map below depicts the result of calculating the gi-star Z-score statistic. Statistically significant hot and cold locations are displayed: 
 
 ```{r, fig.width=4, fig.height=3}
-# temp_hotspot %>% 
-#   filter(pvalue <= .01) %>%  
-#   mutate(flag_gistar = case_when(gistar > 0~"Hot", T~"Cold")) %>% 
-#   mapview(layer.name = "Hotspots", zcol = "flag_gistar")
+temp_hotspot %>%
+  filter(pvalue <= .01) %>%
+  mutate(flag_gistar = case_when(gistar > 0~"Hot", T~"Cold")) %>%
+  mapview(layer.name = "Hotspots", zcol = "flag_gistar")
 ```
 
 By just using the default input options, we get some pretty interesting findings. We see rather large cold spots in Green Lake, Union Bay, Discovery Park (west of Magnolia) - this makes sense as the first two locations are bodies of water and the third is a large wooded park where freight trucks don't go. In comparison to their neighbors, these locations are especially _cold_ regions for trucks and this identified. One could take these findings and remove these areas in subsequent analysis iterations. 
@@ -226,4 +228,4 @@ For a more detailed analysis, one should consider:
 + the neighbor distance used in the  gistar calculations 
   - this impacts whether a cell will statistically varies from its neighbors 
   - altering this will impact the size and shape of hot and cold spots
-
+***

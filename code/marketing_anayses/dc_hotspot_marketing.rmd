@@ -137,104 +137,104 @@ which can be the same as the _Network Boundary Polygon_
 ### Queryied Data
 
 ```{r}
-replica_trip_origin_links_fltrd %>%  
-  sample_n(1000) %>%  
-  mapview()
+# replica_trip_origin_links_fltrd %>%  
+#   sample_n(1000) %>%  
+#   mapview()
 ```
 
 
 ```{r}
-grid_sm = create_grid_hexagonal(replica_trip_origin_links_fltrd,
-                                cell_size = 200) 
-
-grid_sm_water_removed = tigris::erase_water(grid_sm) %>%  
-  st_cast("POLYGON")
+# grid_sm = create_grid_hexagonal(replica_trip_origin_links_fltrd,
+#                                 cell_size = 200) 
+# 
+# grid_sm_water_removed = tigris::erase_water(grid_sm) %>%  
+#   st_cast("POLYGON")
 ```
 
 
 ```{r}
-grid_sm_water_removed_4326 = grid_sm_water_removed %>%  st_transform(4326)
-grid_sm_water_removed %>%  
-  mapview()
-
-grid_sm %>% 
-  st_transform(4326) %>% 
-  leaflet() %>%  
-  addMapPane("left", zIndex = 0) %>%
-  addMapPane("right", zIndex = 0) %>%
-  addTiles(group = "base", layerId = "baseid",
-           options = pathOptions(pane = "right")) %>%
-  addProviderTiles(providers$OpenStreetMap, group="carto", layerId = "cartoid",
-                   options = pathOptions(pane = "left")) %>%
-  addPolygons(weight = 1, options = pathOptions(pane = "left")) %>%  
-  addPolygons(data = grid_sm_water_removed_4326, weight = 1, options = pathOptions(pane = "right")) %>%
-  addSidebyside(layerId = "sidecontrols",
-                rightId = "baseid",
-                leftId = "baseid")
+# grid_sm_water_removed_4326 = grid_sm_water_removed %>%  st_transform(4326)
+# grid_sm_water_removed %>%  
+#   mapview()
+# 
+# grid_sm %>% 
+#   st_transform(4326) %>% 
+#   leaflet() %>%  
+#   addMapPane("left", zIndex = 0) %>%
+#   addMapPane("right", zIndex = 0) %>%
+#   addTiles(group = "base", layerId = "baseid",
+#            options = pathOptions(pane = "right")) %>%
+#   addProviderTiles(providers$OpenStreetMap, group="carto", layerId = "cartoid",
+#                    options = pathOptions(pane = "left")) %>%
+#   addPolygons(weight = 1, options = pathOptions(pane = "left")) %>%  
+#   addPolygons(data = grid_sm_water_removed_4326, weight = 1, options = pathOptions(pane = "right")) %>%
+#   addSidebyside(layerId = "sidecontrols",
+#                 rightId = "baseid",
+#                 leftId = "baseid")
 ```
 
 ```{r}
-hotspot_obeject = list(
-  list("MEDIUM_COMMERCIAL", "MEDIUM_COMMERCIAL", "HEAVY_COMMERCIAL", "HEAVY_COMMERCIAL")
-  ,list(grid_sm_water_removed, grid_sm, grid_sm_water_removed, grid_sm)
-) %>%  
-  pmap(~{
-    temp_hotspot = replica_trip_origin_links_fltrd %>%  
-      filter(vehicle_type == .x) %>% 
-      hotspot_kde(
-        data = .
-        ,grid = .y
-        ,weights = count 
-        ,bandwidth = 800) %>%  
-      mutate(kde_norm = gauntlet::normalize_min_max(kde)) %>% 
-      mutate(label = str_glue("KDE (Min-Max Norm): {dgt2(kde_norm)}<br>KDE (raw): {dgt2(kde)}<br>Sum: {sum}")) %>%
-      st_transform(crs = 4326)
-  })
+# hotspot_obeject = list(
+#   list("MEDIUM_COMMERCIAL", "MEDIUM_COMMERCIAL", "HEAVY_COMMERCIAL", "HEAVY_COMMERCIAL")
+#   ,list(grid_sm_water_removed, grid_sm, grid_sm_water_removed, grid_sm)
+# ) %>%  
+#   pmap(~{
+#     temp_hotspot = replica_trip_origin_links_fltrd %>%  
+#       filter(vehicle_type == .x) %>% 
+#       hotspot_kde(
+#         data = .
+#         ,grid = .y
+#         ,weights = count 
+#         ,bandwidth = 800) %>%  
+#       mutate(kde_norm = gauntlet::normalize_min_max(kde)) %>% 
+#       mutate(label = str_glue("KDE (Min-Max Norm): {dgt2(kde_norm)}<br>KDE (raw): {dgt2(kde)}<br>Sum: {sum}")) %>%
+#       st_transform(crs = 4326)
+#   })
 ```
 
 ```{r}
 
 # (hotspot_obeject[[3]] %>%  mapview(layer.name  = "rm")) +
 # (hotspot_obeject[[1]] %>%  mapview(layer.name  = "raw"))
-# mapview::sync()
-
-
-pal_rm <- colorNumeric(
-  palette = "magma",
-  domain = hotspot_obeject[[3]]$kde_norm)
-
-pal_nrm <- colorNumeric(
-  palette = "magma",
-  domain = hotspot_obeject[[1]]$kde_norm)
-
-leaflet() %>% 
-  addMapPane("left", zIndex = 0) %>%
-  addMapPane("right", zIndex = 0) %>%
-  addTiles(group = "base", layerId = "baseid",
-           options = pathOptions(pane = "right")) %>%
-  addProviderTiles(providers$OpenStreetMap, group="carto", layerId = "cartoid",
-                   options = pathOptions(pane = "left")) %>%
-  addPolygons(data = hotspot_obeject[[3]], weight = 1#, fillOpacity = 1
-              ,color  = ~pal_rm(hotspot_obeject[[3]]$kde_norm), options = pathOptions(pane = "left")
-              ,label = hotspot_obeject[[3]]$label %>%
-                    map(htmltools::HTML)) %>%  
-  addPolygons(data = hotspot_obeject[[1]], weight = 1
-              ,color  = ~pal_nrm(hotspot_obeject[[1]]$kde_norm), options = pathOptions(pane = "right")
-              ,label = hotspot_obeject[[1]]$label %>%
-                    map(htmltools::HTML)) %>% 
-  addSidebyside(layerId = "sidecontrols",
-                rightId = "baseid",
-                leftId = "baseid")
+# # mapview::sync()
+# 
+# 
+# pal_rm <- colorNumeric(
+#   palette = "magma",
+#   domain = hotspot_obeject[[3]]$kde_norm)
+# 
+# pal_nrm <- colorNumeric(
+#   palette = "magma",
+#   domain = hotspot_obeject[[1]]$kde_norm)
+# 
+# leaflet() %>% 
+#   addMapPane("left", zIndex = 0) %>%
+#   addMapPane("right", zIndex = 0) %>%
+#   addTiles(group = "base", layerId = "baseid",
+#            options = pathOptions(pane = "right")) %>%
+#   addProviderTiles(providers$OpenStreetMap, group="carto", layerId = "cartoid",
+#                    options = pathOptions(pane = "left")) %>%
+#   addPolygons(data = hotspot_obeject[[3]], weight = 1#, fillOpacity = 1
+#               ,color  = ~pal_rm(hotspot_obeject[[3]]$kde_norm), options = pathOptions(pane = "left")
+#               ,label = hotspot_obeject[[3]]$label %>%
+#                     map(htmltools::HTML)) %>%  
+#   addPolygons(data = hotspot_obeject[[1]], weight = 1
+#               ,color  = ~pal_nrm(hotspot_obeject[[1]]$kde_norm), options = pathOptions(pane = "right")
+#               ,label = hotspot_obeject[[1]]$label %>%
+#                     map(htmltools::HTML)) %>% 
+#   addSidebyside(layerId = "sidecontrols",
+#                 rightId = "baseid",
+#                 leftId = "baseid")
 ```
 
 ```{r}
-hotspot_obeject[[3]] %>%  
-  st_centroid() %>%  
-  gauntlet::st_extract_coords() %>%  
-  st_drop_geometry() %>% 
-  select(!c(sum, label)) %>% 
-  dbscan::hdbscan(minPts = 5) %>% 
-  mutate(coor gauntlet::st_extract_coords())
+# hotspot_obeject[[3]] %>%  
+#   st_centroid() %>%  
+#   gauntlet::st_extract_coords() %>%  
+#   st_drop_geometry() %>% 
+#   select(!c(sum, label)) %>% 
+#   dbscan::hdbscan(minPts = 5) %>% 
+#   mutate(coor gauntlet::st_extract_coords())
 ```
 
 
@@ -247,7 +247,7 @@ hotspot_obeject[[3]] %>%
 Example of expandable box. 
 
 ```{r}
-Sys.Date()
+# Sys.Date()
 ```
 
 </details>      
@@ -261,7 +261,7 @@ Example of flex displays.
 ::: {}
 
 ```{r fig.height = 2, fig.width=4}
-plot(mtcars[,c(1:3)])
+# plot(mtcars[,c(1:3)])
 ```
 
 :::
@@ -269,7 +269,7 @@ plot(mtcars[,c(1:3)])
 ::: {}
 
 ```{r fig.height = 2}
-plot(mtcars[,c(4:6)])
+# plot(mtcars[,c(4:6)])
 ```
 
 :::

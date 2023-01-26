@@ -105,9 +105,6 @@ library(replicaToolkitR)
 library(gauntlet) #https://github.com/michaelgaunt404/gauntlet 
 ```
 
-## Data Overview 
-
-The data used in this analysis was acquired using the study area bounding box seen below.
 
 ```{r, fig.width=2, fig.height=2, echo = FALSE}
 data("study_area_network")
@@ -115,7 +112,7 @@ data("study_area_network")
 mapview(study_area_network)
 ```
 
----
+
 **Note:** Any trip travelling though this zone is queried via `replicaToolkitR`. This is done to account for all vehicles traveling on study area network links. The full list of trips queried all listed below:  
 + `internal-to-internal`: study area to study area trips
 + `internal-to-external`: study area to external trips
@@ -123,7 +120,7 @@ mapview(study_area_network)
 + `external-to-external`: external to external trips (through trips)
 
 `replicaToolkitR`, however; filters for trips that only originate within the study area polygon when displaying or aggregating anything regarding trip origins. 
----
+
 
 The below map details trip origins as counts aggregated by each trips first network link. Links in this case are displayed as points determined by starting coordinates. Normally, this data would be loaded from the `replica_trip_origin_links.gpkg` file the user creates when quering google but in this instance it is loaded from the package.
 
