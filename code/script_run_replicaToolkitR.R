@@ -27,6 +27,28 @@ get_tigris_polys_from_replica_index(
   ,auto_save = F
 )
 
+data("replica_queried_network")
+
+make_network_link_layer(
+  network_object = replica_queried_network
+  ,auto_save = F
+)
+
+data('replica_queried_network_links')
+
+make_network_centroid_layer(
+  network_object = replica_queried_network_links
+  ,auto_save = F
+)
+
+data("replica_trip_origin_links")
+
+make_trip_origin_point_layer(
+  first_links_object = replica_trip_origin_links
+  ,auto_save = F
+)
+
+
 aggregate_network_links(
   location = "data/req_dev"
   ,folder = "data_20230117_092037"
