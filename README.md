@@ -56,28 +56,27 @@ When completed, the queried data will be written to the location defined by the 
 
 All the data listed above are save as CSVs. Conveince functions are provided to convert tabular data to spatial data and save as GPKG or RDS files. 
 
-See image below for example of data after run.
+Resulting files in folder after data acquisition.
 
-<img src="man/figures/README_example_file_1.png" width="100%" />
-
+<img src="man/figures/README_example_file_1.png" width="50%" />
 
 ## Data Processing 
 
 As indcated above, `replicaToolkitR` provides convience functions to convert the tabular data acquired through `query_network_trip_using_bbox()` to a spatail format conducive to mapping.  
+
+> **_NOTE:_** The functions in this section can be supplied an object to transfrom or location/folder inputs that point to where your data is saved. If the latter is supplied then the function will go and automatically load whatever file the function calls for. Suppling an object directly is compataible with the `targets` package workflow.
 
 Acquire origin polygons from the `tigris` census API package using `replica_sa_poly_index`.
 ``` r
 data("replica_sa_poly_index")
 
 get_tigris_polys_from_replica_index(
-  # location = "data/req_dev"
-  # ,folder = "data_20230117_092037"
   network_object = replica_sa_poly_index
   ,states = "WA"
   ,auto_save = F
 )
 ```
-Convert tabular network to `SF` linestring spatial object. 
+Make `SF` linestring spatial object of network links. 
 ``` r
 data("replica_queried_network")
 
@@ -86,7 +85,7 @@ make_network_link_layer(
   ,auto_save = F
 )
 ```
-Extract centroids from network links to make `SF` point spatial object.
+Make `SF` point spatial object by extracting center points from network links.
 ``` r
 data("replica_queried_network")
 
@@ -95,7 +94,7 @@ make_network_centroid_layer(
   ,auto_save = F
 )
 ```
-Convert trip first link aggregate count table to `SF` point spatial object.
+`SF` point spatial object of trip first link aggregation table.
 ``` r
 data("replica_trip_origin_links")
 
@@ -105,4 +104,18 @@ make_trip_origin_point_layer(
 )
 ```
 
+Make RDS list object containg network link counts aggregated three different pre-set ways.
+``` r
+data("table_agg_by_link_subset_limited")
+
+aggregate_network_links(
+  network_object = table_agg_by_link_subset_limited
+  ,auto_save = F
+)
+```
+Resulting files in folder after processing.
+
+<img src="man/figures/README_example_file_2.png" width="50%" />
+
+> **_NOTE:_** This functions will always return an object. If you do not choose to `auto_save` you will still be returned the result. It is advised to `auto_save` the object at _some point_ as naming conventions will be respected.
 
