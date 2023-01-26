@@ -56,6 +56,11 @@ When completed, the queried data will be written to the location defined by the 
 
 All the data listed above are save as CSVs. Conveince functions are provided to convert tabular data to spatial data and save as GPKG or RDS files. 
 
+See image below for example of data after run.
+
+<img src="man/figures/README_example_file_1.png" width="100%" />
+
+
 ## Data Processing 
 
 As indcated above, `replicaToolkitR` provides convience functions to convert the tabular data acquired through `query_network_trip_using_bbox()` to a spatail format conducive to mapping.  
