@@ -19,6 +19,10 @@ query_network_trip_using_bbox(
 )
 }
 \arguments{
+\item{bb_network_layer}{bounding box object detailing extent of road network that will be used to query trips with. This should be made using sf::st_bbox().}
+
+\item{bb_sa_layer}{bounding box object detailing extent of the study area that will be used to perform aggregations. This should be made using sf::st_bbox(). This input is gernerally larger or identical to [bb_network_layer].}
+
 \item{query_links}{vector of character strings detailing which type of network links to use in the query. These will be used 1) to depict any network link volume graphics with 2) to filter trips with. For the latter, any trip that uses these road within the study area will be including in any reporting.}
 
 \item{customer_name}{character string indicating google account that will be billed}
@@ -32,8 +36,6 @@ query_network_trip_using_bbox(
 \item{query_network}{boolean (T/F) indicating if the network should be downloaded at function runtime. Default is 'T'. It can be beneficial to wait and see how many links will be downloaded before netowrk is downloaded, it can also be downloaded latter as log files record big query table IDs.}
 
 \item{max_record}{integer indicating max number of records will be written out for each data acquired by google - default is 1000, use Inf if you do not want to limit download. Useful if you want to check the data out first before downloading large amounts of data. Google tables are still made in full so they can be manually acquired without rerunning this function - see log files.}
-
-\item{bounding_box_points}{bounding box object detailing extent of road network that you whish to query trips with. This should be made using sf::st_bbox().}
 }
 \value{
 does not return any objects in R. Function creates a log file and data to folder destination in CSV format.

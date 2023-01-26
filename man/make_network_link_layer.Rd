@@ -27,8 +27,8 @@ data('replica_queried_network')
 
 head(replica_queried_network)
 
-make_network_layer(
- network_object = replica_queried_network
- ,auto_save = F
+make_network_link_layer(
+  network_object = replica_queried_network
+  ,auto_save = F
 )
 }
