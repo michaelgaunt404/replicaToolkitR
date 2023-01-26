@@ -232,9 +232,30 @@ get_tigris_polys_from_replica_index = function(
 
 
 
+#' Quickly make network link aggregate objects.
+#'
+#' @description This function makes an RDS list object containing network link layers that have been aggreated three different pre-set ways.
+#' The data contained in `table_agg_by_link_subset_limited` is aggregated by:
+#' + network_link and flag_sa_destination
+#' + network_link_ids_unnested and vehicle_type
+#' + network_link_ids_unnested, origin_poly, and vehicle_type
+#'
+#' @param location character string pointing to top level location where data acquired from google was saved to.
+#' @param folder character string of name where data was automatically saved to from google data download.
+#' @param auto_save boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.
+#' @param network_object network object containing links. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.
+
+#' @return a data frame and/or saved RDS file
+#' @export
+#'
+#' @examples
+#'
+#' #none
 aggregate_network_links = function(location, folder, auto_save = F
                                    ,network_object = NULL){
   #TODO:make this compatible with other polygon types
+  #TODO: review different aggregations - they dont make the most sense
+
 
   # location = "data/req_dev"
   # folder = "data_20230117_092037"
