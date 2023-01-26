@@ -14,7 +14,8 @@ Depends:
 RoxygenNote: 7.2.0
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    spelling
 VignetteBuilder: knitr
 Imports: 
     data.table,
@@ -26,3 +27,4 @@ Imports:
     tigris,
     wellknown
 URL: https://michaelgaunt404.github.io/replicaToolkitR/
+Language: en-US
