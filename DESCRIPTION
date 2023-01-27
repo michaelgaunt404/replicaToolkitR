@@ -20,6 +20,7 @@ VignetteBuilder: knitr
 Imports: 
     data.table,
     dplyr,
+    gauntlet (>= 0.1.0),
     here,
     leaflet,
     leaflet.extras2,
