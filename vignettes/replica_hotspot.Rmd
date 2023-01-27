@@ -13,7 +13,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   warning = FALSE, 
-  message = FALSE
+  message = FALSE,
+  fig.width = 8.83
 )
 ```
 
@@ -23,13 +24,9 @@ library(replicaToolkitR)
 
 ## Intro 
 
-This document is a case study of how the data acquired from the Replica data platform was used to perfrom a freight analysis in the DC area. 
+This vignette shows how to run a Kernel Density Estimate (KDE) and Hotspot analysis using the data retrieved using `replicaToolkitR` package. The goal of this document is not to present a complete analysis but to showcase how easily it is to implement such analyses using the data products created by `replicaToolkitR` from `Replica`.
 
-This vignette shows how to run a Kernel Density Estimate (KDE) and Hotspot analysis using the data retrieved using `replicaToolkitR` package. 
-
-The goal of this document is not to present a complete analysis but to showcase ease in which to run 
-
-> **_NOTE:_** This vignette assumes you have already acquired replica data via `replicaToolkitR` using the *replicaToolkitR::query_network_trip_using_bbox()* function.
+> **_NOTE:_** This vignette uses data that comes from `replicaToolkitR`, the user should have a precursory understanding of how to acquire this data themselves using `replicaToolkitR::query_network_trip_using_bbox()`.
 
 ## Set-Up 
 
@@ -55,7 +52,7 @@ library(gauntlet) #https://github.com/michaelgaunt404/gauntlet
 
 The data used in this analysis was acquired using the study area bounding box seen below.
 
-```{r, fig.width=2, fig.height=2, echo = FALSE}
+```{r echo = FALSE}
 data("study_area_network")
 
 mapview(study_area_network)
@@ -70,7 +67,7 @@ mapview(study_area_network)
 > 
 > `replicaToolkitR`, however; filters for trips that only originate within the study area polygon when displaying or aggregating anything regarding trip origins.   
 
-The below map details trip origins as counts aggregated by each trips first network link. Links in this case are displayed as points determined by starting coordinates. Normally, this data would be loaded from the `replica_trip_origin_links.gpkg` file the user creates when quering Google but in this instance it is loaded from the package.
+The below map details trip origins as counts aggregated by each trips first network link. Links in this case are displayed as points determined by starting coordinates. Normally, this data would be loaded from the `replica_trip_origin_links.gpkg` file the user creates when querying Google but in this instance it is loaded from the package.
 
 ```{r}
 data("replica_trip_origin_links_gpkg")
@@ -81,7 +78,7 @@ replica_trip_origin_links_fltrd = replica_trip_origin_links_gpkg %>%
 ```
 
 
-```{r, fig.width=2, fig.height=2, echo = FALSE}
+```{r echo = FALSE}
 replica_trip_origin_links_fltrd %>%  
   sample_n(1000) %>%  
   mapview()
@@ -112,7 +109,7 @@ grid_sm_water_removed = tigris::erase_water(grid_sm) %>%
 
 Both grids are displayed in the below map. The grid with removed water features is seen in the right panel:
 
-```{r, fig.width=4, fig.height=3, echo = FALSE}
+```{r echo = FALSE}
 grid_sm_water_removed_4326 = grid_sm_water_removed %>%  st_transform(4326)
 
 grid_sm %>%
@@ -159,7 +156,7 @@ hotspot_obeject = list(
 ```
 
 The resulting 2D kernel density estimates for trip origins of heavy (left panel) and medium (right panel) duty vehicles are displayed below: 
-```{r, fig.width=4, fig.height=3, echo = FALSE}
+```{r echo = FALSE}
 pal_rm <- colorNumeric(
   palette = "magma",
   domain = hotspot_obeject[[3]]$kde_norm)
@@ -204,7 +201,7 @@ temp_hotspot = replica_trip_origin_links_fltrd %>%
 
 The map below depicts the result of calculating the gi-star Z-score statistic. Statistically significant hot and cold locations are displayed: 
 
-```{r, fig.width=4, fig.height=3}
+```{r}
 temp_hotspot %>%
   filter(pvalue <= .01) %>%
   mutate(flag_gistar = case_when(gistar > 0~"Hot", T~"Cold")) %>%
