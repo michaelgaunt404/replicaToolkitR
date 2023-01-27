@@ -19,14 +19,21 @@ Suggests:
 VignetteBuilder: knitr
 Imports: 
     data.table,
-    gauntlet (>= 0.1.0),
+    dplyr,
     here,
+    leaflet,
+    leaflet.extras2,
     log4r,
+    magrittr,
+    mapview,
+    purrr,
     sf,
+    sfhotspot,
+    SpatialKDE,
     stringr,
     tigris,
     wellknown
 URL: https://michaelgaunt404.github.io/replicaToolkitR/
 Language: en-US
-Remotes:  
+Remotes: 
     michaelgaunt404/gauntlet

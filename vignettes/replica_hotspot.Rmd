@@ -34,7 +34,11 @@ Here are the packages you'll need for this vignette.
 
 ```{r message = FALSE, warning=FALSE}
 library(here)
-library(tidyverse)
+# library(tidyverse)
+library(dplyr)
+library(stringr)
+library(magrittr)
+library(purrr)
 
 library(leaflet)
 library(leaflet.extras2)
