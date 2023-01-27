@@ -19,7 +19,7 @@ Suggests:
 VignetteBuilder: knitr
 Imports: 
     data.table,
-    gauntlet,
+    gauntlet (>= 0.1.0),
     here,
     log4r,
     sf,
@@ -28,3 +28,5 @@ Imports:
     wellknown
 URL: https://michaelgaunt404.github.io/replicaToolkitR/
 Language: en-US
+Remotes:  
+    michaelgaunt404/gauntlet
