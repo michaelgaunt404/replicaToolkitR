@@ -269,6 +269,7 @@ aggregate_network_links = function(location, folder, auto_save = F
         grp_c = c('network_link_ids_unnested', 'vehicle_type')
         ,grp_p = c('network_link_ids_unnested')
         ,col = count, rnd = 2) %>%
+      data.table() %>%
       .[,`:=`(count_nrm_prank = dgt2(percent_rank(count))
               ,count_nrm_mmax = dgt2(normalize_min_max(count)))
         ,by = .(vehicle_type)] %>%
@@ -294,6 +295,7 @@ aggregate_network_links = function(location, folder, auto_save = F
         grp_c = c('origin_poly', 'network_link_ids_unnested', 'vehicle_type')
         ,grp_p = c('origin_poly', 'network_link_ids_unnested')
         ,col = count, rnd = 2) %>%
+      data.table() %>%
       .[order(origin_poly, network_link_ids_unnested)] %>%
       .[,`:=`(count_nrm_prank = dgt2(percent_rank(count))
               ,count_nrm_mmax = dgt2(normalize_min_max(count)))

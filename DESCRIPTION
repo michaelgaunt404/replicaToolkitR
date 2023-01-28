@@ -18,6 +18,7 @@ Suggests:
     spelling
 VignetteBuilder: knitr
 Imports: 
+    crosstalk,
     data.table,
     dplyr,
     gauntlet (>= 0.1.0),
@@ -28,6 +29,7 @@ Imports:
     magrittr,
     mapview,
     purrr,
+    reactable,
     sf,
     sfhotspot,
     SpatialKDE,
