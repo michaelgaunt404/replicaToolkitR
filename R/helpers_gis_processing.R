@@ -22,12 +22,12 @@
 #')
 make_network_link_layer = function(location, folder, auto_save = F, network_object = NULL){
   if (is.null(network_object)){
-    message("Centroids made using file and location...")
+    message("Spatial links were made using CSV from file and location...")
     replica_queried_network = here::here(location, folder, "replica_queried_network.csv") %>%
       data.table::fread()
     replica_queried_network = sf::st_as_sf(replica_queried_network, wkt = "geometry", crs = 4326)
   } else {
-    message("Centroids made using suplied network object...")
+    message("Spatial links were made using supplied tabular network object...")
     replica_queried_network = sf::st_as_sf(network_object, wkt = "geometry", crs = 4326)
   }
 
@@ -68,12 +68,12 @@ make_network_link_layer = function(location, folder, auto_save = F, network_obje
 make_network_centroid_layer = function(location, folder, auto_save = F, network_object = NULL){
 
   if (is.null(network_object)){
-    message("Centroids made using file and location...")
+    message("Centroids were made using spatial links from file and location...")
     replica_queried_network = here::here(location, folder, "replica_queried_network_links.gpkg") %>%
       sf::read_sf()
     replica_queried_network_cntds = gauntlet::st_true_midpoint(replica_queried_network)
   } else {
-    message("Centroids made using suplied network object...")
+    message("Centroids were made using supplied spatial links network object...")
     replica_queried_network_cntds = gauntlet::st_true_midpoint(network_object)
   }
 
@@ -83,24 +83,6 @@ make_network_centroid_layer = function(location, folder, auto_save = F, network_
 
   return(replica_queried_network_cntds)
 }
-
-
-
-# data('replica_queried_network')
-#
-# temp_network = make_network_link_layer(
-#   network_object = replica_queried_network
-#   ,auto_save = F
-# )
-#
-# temp_centroids = make_network_centroid_layer(
-#   network_object = head(temp_network))
-#
-# temp_centroids
-#
-# sf_object = network_object
-# temp = sf_object %>%
-#   mutate(merge_id = row_number())
 
 
 #' Convert tabular first link file to gis layer.
@@ -133,12 +115,12 @@ make_trip_origin_point_layer = function(location, folder, auto_save = F, first_l
   # folder = 'data_20230117_092037'
 
   if (is.null(first_links_object)){
-    message("Trip origin link centroids made using file and location...")
+    message("Trip origin link points made using file and location...")
     replica_trip_origin_links = here::here(location, folder, "replica_trip_origin_links.csv") %>%
       data.table::fread()
     replica_trip_origin_links = sf::st_as_sf(replica_trip_origin_links, coords = c('startLon', 'startLat'), crs = 4326)
   } else {
-    message("Trip origin link centroids made using suplied network object...")
+    message("Trip origin link points made using suplied network object...")
     replica_trip_origin_links = sf::st_as_sf(first_links_object, coords = c('startLon', 'startLat'), crs = 4326)
   }
 
@@ -230,8 +212,6 @@ get_tigris_polys_from_replica_index = function(
   return(block_groups_sub)
 }
 
-
-
 #' Quickly make network link aggregate objects.
 #'
 #' @description This function makes an RDS list object containing network link layers that have been aggreated three different pre-set ways.
@@ -244,7 +224,6 @@ get_tigris_polys_from_replica_index = function(
 #' @param folder character string of name where data was automatically saved to from google data download.
 #' @param auto_save boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.
 #' @param network_object network object containing links. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.
-
 #' @return a data frame and/or saved RDS file
 #' @export
 #'
@@ -276,20 +255,20 @@ aggregate_network_links = function(location, folder, auto_save = F
     message(str_glue("{make_space()}\nStarting aggreagtion by link and study area destination flag...."))
 
     agg_link_flag = network_links %>%
-      count_percent_zscore_dt(
+      count_percent_zscore(
         grp_c = c('network_link_ids_unnested', 'flag_sa_destination')
         ,grp_p = c('network_link_ids_unnested')
-        ,col = 'count', rnd = 2)
+        ,col = count, rnd = 2)
 
     message("Aggregation complete....")
 
     message(str_glue("{make_space()}\nStarting aggreagtion by link and vehicle type...."))
 
     agg_link_vehicle_type = network_links %>%
-      count_percent_zscore_dt(
+      count_percent_zscore(
         grp_c = c('network_link_ids_unnested', 'vehicle_type')
         ,grp_p = c('network_link_ids_unnested')
-        ,col = 'count', rnd = 2) %>%
+        ,col = count, rnd = 2) %>%
       .[,`:=`(count_nrm_prank = dgt2(percent_rank(count))
               ,count_nrm_mmax = dgt2(normalize_min_max(count)))
         ,by = .(vehicle_type)] %>%
@@ -311,10 +290,10 @@ aggregate_network_links = function(location, folder, auto_save = F
     message(str_glue("{make_space()}\nStarting aggreagtion by link, vehicle type, and originating poly...."))
 
     agg_link_vehicle_type_origin = network_links %>%
-      count_percent_zscore_dt(
+      count_percent_zscore(
         grp_c = c('origin_poly', 'network_link_ids_unnested', 'vehicle_type')
         ,grp_p = c('origin_poly', 'network_link_ids_unnested')
-        ,col = 'count', rnd = 2) %>%
+        ,col = count, rnd = 2) %>%
       .[order(origin_poly, network_link_ids_unnested)] %>%
       .[,`:=`(count_nrm_prank = dgt2(percent_rank(count))
               ,count_nrm_mmax = dgt2(normalize_min_max(count)))
