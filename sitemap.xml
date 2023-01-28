@@ -25,10 +25,16 @@
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/index.html</loc>
   </url>
   <url>
+    <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/inspect_queried_network.html</loc>
+  </url>
+  <url>
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_network_centroid_layer.html</loc>
   </url>
   <url>
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_network_link_layer.html</loc>
+  </url>
+  <url>
+    <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_query_and_process_replica_script.html</loc>
   </url>
   <url>
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_trip_origin_point_layer.html</loc>
