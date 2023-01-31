@@ -104,7 +104,7 @@ make_trip_origin_point_layer(
 )
 ```
 
-Make RDS list object containg network link counts aggregated three different pre-set ways.
+Make RDS list object containing network volume aggregation tables.
 ``` r
 data("table_agg_by_link_subset_limited")
 
@@ -113,6 +113,31 @@ aggregate_network_links(
   ,auto_save = F
 )
 ```
+
+Convert network volume tables to polyline spatial `SF` layers.
+``` r
+data('aggregated_network_links')
+data('replica_queried_network_links')
+
+make_agg_network_shapefile_links(
+  aggregate_object = aggregated_network_links
+  ,network_link_object = replica_queried_network_links
+  ,auto_save = F
+)
+```
+
+Convert network volume tables to point spatial `SF` layers (link centroids).
+``` r
+data('aggregated_network_links')
+data('replica_queried_network_cntds')
+
+make_agg_network_shapefile_centroids(
+  aggregate_object = aggregated_network_links
+  ,network_centroid_object = replica_queried_network_cntrds
+  ,auto_save = F
+)
+```
+
 The below image shows the saved files in the designated folder after processing.
 
 <img src="man/figures/README_example_file_2.png" width="50%" />

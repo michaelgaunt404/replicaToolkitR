@@ -3,9 +3,9 @@
 #' @description The network acquired from google is saved as a shapefile.
 #' This function helps converts file from CSV to GIS layer and provides an option to save GIS object as a ".gpkg".
 #'
-#' @param location character string pointing to top level location where data acquired from google was saved to.
+#' @param location character string pointing to top level location where data acquired from Google was saved to.
 #' @param folder character string of name where data was automatically saved to from google data download.
-#' @param auto_save boolean (T/F - default F) inicating if you want the GIS layer to be saved. Default just creates an object without saving.
+#' @param auto_save boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.
 #' @param network_object tabular link data. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.
 #'
 #' @return GIS layer of network with CRS 4326
@@ -250,7 +250,7 @@ aggregate_network_links = function(location, folder, auto_save = F
     network_links = network_object
   }
 
-  #perfrom aggregations
+  #perform aggregations
   {
     message(str_glue("{make_space()}\nStarting aggreagtion by link and study area destination flag...."))
 
@@ -270,12 +270,12 @@ aggregate_network_links = function(location, folder, auto_save = F
         ,grp_p = c('network_link_ids_unnested')
         ,col = count, rnd = 2) %>%
       data.table() %>%
-      .[,`:=`(count_nrm_prank = dgt2(percent_rank(count))
-              ,count_nrm_mmax = dgt2(normalize_min_max(count)))
-        ,by = .(vehicle_type)] %>%
-      .[,`:=`(ttl_count_link = sum(count)), by = .(network_link_ids_unnested)] %>%
-      .[,`:=`(ttl_count_link_nrm_mmax =  dgt2(normalize_min_max(ttl_count_link)))] %>%
-      data.frame() %>%
+      group_by(vehicle_type) %>%
+      mutate(count_nrm_prank = dgt2(percent_rank(count))
+              ,count_nrm_mmax = dgt2(normalize_min_max(count))) %>%
+      group_by(network_link_ids_unnested) %>%
+      mutate(ttl_count_link = sum(count)) %>%
+      mutate(ttl_count_link_nrm_mmax =  dgt2(normalize_min_max(ttl_count_link))) %>%
       mutate(label = str_glue(
         "Link No.: {network_link_ids_unnested}
     <br>Total Link Volume: {ttl_count_link}
@@ -295,16 +295,16 @@ aggregate_network_links = function(location, folder, auto_save = F
         grp_c = c('origin_poly', 'network_link_ids_unnested', 'vehicle_type')
         ,grp_p = c('origin_poly', 'network_link_ids_unnested')
         ,col = count, rnd = 2) %>%
-      data.table() %>%
-      .[order(origin_poly, network_link_ids_unnested)] %>%
-      .[,`:=`(count_nrm_prank = dgt2(percent_rank(count))
-              ,count_nrm_mmax = dgt2(normalize_min_max(count)))
-        ,by = .(origin_poly, vehicle_type)] %>%
-      .[,`:=`(ttl_count_orgin = sum(count)), by = .(origin_poly)] %>%
-      .[,`:=`(ttl_count_orgin_type = sum(count)), by = .(origin_poly, vehicle_type)] %>%
-      # .[,`:=`(ttl_count_orgin_type_other = ttl_count_orgin-ttl_count_orgin_type
-      #         ,ttl_count_orgin_type_per = ttl_count_orgin_type/ttl_count_orgin)] %>%
-      data.frame() %>%
+      arrange(origin_poly, network_link_ids_unnested) %>%
+      group_by(origin_poly, vehicle_type) %>%
+      mutate(count_nrm_prank = dgt2(percent_rank(count))
+             ,count_nrm_mmax = dgt2(normalize_min_max(count))) %>%
+      ungroup() %>%
+      group_by(origin_poly) %>%
+      mutate(ttl_count_orgin = sum(count)) %>%
+      ungroup() %>%
+      group_by(origin_poly, vehicle_type) %>%
+      mutate(ttl_count_orgin_type = sum(count)) %>%
       mutate(label = str_glue(
         "Origin: {origin_poly}
     <br>Total Trips from Origin: {ttl_count_orgin}
@@ -328,7 +328,109 @@ aggregate_network_links = function(location, folder, auto_save = F
       message("You elected to automatically save the returned list object!")
       file = here::here(location, folder, "aggregated_network_links.rds")
       message(str_glue("It is saved at this location:\n{file}"))
-      saveRDS(list_objects,file)
+      saveRDS(list_objects, file)
+    } else {
+      message("You did not elect to automatically save the returned list object!")
+    }
+  }
+
+  return(list_objects)
+
+}
+
+#' Convert tabular network link count objects to SF polyline objects.
+#'
+#' @description This functions takes the three tabular network link counts data frames and converts them to individual SF objects contained within a list.
+#' It can be supplied with either the list object directly or supplied location and folder strings to point to the folder the list is in.
+#'
+#'
+#' @param location character string pointing to top level location where data acquired from google was saved to.
+#' @param folder character string of name where data was automatically saved to from google data download.
+#' @param auto_save boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.
+#' @param aggregate_object list object containing the network link counts aggregated at different levels.
+#' @param network_link_object network object containing links. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.
+#'
+#' @returna data frame and/or saved RDS file
+#' @export
+#'
+#' @examples
+#' data('aggregated_network_links')
+#' data('replica_queried_network_links')
+#'
+#' make_agg_network_shapefile_links(
+#'   aggregate_object = aggregated_network_links
+#'   ,network_link_object = replica_queried_network_links
+#'   ,auto_save = F
+#' )
+make_agg_network_shapefile_links = function(location, folder, auto_save = F
+                                            ,aggregate_object = NULL, network_link_object = NULL){
+
+  # location = "data/req_dev"
+  # folder = 'data_20230125_162034'
+
+  if (is.null(aggregate_object)){
+    message("Aggregate network links objects will be made using aggregate tables located at folder and location...")
+    aggregated_network_links = here::here(location, folder, "aggregated_network_links.rds") %>%
+      read_rds()
+    replica_trip_origin_links = aggregated_network_links
+  } else {
+    message("Aggregate network links objects will be made using supplied aggregate table...")
+    aggregated_network_links = aggregate_object
+  }
+
+  if (is.null(network_link_object)){
+    network_link_object = here::here(location, folder, "replica_queried_network_links.gpkg") %>%
+      sf::read_sf()
+
+  } else {
+    message("network_link_object will be made using supplied network link object...")
+    network_object = network_link_object
+  }
+
+  message(str_glue("Making shapefiles by merging data centroids with aggregated count data{make_space('-')}"))
+  message("This may take awhile depending on the size of the network and count data")
+
+  temp_object = c("agg_link_flag", "agg_link_vehicle_type", "agg_link_vehicle_type_origin") %>%
+    map(~{
+
+      message(str_glue("Making {.x}...."))
+
+      network_object_mrgd = network_link_object %>%
+        mutate(stableEdgeId_trunc = str_trunc(stableEdgeId, 14, "right", "")) %>%
+        merge(aggregated_network_links[[.x]] %>%
+                mutate(network_link_ids_unnested_trunc = str_trunc(network_link_ids_unnested , 14, "right", ""))
+              ,by.x = "stableEdgeId_trunc", by.y = "network_link_ids_unnested_trunc", all = T)
+
+      # summary_output = network_object_mrgd %>%
+      #   st_drop_geometry() %>%
+      #   count(stable_mis = !is.na(stableEdgeId)
+      #         ,network_mis = !is.na(network_link_ids_unnested)) %>%
+      #   mutate(flag = case_when(
+      #     (stable_mis == T & network_mis == T)~"Successful data matches"
+      #     ,(stable_mis == F & network_mis == T)~"Agg. table link present but no match in network object"
+      #     ,(stable_mis == T & network_mis == F)~"Network object link present but no match in agg. table"
+      #     ,T~"ERROR")) %>%
+      #   select(flag, count = n)
+
+      # message(str_glue("{paste0(capture.output(summary_output), collapse = '\n')}"))
+
+    })
+
+  if (auto_save) {
+    sf::write_sf(replica_trip_origin_links, here::here(location, folder, "network_link_aggregation_list.rds"))
+  }
+
+  #save out
+  {
+    list_objects = list(agg_link_flag = temp_object[[1]]
+                        ,agg_link_vehicle_type = temp_object[[2]]
+                        ,agg_link_vehicle_type_origin = temp_object[[3]])
+
+    if (auto_save) {
+      message("You elected to automatically save the returned list object!")
+      file = here::here(location, folder, "network_link_aggregation_list.rds")
+      message(str_glue("It is saved at this location:\n{file}"))
+      saveRDS(list_objects, file)
     } else {
       message("You did not elect to automatically save the returned list object!")
     }
@@ -339,4 +441,102 @@ aggregate_network_links = function(location, folder, auto_save = F
 }
 
 
+#' Convert tabular network link count objects to SF point objects.
+#'
+#' @description This functions takes the three tabular network link counts data frames and converts them to individual SF objects contained within a list.
+#' It can be supplied with either the list object directly or supplied location and folder strings to point to the folder the list is in.
+#'
+#' Note: This should be used if you intend to visualize these objects with crosstalk.
+#'
+#'
+#' @param location character string pointing to top level location where data acquired from google was saved to.
+#' @param folder character string of name where data was automatically saved to from google data download.
+#' @param auto_save boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.
+#' @param aggregate_object list object containing the network link counts aggregated at different levels.
+#' @param network_centroid_object network object containing links. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.
+#'
+#' @returna data frame and/or saved RDS file
+#' @export
+#'
+#' @examples
+#' data('aggregated_network_links')
+#' data('replica_queried_network_cntds')
+#'
+#' make_agg_network_shapefile_centroids(
+#'   aggregate_object = aggregated_network_links
+#'   ,network_centroid_object = replica_queried_network_links
+#'   ,auto_save = F
+#' )
+make_agg_network_shapefile_centroids = function(location, folder, auto_save = F
+                                                ,aggregate_object = NULL, network_centroid_object = NULL){
+
+  # location = "data/req_dev"
+  # folder = 'data_20230125_162034'
+
+  if (is.null(aggregate_object)){
+    message("Aggregate network links objects will be made using aggregate tables located at folder and location...")
+    aggregated_network_links = here::here(location, folder, "aggregated_network_links.rds") %>%
+      read_rds()
+    replica_trip_origin_links = aggregated_network_links
+  } else {
+    message("Aggregate network links objects will be made using supplied aggregate table...")
+    aggregated_network_links = aggregate_object
+  }
+
+  if (is.null(network_centroid_object)){
+    message("You elected to use folder and location pointers to make spaital object...")
+
+    # message("In addition, you elected to repersent network links as polylines....\nIf you wish to depict network as links as points using their centroids change 'use_centroids = T'")
+    network_centroid_object = here::here(location, folder, "replica_queried_network_cntds.gpkg") %>%
+      sf::read_sf()
+
+  } else {
+    message("Shapefile will be made using supplied network link object...")
+    network_centroid_object = network_centroid_object
+  }
+
+  message(str_glue("Making shapefiles by merging data centroids with aggregated count data{make_space('-')}"))
+  message("This may take awhile depending on the size of the network and count data")
+
+  temp_object = c("agg_link_flag", "agg_link_vehicle_type", "agg_link_vehicle_type_origin") %>%
+    map(~{
+
+      message(str_glue("Making {.x}...."))
+
+      network_object_mrgd = network_centroid_object %>%
+        mutate(stableEdgeId_trunc = str_trunc(stableEdgeId, 14, "right", "")) %>%
+        merge(aggregated_network_links[[.x]] %>%
+                mutate(network_link_ids_unnested_trunc = str_trunc(network_link_ids_unnested , 14, "right", ""))
+              ,by.x = "stableEdgeId_trunc", by.y = "network_link_ids_unnested_trunc", all = T)
+
+    })
+
+  #save out
+  {
+    list_objects = list(agg_link_flag = temp_object[[1]]
+                        ,agg_link_vehicle_type = temp_object[[2]]
+                        ,agg_link_vehicle_type_origin = temp_object[[3]])
+
+    if (auto_save) {
+      message("You elected to automatically save the returned list object!")
+      file = here::here(location, folder, "network_link_aggregation_list.rds")
+      message(str_glue("It is saved at this location:\n{file}"))
+      saveRDS(list_objects, file)
+    } else {
+      message("You did not elect to automatically save the returned list object!")
+    }
+    }
+
+  return(list_objects)
+
+}
+
+data("table_agg_by_link_subset_limited")
+
+aggregate_network_links(
+  network_object = table_agg_by_link_subset_limited
+  ,location = "data/req_dev"
+  ,folder = "data_20230125_162034"
+  ,auto_save = T
+)
 

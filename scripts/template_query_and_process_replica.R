@@ -105,6 +105,12 @@ aggregate_network_links(
   ,auto_save = F
 )
 
+make_agg_network_shapefile_links(
+  location = location
+  ,folder = folder
+  ,auto_save = F
+)
+
 #inspect processed data=========================================================
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #this section contains functions that make it easy to inspect the data made above
@@ -112,4 +118,6 @@ inspect_queried_network(
   location = location
   ,folder = folder
 )
+
+
 

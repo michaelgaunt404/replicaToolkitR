@@ -54,7 +54,7 @@ acquired_sa_polys = here(location, folder, 'acquired_sa_polys') %>%
 usethis::use_data(acquired_sa_polys, overwrite = TRUE)
 
 aggregated_network_links = here(location, folder, 'aggregated_network_links') %>%
-  paste0(".rds")
+  paste0(".rds") %>%  read_rds()
 usethis::use_data(aggregated_network_links, overwrite = TRUE)
 
 
