@@ -6,7 +6,18 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 
 This R package provides a set of functions which allow the user to query and process Replica data. Using user inputs, SQL queries area made to the Replica BigQuery database. The results of those queries are returned to the user in the form of CSVs. Convience functions are then used to convert tabular data to spatial `SF` objects. 
 
-The usage of this package requires the user to have an account with Replica. 
+What you can do with this package:
+    
+:heavy_check_mark: Make queires directly to and acquire data from Replica's BigQuery database using your own inputs and custom geometry     
+:heavy_check_mark: Create datasets from your queries and use them to: 
++ Quantify trip ODs  
++ Aggregate network link volumes  
++ Produce trip origin kernel density estimates (KDE)   
++ Identify trip origin hotspots and coldspots  
+
+:heavy_check_mark: Create interactive, filterable map widgets that help you further inspect your data 
+
+> **_NOTE:_** The usage of this package requires the user to have an account with Replica and access to Google BigQuery via Replica. 
 
 ## Installation
 
@@ -128,7 +139,7 @@ The below image shows the saved files in the designated folder after processing.
 
 This package contains a number of functions that create interactive, filterable leaflet widgets that can aid you in your analysis and research. 
 
-Make widget of acquired network links, see example below code:
+Make an interactive filterable map widget of acquired network links, see example below code:
 ``` r
 data("replica_queried_network_links")
 
@@ -138,8 +149,7 @@ inspect_queried_network(
 ```
 <img src="man/figures/INSPECT_example_1.png" width="100%" />
 
-
-Make widget of network links pre-aggregated a number of ways, see example below code:    
+Make an interactive filterable map widgets of network links pre-aggregated a number of ways, see example below code:    
 
 + `make_network_map_anltpt()` - `A`ggregated `N`etwork `L`inks by vehicle `T`ri`P` `T`ype
 + `make_network_map_anlt()` - `A`ggregated `N`etwork `L`inks by vehicle `T`ype
@@ -179,28 +189,4 @@ Run the below code to create an analysis template.
 ``` r
 replicaToolkitR::make_query_and_process_replica_script()
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
