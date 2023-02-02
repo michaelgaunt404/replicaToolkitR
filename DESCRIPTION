@@ -4,8 +4,10 @@ Title: Easily query and process data from Replica Mobility Platform
 Version: 0.1.0
 Author: Mike Gaunt <mike.gaunt.404@gmail.com>
 Maintainer: Mike Gaunt <mike.gaunt.404@gmail.com>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: replicaToolkitR automates the quering, processing, and analysis of Replica mobility data.
+    Easily query Replica database using your inputs and own custom geometries.
+    Use package functions to process queried data to build your analysis off of. 
+    Create interactive, filerable map widgets to further inspect, slice, and extract information from your data.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
