@@ -57,7 +57,7 @@ This function helps converts file from CSV to GIS layer and provides an option t
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>location</dt>
-<dd><p>character string pointing to top level location where data acquired from google was saved to.</p></dd>
+<dd><p>character string pointing to top level location where data acquired from Google was saved to.</p></dd>
 
 
 <dt>folder</dt>
@@ -65,7 +65,7 @@ This function helps converts file from CSV to GIS layer and provides an option t
 
 
 <dt>auto_save</dt>
-<dd><p>boolean (T/F - default F) inicating if you want the GIS layer to be saved. Default just creates an object without saving.</p></dd>
+<dd><p>boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.</p></dd>
 
 
 <dt>network_object</dt>
@@ -125,56 +125,7 @@ This function helps converts file from CSV to GIS layer and provides an option t
 <span class="r-in"><span>  ,auto_save <span class="op">=</span> <span class="cn">F</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Spatial links were made using supplied tabular network object...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Simple feature collection with 25869 features and 13 fields</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Geometry type: LINESTRING</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Dimension:     XY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Bounding box:  xmin: -122.4135 ymin: 47.50069 xmax: -122.2406 ymax: 47.74676</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Geodetic CRS:  WGS 84</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> First 10 features:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    stableEdgeId startLat  startLon   endLat    endLon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1.716380e+19 47.59232 -122.3259 47.59303 -122.3231</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  2.374856e+18 47.53192 -122.3766 47.53336 -122.3766</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  6.003071e+18 47.65612 -122.3021 47.65640 -122.3020</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  1.045799e+19 47.68030 -122.3258 47.68002 -122.3258</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  6.084231e+18 47.66153 -122.3467 47.66126 -122.3468</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  4.999734e+18 47.68306 -122.3003 47.68306 -122.3008</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7  3.453132e+18 47.67190 -122.3174 47.67162 -122.3174</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8  1.585985e+19 47.66923 -122.3060 47.66930 -122.3056</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9  1.425740e+19 47.66865 -122.3622 47.66840 -122.3620</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 1.718644e+19 47.53488 -122.2806 47.53516 -122.2807</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                             streetName distance     osmid    speed</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1                                 I 90   224000 621426664 62.11319</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2                35th Avenue Southwest   160000 332496923 36.23891</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3         Montlake Boulevard Northeast    32000 500504113 46.60353</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4          East Green Lake Drive North    32000   6410233 36.23891</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5                 Green Lake Way North    32000   8026709 36.23891</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6                Northeast 75th Street    32000 428091103 36.23891</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7              Roosevelt Way Northeast    32000 421652698 36.23891</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8          Northeast Ravenna Boulevard    32000 590421615 36.23891</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9              Northwest Market Street    32000 158265863 36.23891</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 Martin Luther King Junior Way South    32000 428291925 36.23891</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                           flags lanes   highway flag_contains</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1                                  [ALLOWS_CAR]     2  motorway          TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  [ALLOWS_CAR, ALLOWS_BIKE, ALLOWS_PEDESTRIAN]    -1 secondary          TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  [ALLOWS_CAR, ALLOWS_BIKE, ALLOWS_PEDESTRIAN]     2   primary          TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  [ALLOWS_CAR, ALLOWS_BIKE, ALLOWS_PEDESTRIAN]    -1 secondary          TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5                           [ALLOWS_PEDESTRIAN]     0 secondary          TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  [ALLOWS_CAR, ALLOWS_BIKE, ALLOWS_PEDESTRIAN]    -1 secondary          TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7  [ALLOWS_CAR, ALLOWS_BIKE, ALLOWS_PEDESTRIAN]     2 secondary          TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8  [ALLOWS_CAR, ALLOWS_BIKE, ALLOWS_PEDESTRIAN]     1 secondary          TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9                           [ALLOWS_PEDESTRIAN]     0 secondary          TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 [ALLOWS_CAR, ALLOWS_BIKE, ALLOWS_PEDESTRIAN]     2 secondary          TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                          geometry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  LINESTRING (-122.3259 47.59...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  LINESTRING (-122.3766 47.53...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  LINESTRING (-122.3021 47.65...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  LINESTRING (-122.3258 47.68...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  LINESTRING (-122.3467 47.66...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  LINESTRING (-122.3003 47.68...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7  LINESTRING (-122.3174 47.67...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8  LINESTRING (-122.306 47.669...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9  LINESTRING (-122.3622 47.66...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 LINESTRING (-122.2806 47.53...</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in st_geometry_type(replica_queried_network):</span> could not find function "st_geometry_type"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

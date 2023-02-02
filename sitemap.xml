@@ -28,10 +28,22 @@
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/inspect_queried_network.html</loc>
   </url>
   <url>
+    <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_agg_network_shapefile_centroids.html</loc>
+  </url>
+  <url>
+    <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_agg_network_shapefile_links.html</loc>
+  </url>
+  <url>
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_network_centroid_layer.html</loc>
   </url>
   <url>
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_network_link_layer.html</loc>
+  </url>
+  <url>
+    <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_network_map_anlt.html</loc>
+  </url>
+  <url>
+    <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_network_map_anlto.html</loc>
   </url>
   <url>
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_query_and_process_replica_script.html</loc>
