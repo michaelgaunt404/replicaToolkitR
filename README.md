@@ -132,7 +132,7 @@ inspect_queried_network(
   network_links_object = replica_queried_network_links
 )
 ```
-<img src="man/figures/INSPECT_example_1.png" width="75%" />
+<img src="man/figures/INSPECT_example_1.png" width="100%" />
 
 
 Make widget of network links pre-aggregated a number of ways, see example below code:    
