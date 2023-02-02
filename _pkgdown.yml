@@ -1,4 +1,13 @@
 url: https://michaelgaunt404.github.io/replicaToolkitR/
+
 template:
   bootstrap: 5
 
+navbar:
+  structure:
+    left:  [intro, reference, articles, tutorials, news]
+    right: [search, github]
+
+home:
+  sidebar:
+    structure: [links, community, citation, authors, dev]

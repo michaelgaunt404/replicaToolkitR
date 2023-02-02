@@ -2,13 +2,15 @@ Package: replicaToolkitR
 Type: Package
 Title: Easily query and process data from Replica Mobility Platform
 Version: 0.1.0
-Author: Mike Gaunt <mike.gaunt.404@gmail.com>
+Authors@R: c(person("Mike", "Gaunt", role = c("aut", "cre"), email = "mike.gaunt.404@gmail.com"))
 Maintainer: Mike Gaunt <mike.gaunt.404@gmail.com>
 Description: replicaToolkitR automates the quering, processing, and analysis of Replica mobility data.
     Easily query Replica database using your inputs and own custom geometries.
     Use package functions to process queried data to build your analysis off of. 
     Create interactive, filerable map widgets to further inspect, slice, and extract information from your data.
-License: What license is it under?
+License: MIT + file LICENSE
+URL: https://github.com/michaelgaunt404/replicaToolkitR
+BugReports: https://github.com/michaelgaunt404/replicaToolkitR/issues
 Encoding: UTF-8
 LazyData: true
 Depends: 
@@ -42,7 +44,6 @@ Imports:
     tidyr,
     tigris,
     wellknown
-URL: https://michaelgaunt404.github.io/replicaToolkitR/
 Language: en-US
 Remotes: 
     michaelgaunt404/gauntlet
