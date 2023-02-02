@@ -107,11 +107,15 @@ make_trip_origin_point_layer(
 Make RDS list object containing network volume aggregation tables.
 ``` r
 data("table_agg_by_link_subset_limited")
+data("poi_list")
+data("replica_queried_network_cntds")
 
 aggregate_network_links(
-  network_object = table_agg_by_link_subset_limited
-  ,auto_save = F
+  agg_count_object = table_agg_by_link_subset_limited
+  ,poi_list = poi_list
+  ,network_object = replica_queried_network_cntds
 )
+
 ```
 
 The below image shows the saved files in the designated folder after processing.
