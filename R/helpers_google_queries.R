@@ -172,7 +172,7 @@ where flag_contains = TRUE")
         log4r::fatal(logger, mes_fatal)
         stopifnot("Number of returned links was zero\n...change bounding box\n...stopping...." = F)
       } else {
-        str_glue("{make_space()}\nNon-empty data returned, Good\nQuery continued...\nIn total {sum(highway_counts$count)} links\n{str_glue('-{highway_counts$count} ({100*dgt2(highway_counts$count/sum({highway_counts$count}))})% {highway_counts$highway}') %>%
+        str_glue("{make_space()}\nNon-empty data returned, Good\nQuery continued...\nIn total {sum(highway_counts$count)} links\n{str_glue('-{highway_counts$count} ({100*gauntlet::dgt2(highway_counts$count/sum({highway_counts$count}))})% {highway_counts$highway}') %>%
                 paste0(collapse = '\n')}") %>%
           gauntlet::log_and_info(., logger)
 
@@ -406,9 +406,9 @@ mode, vehicle_type
         #                                  c("1 count", "2 count", "3 count"
         #                                    ,"4 count", '5 count', "6-10 count", "11 or greater"))) %>%
         #   arrange(flag_link) %>%
-        #   mutate(percent = 100*dgt3(count/sum(count))
+        #   mutate(percent = 100*gauntlet::dgt3(count/sum(count))
         #          ,count_cum = cumsum(count)
-        #          ,percent_cum = 100*dgt3(count_cum/sum(count))) %>%
+        #          ,percent_cum = 100*gauntlet::dgt3(count_cum/sum(count))) %>%
         #   arrange(desc(flag_link)) %>%
         #   mutate(count_rm = cumsum(count)
         #          ,percent_rm = cumsum(percent))
@@ -447,13 +447,13 @@ where network_link_ids_unnested in
           ,qs_table_agg_by_link_sum(table_agg_by_link_subset))
 
         summary_table_link_counts = bigrquery::bq_table_download(table_agg_by_link_sum_subset) %>%
-          mutate(flag_link = fct_relevel(flag_link,
+          mutate(flag_link = forcats::fct_relevel(flag_link,
                                          c("1 count", "2 count", "3 count"
                                            ,"4 count", '5 count', "6-10 count", "11 or greater"))) %>%
           arrange(flag_link) %>%
-          mutate(percent = 100*dgt3(count/sum(count))
+          mutate(percent = 100*gauntlet::dgt3(count/sum(count))
                  ,count_cum = cumsum(count)
-                 ,percent_cum = 100*dgt3(count_cum/sum(count))) %>%
+                 ,percent_cum = 100*gauntlet::dgt3(count_cum/sum(count))) %>%
           arrange(desc(flag_link)) %>%
           mutate(count_rm = cumsum(count)
                  ,percent_rm = cumsum(percent))

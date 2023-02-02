@@ -114,33 +114,89 @@ aggregate_network_links(
 )
 ```
 
-Convert network volume tables to polyline spatial `SF` layers.
-``` r
-data('aggregated_network_links')
-data('replica_queried_network_links')
-
-make_agg_network_shapefile_links(
-  aggregate_object = aggregated_network_links
-  ,network_link_object = replica_queried_network_links
-  ,auto_save = F
-)
-```
-
-Convert network volume tables to point spatial `SF` layers (link centroids).
-``` r
-data('aggregated_network_links')
-data('replica_queried_network_cntds')
-
-make_agg_network_shapefile_centroids(
-  aggregate_object = aggregated_network_links
-  ,network_centroid_object = replica_queried_network_cntrds
-  ,auto_save = F
-)
-```
-
 The below image shows the saved files in the designated folder after processing.
 
 <img src="man/figures/README_example_file_2.png" width="50%" />
 
 > **_NOTE:_** This functions will always return an object. If you do not choose to `auto_save` you will still be returned the result. It is advised to `auto_save` the object at _some point_ as naming conventions will be respected.
+
+## Analysis Tools
+
+This package contains a number of functions that create interactive, filterable leaflet widgets that can aid you in your analysis and research. 
+
+Make widget of acquired network links, see example below code:
+``` r
+data("replica_queried_network_links")
+
+inspect_queried_network(
+  network_links_object = replica_queried_network_links
+)
+```
+<img src="man/figures/INSPECT_example_1.png" width="75%" />
+
+
+Make widget of network links pre-aggregated a number of ways, see example below code:    
+
++ `make_network_map_anltpt()` - `A`ggregated `N`etwork `L`inks by vehicle `T`ri`P` `T`ype
++ `make_network_map_anlt()` - `A`ggregated `N`etwork `L`inks by vehicle `T`ype
++ `make_network_map_anlt0()` - `A`ggregated `N`etwork `L`inks by vehicle `T`ype and `O`rigin
+
+``` r
+data("aggregated_network_links")
+data("poi_list")
+data("acquired_sa_polys")
+
+make_network_map_anltpt(
+  network_cntrd_object = aggregated_network_links
+  ,poi_list = poi_list
+  ,origin_polys = acquired_sa_polys
+)
+
+make_network_map_anlt(
+  network_cntrd_object = aggregated_network_links
+  ,poi_list = poi_list
+  ,origin_polys = acquired_sa_polys
+)
+
+make_network_map_anlto(
+  network_cntrd_object = aggregated_network_links
+  ,poi_list = poi_list
+  ,origin_polys = acquired_sa_polys
+)
+```
+<img src="man/figures/ANLTO_example_1.png" width="100%" />
+
+## What Now?
+
+Lastly, this package contains functions that save basic analysis functions. 
+
+Run the below code to create an analysis template. 
+
+``` r
+replicaToolkitR::make_query_and_process_replica_script()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -1,12 +1,14 @@
 Package: replicaToolkitR
 Type: Package
-Title: Easily query and process Replica data.
+Title: Easily query and process data from Replica Mobility Platform
 Version: 0.1.0
-Author: Mike Gaunt
+Author: Mike Gaunt <mike.gaunt.404@gmail.com>
 Maintainer: Mike Gaunt <mike.gaunt.404@gmail.com>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: What license is it under?
+URL: https://github.com/michaelgaunt404/replicaToolkitR
+BugReports: https://github.com/michaelgaunt404/replicaToolkitR/issues
 Encoding: UTF-8
 LazyData: true
 Depends: 
@@ -21,8 +23,10 @@ Imports:
     crosstalk,
     data.table,
     dplyr,
+    forcats,
     gauntlet (>= 0.1.0),
     here,
+    leafem,
     leaflet,
     leaflet.extras2,
     log4r,
@@ -30,10 +34,12 @@ Imports:
     mapview,
     purrr,
     reactable,
+    readr,
     sf,
     sfhotspot,
     SpatialKDE,
     stringr,
+    tidyr,
     tigris,
     wellknown
 URL: https://michaelgaunt404.github.io/replicaToolkitR/

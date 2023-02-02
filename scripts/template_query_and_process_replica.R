@@ -19,21 +19,27 @@
 #library set-up=================================================================
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #content in this section should be removed if in production - ok for dev
+library(crosstalk)
 library(data.table)
 library(dplyr)
+library(forcats)
 library(gauntlet)
 library(here)
+library(leafem)
 library(leaflet)
 library(leaflet.extras2)
 library(log4r)
 library(magrittr)
 library(mapview)
 library(purrr)
+library(reactable)
+library(readr)
 library(sf)
 library(sfhotspot)
 library(SpatialKDE)
 library(stringr)
 library(tigris)
+library(tidyr)
 library(wellknown)
 
 #source helpers/utilities=======================================================
@@ -74,6 +80,9 @@ query_network_trip_using_bbox(
 #by default they save the data automatically
 #you can override this and save the returned objects to whatever variable
 
+
+##create gis layers=============================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 get_tigris_polys_from_replica_index(
   location = location
   ,folder = folder
@@ -93,6 +102,8 @@ make_network_centroid_layer(
   ,auto_save = F
 )
 
+##aggregate data================================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 make_trip_origin_point_layer(
   location = location
   ,folder = folder
@@ -103,12 +114,7 @@ aggregate_network_links(
   location = location
   ,folder = folder
   ,auto_save = F
-)
-
-make_agg_network_shapefile_links(
-  location = location
-  ,folder = folder
-  ,auto_save = F
+  ,network_object = replica_queried_network_cntds
 )
 
 #inspect processed data=========================================================
@@ -117,6 +123,30 @@ make_agg_network_shapefile_links(
 inspect_queried_network(
   location = location
   ,folder = folder
+)
+
+#anlt - Aggregated Network Links by Link and vehicle Type
+
+data("aggregated_network_links")
+data("poi_list")
+data("acquired_sa_polys")
+
+make_network_map_anlt(
+  network_cntrd_object = aggregated_network_links
+  ,poi_list = poi_list
+  ,origin_polys = acquired_sa_polys
+)
+
+make_network_map_anltpt(
+  network_cntrd_object = aggregated_network_links
+  ,poi_list = poi_list
+  ,origin_polys = acquired_sa_polys
+)
+
+make_network_map_anlto(
+  network_cntrd_object = aggregated_network_links
+  ,poi_list = poi_list
+  ,origin_polys = acquired_sa_polys
 )
 
 
