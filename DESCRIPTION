@@ -7,8 +7,6 @@ Maintainer: Mike Gaunt <mike.gaunt.404@gmail.com>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: What license is it under?
-URL: https://github.com/michaelgaunt404/replicaToolkitR
-BugReports: https://github.com/michaelgaunt404/replicaToolkitR/issues
 Encoding: UTF-8
 LazyData: true
 Depends: 
