@@ -168,10 +168,13 @@
 <p>Make RDS list object containing network volume aggregation tables.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"table_agg_by_link_subset_limited"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"poi_list"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"replica_queried_network_cntds"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/aggregate_network_links.html">aggregate_network_links</a></span><span class="op">(</span></span>
-<span>  network_object <span class="op">=</span> <span class="va">table_agg_by_link_subset_limited</span></span>
-<span>  ,auto_save <span class="op">=</span> <span class="cn">F</span></span>
+<span>  agg_count_object <span class="op">=</span> <span class="va">table_agg_by_link_subset_limited</span></span>
+<span>  ,poi_list <span class="op">=</span> <span class="va">poi_list</span></span>
+<span>  ,network_object <span class="op">=</span> <span class="va">replica_queried_network_cntds</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The below image shows the saved files in the designated folder after processing.</p>
 <p><img src="reference/figures/README_example_file_2.png" width="50%"></p>
