@@ -52,15 +52,16 @@ library(wellknown)
 #content in this section should be removed if in production - ok for dev
 #area to upload data with and to perform initial munging
 query_network_trip_using_bbox(
-  bb_network_layer = 'data/req_seattle_everett/study_network.gpkg'
-  ,bb_sa_layer = 'data/req_seattle_everett/study_area_poly.gpkg'
+  bb_network_layer = 'data/req_dev/study_network.gpkg'
+  ,bb_sa_layer = 'data/req_dev/study_area_poly.gpkg'
   ,network_table = "replica-customer.northwest.northwest_2019_Q4_network_segments"
   ,trip_table = "replica-customer.northwest.northwest_2019_Q4_thursday_trip"
   ,customer_name = "replica-customer"
-  ,file_destination = "data/req_seattle_everett"
+  ,file_destination = "data/req_dev"
   ,max_record = Inf
-  ,query_links = c("highway", "corridor", "road", "motorway", "motorway_link", "trunk",
-                   "trunk_link", "primary", "primary_link", "secondary", "secondary_link")
+  ,mode_type = c('COMMERCIAL')
+  # ,mode_type = c('ON_DEMAND_AUTO')
+  ,query_links = c("highway", "corridor", "road", "motorway", "motorway_link", "trunk")
 )
 
 #path set-up====================================================================
@@ -68,11 +69,11 @@ query_network_trip_using_bbox(
 #content in this section should be removed if in production - ok for dev
 
 #should be the same as *file_destination* input above
-# location =
+# location = "data/req_dev"
 
 #this is the folder that the data is written to
 #it is a sub-folder to *file_destination* and will have a data_[datetime] format
-#folder =
+# folder =
 
 #process acquired data==========================================================
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
