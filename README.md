@@ -4,12 +4,16 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->
 
-This R package provides a set of functions which allow the user to query and process Replica data. Using user inputs, SQL queries area made to the Replica BigQuery database. The results of those queries are returned to the user in the form of CSVs. Convenience functions are used to convert tabular data to spatial `SF` objects. 
+This R package provides a set of functions which allow the user to query and process Replica data. Using user inputs, SQL queries area made to the Replica Big Query database. The results of those queries are returned to the user in the form of CSVs. Convenience functions are used to convert tabular data to spatial `SF` objects. 
+
+#### Intent of this package:
+
+This package is intended to lower the overhead when working with Replica data. Specifically, to make it extremely easy with little cost to acquire Replica data and to produce some basic analytic tools (dashboards) to quickly gain useful insights.  
 
 #### What you can do with this package:
     
-:heavy_check_mark: Make queries directly to and acquire data from Replica's BigQuery database using your own inputs and custom geometry     
-:heavy_check_mark: Create datasets from your queries and use them to: 
+:heavy_check_mark: Make queries directly to and acquire data from Replica's Big Query database using your own inputs and custom geometry     
+:heavy_check_mark: Create data sets from your queries and use them to: 
     
 + Quantify trip ODs  
 + Aggregate network link volumes  
@@ -37,7 +41,7 @@ Load the package.
 library(replicaToolkitR)
 
 ```
-The run the function `query_network_trip_using_bbox()` to query the replica database given your supplid inputs.
+The run the function `query_network_trip_using_bbox()` to query the replica database given your supplied inputs.
 ``` r
 query_network_trip_using_bbox(
   bb_network_layer = 'data/req_dev/study_area_network.shp'
@@ -59,14 +63,14 @@ When completed, the queried data will be written to the location defined by the 
 
 6 files will be written, they are: 
     
-+ `log_file`: Simple text file logging the events of the run. Records the table IDs of the temporary tables that are made in Google BigQuery table during the run. These can be accessed later.   
++ `log_file`: Simple text file logging the events of the run. Records the table IDs of the temporary tables that are made in Google Big Query table during the run. These can be accessed later.   
 + `replica_queried_network`: The network queried by the user. The user will be asked if they want to download this file or not - it can be rather large given query inputs.    
-+ `replica_sa_poly_index`: A table containg all polygons found within the user supplied bb_sa_layer polygon.   
++ `replica_sa_poly_index`: A table containing all polygons found within the user supplied bb_sa_layer polygon.   
 + `replica_trip_origin_destination`: A table containing counts of vehicles aggregated by origin polygon, destination polygon, and vehicle type. Origins and destinations outside of the study area are collapsed into single level called `out of study area`.   
-+ `replica_trip_origin_links`: A table containg counts of vehicle given origin polygon and starting network link. This data set provides a more precise view of vehicle starting locations rather than by its origin polygon (usually census block groups). This is useful when performing hotspot analyses or calcualting kernel desnity estimates (KDEs).   
++ `replica_trip_origin_links`: A table containing counts of vehicle given origin polygon and starting network link. This data set provides a more precise view of vehicle starting locations rather than by its origin polygon (usually census block groups). This is useful when performing hotspot analyses or calculating kernel density estimates (KDEs).   
 + `table_agg_by_link_subset_limited`: A table detailing network link volumes for a given day aggregated by origin polygon and network link    
 
-All the data listed above are save as CSVs. Conveince functions are provided to convert tabular data to spatial data and save as GPKG or RDS files. 
+All the data listed above are save as CSVs. Helper functions are provided to convert tabular data to spatial data and save as GPKG or RDS files. 
 
 Resulting files in folder after data acquisition.
 
@@ -74,7 +78,7 @@ Resulting files in folder after data acquisition.
 
 ## Data Processing 
 
-As indcated above, `replicaToolkitR` provides convience functions to convert the tabular data acquired through `query_network_trip_using_bbox()` to a spatail format conducive to mapping.  
+As indicated above, `replicaToolkitR` provides helper functions to convert the tabular data acquired through `query_network_trip_using_bbox()` to a spatial format conducive to mapping.  
 
 > **_NOTE:_** The functions in this section can be supplied an object to transfrom or location/folder inputs that point to where your data is saved. If the latter is supplied then the function will go and automatically load whatever file the function calls for. Suppling an object directly is compataible with the `targets` package workflow.
 
@@ -88,7 +92,7 @@ get_tigris_polys_from_replica_index(
   ,auto_save = F
 )
 ```
-Make `SF` linestring spatial object of network links. 
+Make `SF` line-string spatial object of network links. 
 ``` r
 data("replica_queried_network")
 

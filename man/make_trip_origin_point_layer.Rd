@@ -18,7 +18,7 @@ make_trip_origin_point_layer(
 
 \item{auto_save}{boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.}
 
-\item{network_object}{network object containing links. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.}
+\item{first_links_object}{network object containing links. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.}
 }
 \value{
 GIS layer of network with CRS 4326

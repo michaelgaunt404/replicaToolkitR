@@ -51,16 +51,17 @@ library(wellknown)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #content in this section should be removed if in production - ok for dev
 #area to upload data with and to perform initial munging
+
 query_network_trip_using_bbox(
-  bb_network_layer = 'data/req_seattle_everett/study_network.gpkg'
-  ,bb_sa_layer = 'data/req_seattle_everett/study_area_poly.gpkg'
-  ,network_table = "replica-customer.northwest.northwest_2019_Q4_network_segments"
-  ,trip_table = "replica-customer.northwest.northwest_2019_Q4_thursday_trip"
+  bb_network_layer = 'data/req_dev/study_area_network.shp'
+  ,bb_sa_layer = 'data/req_dev/study_area_network.shp'
+  ,network_table = "replica-customer.northwest.northwest_2021_Q4_network_segments"
+  ,trip_table = "replica-customer.northwest.northwest_2021_Q4_thursday_trip"
   ,customer_name = "replica-customer"
-  ,file_destination = "data/req_seattle_everett"
+  ,file_destination = "data/req_dev"
   ,max_record = Inf
-  ,query_links = c("highway", "corridor", "road", "motorway", "motorway_link", "trunk",
-                   "trunk_link", "primary", "primary_link", "secondary", "secondary_link")
+  ,mode_type = c('COMMERCIAL')
+  ,query_links = c("highway", "corridor", "road", "motorway", "motorway_link", "trunk")
 )
 
 #path set-up====================================================================
@@ -72,7 +73,7 @@ query_network_trip_using_bbox(
 
 #this is the folder that the data is written to
 #it is a sub-folder to *file_destination* and will have a data_[datetime] format
-#folder =
+# folder =
 
 #process acquired data==========================================================
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -124,8 +125,6 @@ inspect_queried_network(
   location = location
   ,folder = folder
 )
-
-#anlt - Aggregated Network Links by Link and vehicle Type
 
 data("aggregated_network_links")
 data("poi_list")
