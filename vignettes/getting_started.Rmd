@@ -138,22 +138,22 @@ In addition, at certain points in the querying process the function will ask for
 At the end the query, `query_network_trip_using_bbox()` will write 6 files to where you specified by the `file_destination` input. More specifically, it will write the data to a sub-folder at that location named `data_[[sys.time of run]]`. 
 
 #### log_file
-The first file that is made is the `log_file` and is a simple text file that logs events of the run. This will be made regardless if the run is completed, most importantly it records the table IDs of the temporary tables that are made in Google BigQuery table during the run. These can be accessed later.   
+The first file that is made is the `log_file` and is a simple text file that logs events of the run. This will be made regardless if the run is completed, most importantly it records the table IDs of the temporary tables that are made in Google Big Query table during the run. These can be accessed later.   
 
 It also logs your inputs so you can trace what the inputs where for a given analysis.
 
-![Log file example](./figures/logfile_example.png)
+![Log file example](../man/figures/logfile_example.png)
 
 #### replica_queried_network
 This is the network that is defined by the spatial polygon you supplied for the network and the links you requested data for. You will have the option to automatically download it or not. Sometimes it is beneficial to not download it - e.g. if you have already done so or still figuring out what links you need for the full analysis. 
 
-It will be saved as a CSV with a Well-known Text (WKT) attribute that spatially defines the polylines.
+It will be saved as a CSV with a Well-known Text (WKT) attribute that spatially defines the poly-lines.
 
 ```{r echo=FALSE}
 data("replica_queried_network")
 
 reactable(replica_queried_network %>% 
-            head(10), height = 200)
+            head(10), height = 300)
 ```
 
 #### replica_sa_poly_index
@@ -165,7 +165,7 @@ It is used later on to query the polygons using the [TIGRIS API](https://github.
 data("replica_sa_poly_index")
 
 reactable(replica_sa_poly_index %>% 
-            head(10), height = 200)
+            head(10), height = 300)
 ```
 
 #### replica_trip_origin_destination
@@ -173,12 +173,11 @@ reactable(replica_sa_poly_index %>%
 A data frame of vehicle trips defined by origin, destination, mode and vehicle type. This is tabular data and needs to be combined with one a spatial polygon layer in order to map it. 
 
 Again, origins and destinations outside of the study area are collapsed into single level called `out of study area`.  
-
 ```{r echo=FALSE}
 data("replica_trip_origin_links")
 
 reactable(replica_trip_origin_links %>% 
-            head(10), height = 200)
+            head(10), height = 300)
 ```
 
 #### replica_trip_origin_links
@@ -194,7 +193,7 @@ This is useful for a number of reasons.
 data("replica_trip_origin_links")
 
 reactable(replica_trip_origin_links %>% 
-            head(10), height = 200)
+            head(10), height = 300)
 ```
    
 #### table_agg_by_link_subset_limited
@@ -207,7 +206,7 @@ Again, this table is a saved as a CSV and is merged with the queried network lin
 data("table_agg_by_link_subset_limited")
 
 reactable(table_agg_by_link_subset_limited %>% 
-            head(10), height = 200)
+            head(10), height = 300)
 ```
 
 > **_NOTE:_** `table_agg_by_link_subset_limited` will likely be the focus of your analysis as it contains network links. `replicaToolkitR` provides helper functions that aggregate network links a number of pre-set ways but they may not help you in your analysis or you may want to aggregte them differently. 
@@ -221,7 +220,6 @@ These functions and the data processing workflow are described in this section.
 > **Note:** The functions in this section can be supplied an object to transfrom or location and folder inputs that point to where your data is saved. If the latter is supplied then the function will go and automatically load whatever file the function calls for. Suppling an object directly is compataible with the targets package workflow.
 >
 > Additionally, each function can be told to automatically save the resulting processed data to the same location/folder as the raw data.
-
 
 #### acquired_sa_polys
 
@@ -249,9 +247,9 @@ mapview(acquired_sa_polys)
 
 The functions `make_network_link_layer()` and `make_network_centroid_layer()` convert the Replica network links from tabular data to spatial polyline object and from a spatial polyline object to a spatial points object, respectively. 
 
-The network polylines object can be merged with the network volume data to create interactive maps. 
+The network poly-lines object can be merged with the network volume data to create interactive maps. 
 
-The network points object is created by extracting the center-point of each polyline and then represents each network polyline using its center or mid-point. This is done because this package contains a number of helper functions that help visualize network volumes. These functions create interactive, filterable dashboards detailing network volumes and are only compatible with spatial points objects and not spatial polylines. 
+The network points object is created by extracting the center-point of each polyline and then represents each network polyline using its center or mid-point. This is done because this package contains a number of helper functions that help visualize network volumes. These functions create interactive, filterable dashboards detailing network volumes and are only compatible with spatial points objects and not spatial poly-lines. 
 
 > **Note:** `make_network_link_layer()` must be ran before `make_network_centroid_layer()`. 
 
@@ -277,7 +275,7 @@ data("replica_queried_network_links")
 data("replica_queried_network_cntds")
 ```
 
-Below is a sample of both the network link polylines and network link midpoints. 
+Below is a sample of both the network link poly-lines and network link midpoints. 
 ```{r}
 replica_queried_network_links_m = replica_queried_network_links %>%  
   filter(highway == "motorway")
@@ -291,17 +289,19 @@ Once you create `replica_queried_network_links`, you can inspect it using the he
 
 > **Note:** This is a standalone HTML widget that will open up in your RStudio viewer, I have embedded in this documnet for clarity.
 
-```{r warning=F, message=FALSE, fig.width=11}
+```{r warning=F, message=FALSE, fig.width=15}
 inspect_queried_network(
   network_links_object = replica_queried_network_links
 )
 ```
 
+![Log file example](../man/figures/INSPECT_example_1.png)
+
 #### aggregated_network_links
 
-The last main processing function in `replicaToolkitR` is `aggregate_network_links()`. As mentioned earlier, this function aggregates the tabular network link volume data a number of different ways - by trip type, vehicle type, and by origin and trip type. 
+The last main processing function in `replicaToolkitR` is `aggregate_networkpkgdo_links()`. As mentioned earlier, this function aggregates the tabular network link volume data a number of different ways - by trip type, vehicle type, and by origin and trip type. In addition, it merges the network link mid-point object, `replica_queried_network_cntds`, to the aggregated data frames to make spatial objects depicting network link volumes by their mid-points. 
 
-These aggregation levels may seem somewhat arbitrary but they are in fact the result of a common set of questions that kept arising over freight studies.    
+This object is saved out as an RDS list object, containing each aggregated network object in a list that can be indexed when loaded. 
 
 ```{r eval=F}
 data("table_agg_by_link_subset_limited")
@@ -315,6 +315,43 @@ aggregate_network_links(
 )
 
 ```
+
+## Analysis Tools
+
+Lastly, as stated before, the intent of this package is to streamline the Replica workflow, making it as easy as possible to ask a question, get data, and begin to extract meaningful insights.
+
+`replicaToolkitR` provides additional helper functions that automatically create interactive, filterable dashboard-like objects of your data. These helper tools and visualization products make it easy for you to further slice and inspect your data without going though the repetitive steps of coding this yourself or putting it into other programs. 
+
+There are specific helper functions to visualize each network volume aggregation object. 
+
+```{r eval=FALSE}
+data("aggregated_network_links")
+data("poi_list")
+data("acquired_sa_polys")
+
+make_network_map_anltpt(
+  network_cntrd_object = aggregated_network_links
+  ,poi_list = poi_list
+  ,origin_polys = acquired_sa_polys
+)
+
+make_network_map_anlt(
+  network_cntrd_object = aggregated_network_links
+  ,poi_list = poi_list
+  ,origin_polys = acquired_sa_polys
+)
+
+make_network_map_anlto(
+  network_cntrd_object = aggregated_network_links
+  ,poi_list = poi_list
+  ,origin_polys = acquired_sa_polys
+)
+
+```
+
+Below is a static image of the interactive dashboard.
+
+![Log file example](../man/figures/ANLTO_example_1.png)
 
 
 

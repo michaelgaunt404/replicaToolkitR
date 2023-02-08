@@ -4,16 +4,27 @@
 \alias{aggregate_network_links}
 \title{Quickly make network link aggregate objects.}
 \usage{
-aggregate_network_links(location, folder, auto_save = F, network_object = NULL)
+aggregate_network_links(
+  location,
+  folder,
+  auto_save = F,
+  agg_count_object = NULL,
+  aggregate_network_links = NULL,
+  network_object = NULL
+)
 }
 \arguments{
 \item{location}{character string pointing to top level location where data acquired from google was saved to.}
 
 \item{folder}{character string of name where data was automatically saved to from google data download.}
 
-\item{auto_save}{boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.}
+\item{auto_save}{Boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.}
 
-\item{network_object}{network object containing links. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.}
+\item{agg_count_object}{data frame object containing raw link volumes.}
+
+\item{network_object}{spatial object of either the network as represented with poly-lines or with network link mid-points.}
+
+\item{poi_list}{data frame object detailing id and group attributes for polygons that network links will be displayed for. These polygons are considered Points-of-Interests and should be within the study area polygon.}
 }
 \value{
 a data frame and/or saved RDS file
@@ -27,5 +38,13 @@ The data contained in `table_agg_by_link_subset_limited` is aggregated by:
 }
 \examples{
 
-#none
+data("table_agg_by_link_subset_limited")
+data("poi_list")
+data("replica_queried_network_cntds")
+
+aggregate_network_links(
+  agg_count_object = table_agg_by_link_subset_limited
+  ,poi_list = poi_list
+  ,network_object = replica_queried_network_cntds
+)
 }

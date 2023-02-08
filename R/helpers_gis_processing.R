@@ -5,7 +5,7 @@
 #'
 #' @param location character string pointing to top level location where data acquired from Google was saved to.
 #' @param folder character string of name where data was automatically saved to from google data download.
-#' @param auto_save boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.
+#' @param auto_save Boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.
 #' @param network_object tabular link data. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.
 #'
 #' @return GIS layer of network with CRS 4326
@@ -116,7 +116,7 @@ make_network_centroid_layer = function(location, folder, auto_save = F, network_
 #' @param location character string pointing to top level location where data acquired from google was saved to.
 #' @param folder character string of name where data was automatically saved to from Google data download.
 #' @param auto_save boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.
-#' @param network_object network object containing links. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.
+#' @param first_links_object network object containing links. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.
 #'
 #' @return GIS layer of network with CRS 4326
 #' @export
@@ -132,7 +132,8 @@ make_network_centroid_layer = function(location, folder, auto_save = F, network_
 #'   ,network_object = replica_queried_network_links
 #'   ,auto_save = F
 #' )
-make_trip_origin_point_layer = function(location, folder, auto_save = F, first_links_object = NULL){
+make_trip_origin_point_layer = function(location, folder, auto_save = F
+                                        ,first_links_object = NULL){
 
   # location = "data/req_dev"
   # folder = 'data_20230117_092037'
@@ -249,17 +250,27 @@ get_tigris_polys_from_replica_index = function(
 #'
 #' @param location character string pointing to top level location where data acquired from google was saved to.
 #' @param folder character string of name where data was automatically saved to from google data download.
-#' @param auto_save boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.
-#' @param network_object network object containing links. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.
+#' @param auto_save Boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.
+#' @param agg_count_object data frame object containing raw link volumes.
+#' @param poi_list data frame object detailing id and group attributes for polygons that network links will be displayed for. These polygons are considered Points-of-Interests and should be within the study area polygon.
+#' @param network_object spatial object of either the network as represented with poly-lines or with network link mid-points.
 #' @return a data frame and/or saved RDS file
 #' @export
 #'
 #' @examples
 #'
-#' #none
+#' data("table_agg_by_link_subset_limited")
+#' data("poi_list")
+#' data("replica_queried_network_cntds")
+#'
+#' aggregate_network_links(
+#'   agg_count_object = table_agg_by_link_subset_limited
+#'   ,poi_list = poi_list
+#'   ,network_object = replica_queried_network_cntds
+#' )
 aggregate_network_links = function(location, folder, auto_save = F
                                    ,agg_count_object = NULL
-                                   ,poi_list = NULL
+                                   ,aggregate_network_links = NULL
                                    ,network_object = NULL){
   #TODO:make this compatible with other polygon types
   #TODO:review different aggregations - they don't make the most sense

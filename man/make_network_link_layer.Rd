@@ -11,7 +11,7 @@ make_network_link_layer(location, folder, auto_save = F, network_object = NULL)
 
 \item{folder}{character string of name where data was automatically saved to from google data download.}
 
-\item{auto_save}{boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.}
+\item{auto_save}{Boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.}
 
 \item{network_object}{tabular link data. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.}
 }
