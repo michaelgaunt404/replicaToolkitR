@@ -28,6 +28,7 @@ This function creates a log file that records inputs, the query sent to Google, 
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/getting_started.html">Getting Started</a>
     <a class="dropdown-item" href="../articles/replica_hotspot.html">KDE and Hotspot Workflow</a>
   </div>
 </li>
@@ -66,6 +67,8 @@ Function currently only works for data using block groups as it is hardcoded in 
 <span>  query_links <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"highway"</span>, <span class="st">"corridor"</span>, <span class="st">"road"</span>, <span class="st">"motorway"</span>, <span class="st">"motorway_link"</span>, <span class="st">"trunk"</span>,</span>
 <span>    <span class="st">"trunk_link"</span>, <span class="st">"primary"</span>, <span class="st">"primary_link"</span>, <span class="st">"secondary"</span>, <span class="st">"secondary_link"</span>, <span class="st">"tertiary"</span>,</span>
 <span>    <span class="st">"tertiary_link"</span><span class="op">)</span>,</span>
+<span>  mode_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PASSENGER_CAR"</span>, <span class="st">"PRIVATE_AUTO"</span>, <span class="st">"COMMERCIAL"</span>, <span class="st">"CARPOOL"</span>, <span class="st">"WALKING"</span>,</span>
+<span>    <span class="st">"BIKING"</span>, <span class="st">"PUBLIC_TRANSIT"</span>, <span class="st">"ON_DEMAND_AUTO"</span>, <span class="st">"OTHER_TRAVEL_MODE"</span><span class="op">)</span>,</span>
 <span>  <span class="va">customer_name</span>,</span>
 <span>  <span class="va">trip_table</span>,</span>
 <span>  <span class="va">network_table</span>,</span>
@@ -78,11 +81,11 @@ Function currently only works for data using block groups as it is hardcoded in 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>bb_network_layer</dt>
-<dd><p>bounding box object detailing extent of road network that will be used to query trips with. This should be made using sf::st_bbox().</p></dd>
+<dd><p>a string of the relative path to the bounding box object detailing extent of road network. This will be used to query trips with. This should be made using sf::st_bbox().</p></dd>
 
 
 <dt>bb_sa_layer</dt>
-<dd><p>bounding box object detailing extent of the study area that will be used to perform aggregations. This should be made using sf::st_bbox(). This input is gernerally larger or identical to [bb_network_layer].</p></dd>
+<dd><p>a string of the relative path to the bounding box object detailing extent of the study area. This will be used to perform aggregations. This should be made using sf::st_bbox(). This input is gernerally larger or identical to [bb_network_layer].</p></dd>
 
 
 <dt>query_links</dt>
@@ -90,15 +93,15 @@ Function currently only works for data using block groups as it is hardcoded in 
 
 
 <dt>customer_name</dt>
-<dd><p>character string indicating google account that will be billed</p></dd>
+<dd><p>character string indicating Google account that will be billed</p></dd>
 
 
 <dt>trip_table</dt>
-<dd><p>character string indicating which trip table should be queired - location, year, quarter, day, etc should match network_table. Please include entire table name as well '[customer_name].[trip_table]'</p></dd>
+<dd><p>character string indicating which trip table should be queried - location, year, quarter, day, etc should match network_table. Please include entire table name as well '[customer_name].[trip_table]'</p></dd>
 
 
 <dt>network_table</dt>
-<dd><p>character string indicating which trip table should be queired - location, year, quarter, day, etc should match trip_table. Please include entire table name as well '[customer_name].[network_table]'</p></dd>
+<dd><p>character string indicating which trip table should be queried - location, year, quarter, day, etc should match trip_table. Please include entire table name as well '[customer_name].[network_table]'</p></dd>
 
 
 <dt>file_destination</dt>
@@ -110,7 +113,7 @@ Function currently only works for data using block groups as it is hardcoded in 
 
 
 <dt>max_record</dt>
-<dd><p>integer indicating max number of records will be written out for each data acquired by google - default is 1000, use Inf if you do not want to limit download. Useful if you want to check the data out first before downloading large amounts of data. Google tables are still made in full so they can be manually acquired without rerunning this function - see log files.</p></dd>
+<dd><p>integer indicating max number of records will be written out for each data acquired by Google - default is 1000, use Inf if you do not want to limit download. Useful if you want to check the data out first before downloading large amounts of data. Google tables are still made in full so they can be manually acquired without rerunning this function - see log files.</p></dd>
 
 </dl></div>
     <div class="section level2">

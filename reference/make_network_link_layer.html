@@ -26,6 +26,7 @@ This function helps converts file from CSV to GIS layer and provides an option t
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/getting_started.html">Getting Started</a>
     <a class="dropdown-item" href="../articles/replica_hotspot.html">KDE and Hotspot Workflow</a>
   </div>
 </li>
@@ -71,7 +72,7 @@ This function helps converts file from CSV to GIS layer and provides an option t
 
 
 <dt>auto_save</dt>
-<dd><p>boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.</p></dd>
+<dd><p>Boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.</p></dd>
 
 
 <dt>network_object</dt>
@@ -90,34 +91,27 @@ This function helps converts file from CSV to GIS layer and provides an option t
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'replica_queried_network'</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">replica_queried_network</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   stableEdgeId startLat  startLon   endLat    endLon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1.716380e+19 47.59232 -122.3259 47.59303 -122.3231</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 2.374856e+18 47.53192 -122.3766 47.53336 -122.3766</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 6.003071e+18 47.65612 -122.3021 47.65640 -122.3020</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 1.045799e+19 47.68030 -122.3258 47.68002 -122.3258</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 6.084231e+18 47.66153 -122.3467 47.66126 -122.3468</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 4.999734e+18 47.68306 -122.3003 47.68306 -122.3008</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                     streetName distance     osmid    speed</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1                         I 90   224000 621426664 62.11319</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2        35th Avenue Southwest   160000 332496923 36.23891</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 Montlake Boulevard Northeast    32000 500504113 46.60353</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  East Green Lake Drive North    32000   6410233 36.23891</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5         Green Lake Way North    32000   8026709 36.23891</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6        Northeast 75th Street    32000 428091103 36.23891</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                          flags lanes   highway</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1                                 [ALLOWS_CAR]     2  motorway</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 [ALLOWS_CAR, ALLOWS_BIKE, ALLOWS_PEDESTRIAN]    -1 secondary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 [ALLOWS_CAR, ALLOWS_BIKE, ALLOWS_PEDESTRIAN]     2   primary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 [ALLOWS_CAR, ALLOWS_BIKE, ALLOWS_PEDESTRIAN]    -1 secondary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5                          [ALLOWS_PEDESTRIAN]     0 secondary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 [ALLOWS_CAR, ALLOWS_BIKE, ALLOWS_PEDESTRIAN]    -1 secondary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                         geometry</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 LINESTRING(-122.32587 47.592317, -122.324199 47.592718, -122.323077 47.593035)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2                       LINESTRING(-122.376642 47.531919, -122.376609 47.533357)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3                        LINESTRING(-122.302087 47.65612, -122.301999 47.656399)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 LINESTRING(-122.325841 47.680297, -122.325787 47.680178, -122.325753 47.68002)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5                        LINESTRING(-122.34667 47.661529, -122.346839 47.661261)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6                       LINESTRING(-122.300333 47.683056, -122.300754 47.683057)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   stableEdgeId startLat  startLon   endLat    endLon          streetName</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 3.314086e+18 47.57149 -122.3263 47.57128 -122.3218 West Seattle Bridge</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 1.336408e+19 47.71454 -122.3264 47.71860 -122.3243                 I 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 1.122087e+19 47.67396 -122.3211 47.66535 -122.3220         I 5 Express</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 2.710055e+18 47.65245 -122.3473 47.65227 -122.3473 Aurora Avenue North</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 1.028386e+19 47.56954 -122.3198 47.57020 -122.3199                &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 6.870997e+18 47.61626 -122.3286 47.61645 -122.3283                &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   distance     osmid    speed               flags lanes       highway</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   341000  32289049 51.74856        [ALLOWS_CAR]     2      motorway</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   479000 306194398 88.02476        [ALLOWS_CAR]     6      motorway</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   959000 331932767 88.02476        [ALLOWS_CAR]    -1      motorway</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    20000 457542648 62.11319 [ALLOWS_PEDESTRIAN]     0         trunk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    73000  32222767 72.47782        [ALLOWS_CAR]     2 motorway_link</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    30000 436165683 72.47782        [ALLOWS_CAR]     1 motorway_link</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                                                                                                                  geometry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                                                                      LINESTRING(-122.326328 47.571485, -122.326062 47.571474, -122.324805 47.57126, -122.324484 47.57124, -122.324161 47.571232, -122.321796 47.571279)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 LINESTRING(-122.326383 47.714536, -122.32561 47.715517, -122.325202 47.716067, -122.324979 47.716434, -122.324666 47.71707, -122.324502 47.717483, -122.324367 47.717924, -122.324282 47.718343, -122.324258 47.718603)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                                                                     LINESTRING(-122.321138 47.673956, -122.321675 47.672022, -122.321843 47.671213, -122.321914 47.67068, -122.321973 47.669872, -122.322007 47.665353)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                                                                                                                                                                LINESTRING(-122.347252 47.652447, -122.347254 47.652271)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                                                                                                                     LINESTRING(-122.319812 47.569542, -122.319788 47.569727, -122.319793 47.569911, -122.31987 47.5702)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                                                                                                                                         LINESTRING(-122.328613 47.616257, -122.328483 47.616361, -122.328335 47.616447)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   flag_contains</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1          TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2          TRUE</span>

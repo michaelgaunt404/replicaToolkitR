@@ -26,6 +26,7 @@ This function helps converts file from CSV to GIS layer and provides an option t
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/getting_started.html">Getting Started</a>
     <a class="dropdown-item" href="../articles/replica_hotspot.html">KDE and Hotspot Workflow</a>
   </div>
 </li>
@@ -79,7 +80,7 @@ This function helps converts file from CSV to GIS layer and provides an option t
 <dd><p>boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.</p></dd>
 
 
-<dt>network_object</dt>
+<dt>first_links_object</dt>
 <dd><p>network object containing links. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.</p></dd>
 
 </dl></div>
@@ -98,19 +99,19 @@ This function helps converts file from CSV to GIS layer and provides an option t
 <span class="r-out co"><span class="r-pr">#&gt;</span> Simple feature collection with 6 features and 7 fields</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Geometry type: LINESTRING</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dimension:     XY</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Bounding box:  xmin: -122.3766 ymin: 47.53192 xmax: -122.3003 ymax: 47.68306</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Bounding box:  xmin: -122.3473 ymin: 47.56954 xmax: -122.3198 ymax: 47.7186</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Geodetic CRS:  WGS 84</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 8</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   stableEdgeId   streetName               dista…¹  osmid highway flag_…² flag_…³</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 17163796951611 I 90                      <span style="text-decoration: underline;">224</span>000 6.21<span style="color: #949494;">e</span>8 motorw… TRUE    Flagge…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 23748556203875 35th Avenue Southwest     <span style="text-decoration: underline;">160</span>000 3.32<span style="color: #949494;">e</span>8 second… TRUE    Not a …</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 60030705314165 Montlake Boulevard Nort…   <span style="text-decoration: underline;">32</span>000 5.01<span style="color: #949494;">e</span>8 primary TRUE    Not a …</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 10457989014503 East Green Lake Drive N…   <span style="text-decoration: underline;">32</span>000 6.41<span style="color: #949494;">e</span>6 second… TRUE    Not a …</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 60842307457466 Green Lake Way North       <span style="text-decoration: underline;">32</span>000 8.03<span style="color: #949494;">e</span>6 second… TRUE    Not a …</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 49997339697932 Northeast 75th Street      <span style="text-decoration: underline;">32</span>000 4.28<span style="color: #949494;">e</span>8 second… TRUE    Not a …</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   stableEdgeId   streetName          distance     osmid highway  flag_…¹ flag_…²</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 33140864431532 West Seattle Bridge   <span style="text-decoration: underline;">341</span>000  32<span style="text-decoration: underline;">289</span>049 motorway TRUE    Not a …</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 13364080376100 I 5                   <span style="text-decoration: underline;">479</span>000 306<span style="text-decoration: underline;">194</span>398 motorway TRUE    Flagge…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 11220870802337 I 5 Express           <span style="text-decoration: underline;">959</span>000 331<span style="text-decoration: underline;">932</span>767 motorway TRUE    Flagge…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 27100545508016 Aurora Avenue North    <span style="text-decoration: underline;">20</span>000 457<span style="text-decoration: underline;">542</span>648 trunk    TRUE    Not a …</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 10283859269900 <span style="color: #BB0000;">NA</span>                     <span style="text-decoration: underline;">73</span>000  32<span style="text-decoration: underline;">222</span>767 motorwa… TRUE    Not a …</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 68709974895651 <span style="color: #BB0000;">NA</span>                     <span style="text-decoration: underline;">30</span>000 436<span style="text-decoration: underline;">165</span>683 motorwa… TRUE    Not a …</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 1 more variable: geom &lt;LINESTRING [°]&gt;, and abbreviated variable names</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   ¹​distance, ²​flag_contains, ³​flag_highway</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   ¹​flag_contains, ²​flag_highway</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="make_network_centroid_layer.html">make_network_centroid_layer</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  location <span class="op">=</span> <span class="st">"data/req_dev"</span></span></span>

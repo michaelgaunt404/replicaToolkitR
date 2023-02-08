@@ -32,6 +32,7 @@ The data contained in `table_agg_by_link_subset_limited` is aggregated by:
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/getting_started.html">Getting Started</a>
     <a class="dropdown-item" href="../articles/replica_hotspot.html">KDE and Hotspot Workflow</a>
   </div>
 </li>
@@ -66,7 +67,14 @@ The data contained in `table_agg_by_link_subset_limited` is aggregated by:
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">aggregate_network_links</span><span class="op">(</span><span class="va">location</span>, <span class="va">folder</span>, auto_save <span class="op">=</span> <span class="cn">F</span>, network_object <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">aggregate_network_links</span><span class="op">(</span></span>
+<span>  <span class="va">location</span>,</span>
+<span>  <span class="va">folder</span>,</span>
+<span>  auto_save <span class="op">=</span> <span class="cn">F</span>,</span>
+<span>  agg_count_object <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  aggregate_network_links <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  network_object <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -80,11 +88,19 @@ The data contained in `table_agg_by_link_subset_limited` is aggregated by:
 
 
 <dt>auto_save</dt>
-<dd><p>boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.</p></dd>
+<dd><p>Boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.</p></dd>
+
+
+<dt>agg_count_object</dt>
+<dd><p>data frame object containing raw link volumes.</p></dd>
 
 
 <dt>network_object</dt>
-<dd><p>network object containing links. Default is NULL or input left empty - function will use location and folder inputs to load object and then convert.</p></dd>
+<dd><p>spatial object of either the network as represented with poly-lines or with network link mid-points.</p></dd>
+
+
+<dt>poi_list</dt>
+<dd><p>data frame object detailing id and group attributes for polygons that network links will be displayed for. These polygons are considered Points-of-Interests and should be within the study area polygon.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -97,8 +113,16 @@ The data contained in `table_agg_by_link_subset_limited` is aggregated by:
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">#none</span></span></span>
-<span class="r-in"></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"table_agg_by_link_subset_limited"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"poi_list"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"replica_queried_network_cntds"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">aggregate_network_links</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  agg_count_object <span class="op">=</span> <span class="va">table_agg_by_link_subset_limited</span></span></span>
+<span class="r-in"><span>  ,poi_list <span class="op">=</span> <span class="va">poi_list</span></span></span>
+<span class="r-in"><span>  ,network_object <span class="op">=</span> <span class="va">replica_queried_network_cntds</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in aggregate_network_links(agg_count_object = table_agg_by_link_subset_limited,     poi_list = poi_list, network_object = replica_queried_network_cntds):</span> unused argument (poi_list = poi_list)</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

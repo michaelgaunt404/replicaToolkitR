@@ -47,6 +47,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="articles/getting_started.html">Getting Started</a>
     <a class="dropdown-item" href="articles/replica_hotspot.html">KDE and Hotspot Workflow</a>
   </div>
 </li>
@@ -73,11 +74,16 @@
 <div class="page-header"><h1 id="replicatoolkitr">replicaToolkitR<a class="anchor" aria-label="anchor" href="#replicatoolkitr"></a>
 </h1></div>
 <p><a href="https://www.tidyverse.org/lifecycle/#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a> <!-- badges: end --></p>
-<p>This R package provides a set of functions which allow the user to query and process Replica data. Using user inputs, SQL queries area made to the Replica BigQuery database. The results of those queries are returned to the user in the form of CSVs. Convenience functions are used to convert tabular data to spatial <code>SF</code> objects.</p>
+<p>This R package provides a set of functions which allow the user to query and process Replica data. Using user inputs, SQL queries area made to the Replica Big Query database. The results of those queries are returned to the user in the form of CSVs. Convenience functions are used to convert tabular data to spatial <code>SF</code> objects.</p>
+<div class="section level4">
+<h4 id="intent-of-this-package">Intent of this package:<a class="anchor" aria-label="anchor" href="#intent-of-this-package"></a>
+</h4>
+<p>This package is intended to lower the overhead when working with Replica data. Specifically, to make it extremely easy with little cost to acquire Replica data and to produce some basic analytic tools (dashboards) to quickly gain useful insights.</p>
+</div>
 <div class="section level4">
 <h4 id="what-you-can-do-with-this-package">What you can do with this package:<a class="anchor" aria-label="anchor" href="#what-you-can-do-with-this-package"></a>
 </h4>
-<p><span class="emoji" data-emoji="heavy_check_mark">✔️</span> Make queries directly to and acquire data from Replica’s BigQuery database using your own inputs and custom geometry<br><span class="emoji" data-emoji="heavy_check_mark">✔️</span> Create datasets from your queries and use them to:</p>
+<p><span class="emoji" data-emoji="heavy_check_mark">✔️</span> Make queries directly to and acquire data from Replica’s Big Query database using your own inputs and custom geometry<br><span class="emoji" data-emoji="heavy_check_mark">✔️</span> Create data sets from your queries and use them to:</p>
 <ul>
 <li>Quantify trip ODs<br>
 </li>
@@ -106,7 +112,7 @@
 <p>Load the package.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/michaelgaunt404/replicaToolkitR" class="external-link">replicaToolkitR</a></span><span class="op">)</span></span></code></pre></div>
-<p>The run the function <code><a href="reference/query_network_trip_using_bbox.html">query_network_trip_using_bbox()</a></code> to query the replica database given your supplid inputs.</p>
+<p>The run the function <code><a href="reference/query_network_trip_using_bbox.html">query_network_trip_using_bbox()</a></code> to query the replica database given your supplied inputs.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/query_network_trip_using_bbox.html">query_network_trip_using_bbox</a></span><span class="op">(</span></span>
 <span>  bb_network_layer <span class="op">=</span> <span class="st">'data/req_dev/study_area_network.shp'</span></span>
@@ -128,31 +134,31 @@
 <p>6 files will be written, they are:</p>
 <ul>
 <li>
-<code>log_file</code>: Simple text file logging the events of the run. Records the table IDs of the temporary tables that are made in Google BigQuery table during the run. These can be accessed later.<br>
+<code>log_file</code>: Simple text file logging the events of the run. Records the table IDs of the temporary tables that are made in Google Big Query table during the run. These can be accessed later.<br>
 </li>
 <li>
 <code>replica_queried_network</code>: The network queried by the user. The user will be asked if they want to download this file or not - it can be rather large given query inputs.<br>
 </li>
 <li>
-<code>replica_sa_poly_index</code>: A table containg all polygons found within the user supplied bb_sa_layer polygon.<br>
+<code>replica_sa_poly_index</code>: A table containing all polygons found within the user supplied bb_sa_layer polygon.<br>
 </li>
 <li>
 <code>replica_trip_origin_destination</code>: A table containing counts of vehicles aggregated by origin polygon, destination polygon, and vehicle type. Origins and destinations outside of the study area are collapsed into single level called <code>out of study area</code>.<br>
 </li>
 <li>
-<code>replica_trip_origin_links</code>: A table containg counts of vehicle given origin polygon and starting network link. This data set provides a more precise view of vehicle starting locations rather than by its origin polygon (usually census block groups). This is useful when performing hotspot analyses or calcualting kernel desnity estimates (KDEs).<br>
+<code>replica_trip_origin_links</code>: A table containing counts of vehicle given origin polygon and starting network link. This data set provides a more precise view of vehicle starting locations rather than by its origin polygon (usually census block groups). This is useful when performing hotspot analyses or calculating kernel density estimates (KDEs).<br>
 </li>
 <li>
 <code>table_agg_by_link_subset_limited</code>: A table detailing network link volumes for a given day aggregated by origin polygon and network link</li>
 </ul>
-<p>All the data listed above are save as CSVs. Conveince functions are provided to convert tabular data to spatial data and save as GPKG or RDS files.</p>
+<p>All the data listed above are save as CSVs. Helper functions are provided to convert tabular data to spatial data and save as GPKG or RDS files.</p>
 <p>Resulting files in folder after data acquisition.</p>
 <p><img src="reference/figures/README_example_file_1.png" width="50%"></p>
 </div>
 <div class="section level2">
 <h2 id="data-processing">Data Processing<a class="anchor" aria-label="anchor" href="#data-processing"></a>
 </h2>
-<p>As indcated above, <code>replicaToolkitR</code> provides convience functions to convert the tabular data acquired through <code><a href="reference/query_network_trip_using_bbox.html">query_network_trip_using_bbox()</a></code> to a spatail format conducive to mapping.</p>
+<p>As indicated above, <code>replicaToolkitR</code> provides helper functions to convert the tabular data acquired through <code><a href="reference/query_network_trip_using_bbox.html">query_network_trip_using_bbox()</a></code> to a spatial format conducive to mapping.</p>
 <blockquote>
 <p><strong><em>NOTE:</em></strong> The functions in this section can be supplied an object to transfrom or location/folder inputs that point to where your data is saved. If the latter is supplied then the function will go and automatically load whatever file the function calls for. Suppling an object directly is compataible with the <code>targets</code> package workflow.</p>
 </blockquote>
@@ -165,7 +171,7 @@
 <span>  ,states <span class="op">=</span> <span class="st">"WA"</span></span>
 <span>  ,auto_save <span class="op">=</span> <span class="cn">F</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Make <code>SF</code> linestring spatial object of network links.</p>
+<p>Make <code>SF</code> line-string spatial object of network links.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"replica_queried_network"</span><span class="op">)</span></span>
 <span></span>
@@ -221,7 +227,7 @@
 <p>Make an interactive filterable map widgets of network links pre-aggregated a number of ways, see example below code:</p>
 <ul>
 <li>
-<code>make_network_map_anltpt()</code> - <code>A</code>ggregated <code>N</code>etwork <code>L</code>inks by vehicle <code>T</code>ri<code>P</code> <code>T</code>ype</li>
+<code><a href="reference/make_network_map_anltpt.html">make_network_map_anltpt()</a></code> - <code>A</code>ggregated <code>N</code>etwork <code>L</code>inks by vehicle <code>T</code>ri<code>P</code> <code>T</code>ype</li>
 <li>
 <code><a href="reference/make_network_map_anlt.html">make_network_map_anlt()</a></code> - <code>A</code>ggregated <code>N</code>etwork <code>L</code>inks by vehicle <code>T</code>ype</li>
 <li>
@@ -232,7 +238,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"poi_list"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"acquired_sa_polys"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">make_network_map_anltpt</span><span class="op">(</span></span>
+<span><span class="fu"><a href="reference/make_network_map_anltpt.html">make_network_map_anltpt</a></span><span class="op">(</span></span>
 <span>  network_cntrd_object <span class="op">=</span> <span class="va">aggregated_network_links</span></span>
 <span>  ,poi_list <span class="op">=</span> <span class="va">poi_list</span></span>
 <span>  ,origin_polys <span class="op">=</span> <span class="va">acquired_sa_polys</span></span>

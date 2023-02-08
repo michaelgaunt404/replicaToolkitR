@@ -4,6 +4,9 @@
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/404.html</loc>
   </url>
   <url>
+    <loc>https://michaelgaunt404.github.io/replicaToolkitR/articles/getting_started.html</loc>
+  </url>
+  <url>
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/articles/index.html</loc>
   </url>
   <url>
@@ -17,6 +20,9 @@
   </url>
   <url>
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/aggregate_network_links.html</loc>
+  </url>
+  <url>
+    <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/check_links_download.html</loc>
   </url>
   <url>
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/get_tigris_polys_from_replica_index.html</loc>
@@ -44,6 +50,9 @@
   </url>
   <url>
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_network_map_anlto.html</loc>
+  </url>
+  <url>
+    <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_network_map_anltpt.html</loc>
   </url>
   <url>
     <loc>https://michaelgaunt404.github.io/replicaToolkitR/reference/make_query_and_process_replica_script.html</loc>
