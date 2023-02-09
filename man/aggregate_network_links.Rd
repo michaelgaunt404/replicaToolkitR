@@ -9,7 +9,6 @@ aggregate_network_links(
   folder,
   auto_save = F,
   agg_count_object = NULL,
-  aggregate_network_links = NULL,
   network_object = NULL
 )
 }
@@ -23,8 +22,6 @@ aggregate_network_links(
 \item{agg_count_object}{data frame object containing raw link volumes.}
 
 \item{network_object}{spatial object of either the network as represented with poly-lines or with network link mid-points.}
-
-\item{poi_list}{data frame object detailing id and group attributes for polygons that network links will be displayed for. These polygons are considered Points-of-Interests and should be within the study area polygon.}
 }
 \value{
 a data frame and/or saved RDS file
@@ -39,12 +36,10 @@ The data contained in `table_agg_by_link_subset_limited` is aggregated by:
 \examples{
 
 data("table_agg_by_link_subset_limited")
-data("poi_list")
 data("replica_queried_network_cntds")
 
 aggregate_network_links(
   agg_count_object = table_agg_by_link_subset_limited
-  ,poi_list = poi_list
   ,network_object = replica_queried_network_cntds
 )
 }

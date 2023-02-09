@@ -545,6 +545,228 @@ make_network_map_anltpt = function(network_cntrd_object
 }
 
 
+#' Make interactive network link volume maps using MapView - maps ANLT network links (Aggregated Network Links by vehicle Type).
+#'
+#' @description This is a helper function that quickly makes an interactive map of aggregated network link volumes.
+#' All functions in the viz_static_ntwrk_map_% function family makes a singular leaflet/mapview object.
+#'
+#' This is another mapping option if you wish to map network links and view link volumes without making an interactive, HTML elements.
+#'
+#' @param spatial_agg_object spatial links objects of aggregated network. Has to be links, centroids will print but aesthetic options in Mapview code are specific to links.
+#'
+#' @return a leaflet object made using MapView API depicting links
+#' @export
+#'
+#' @examples
+#'
+#' data_temp = aggregate_network_links(
+#' agg_count_object = table_agg_by_link_subset_limited
+#' ,network_object = replica_queried_network_links
+#' )
+#'
+#' viz_static_ntwrk_map_anlt(
+#'   spatial_agg_object = data_temp
+#'   )
+viz_static_ntwrk_map_anlt = function(spatial_agg_object){
+  data = spatial_agg_object[["agg_link_vehicle_type"]] %>%
+    mutate(lwd_rescale = rescale_to(count, 10))
 
+  map_object = list(
+    unique(data$vehicle_type)
+    ,viridisLite::viridis(length(unique(data$vehicle_type)))
+  )%>%
+    pmap(function(x, y){
+      temp = data %>%
+        filter(vehicle_type == x)
+
+      temp %>%
+        mapview(label = "label"
+                ,color = y
+                ,layer.name = x
+                ,lwd = 'lwd_rescale'
+                ,popup = popup_tbl_pretty(temp %>%  select(-c(label, lwd_rescale)))
+                ,homebutton = F)
+    }) %>%
+    reduce(`+`)
+
+  map_object@map %>%
+    leaflet::hideGroup(unique(data$vehicle_type))
+}
+
+#' Make interactive network link volume maps using MapView - maps ANLT network links (Aggregated Network Links by vehicle Type and Origin poly).
+#'
+#' @description This is a helper function that quickly makes an interactive map of aggregated network link volumes.
+#' All functions in the viz_static_ntwrk_map_% function family makes a singular leaflet/mapview object.
+#'
+#' This is another mapping option if you wish to map network links and view link volumes without making an interactive, HTML elements.
+#'
+#' @param spatial_agg_object spatial links objects of aggregated network. Has to be links, centroids will print but aesthetic options in Mapview code are specific to links.
+#'
+#' @return a leaflet object made using MapView API depicting links
+#' @export
+#'
+#' @examples
+#'
+#' data_temp = aggregate_network_links(
+#' agg_count_object = table_agg_by_link_subset_limited
+#' ,network_object = replica_queried_network_links
+#' )
+#'
+#' viz_static_ntwrk_map_anlto_grp(
+#'   spatial_agg_object = data_temp
+#'   )
+viz_static_ntwrk_map_anlto_grp = function(spatial_agg_object){
+  data = spatial_agg_object[["agg_link_vehicle_type_origin"]]  %>%
+    na.omit() %>%
+    filter(origin_poly %in% as.character(poi_list$id)) %>%
+    merge(poi_list %>%
+            mutate(id = as.character(id)), by.x = "origin_poly", by.y = "id", all.x = T) %>%
+    mutate(lwd_rescale = rescale_to(count, 10))
+
+  cross_items = cross(
+    list(unique(data$group)
+         ,unique(data$vehicle_type)))
+
+  map_object = list(cross_items
+                    ,viridisLite::viridis(length(cross_items))) %>%
+    pmap(function(x, y){
+
+      temp = data %>%
+        filter(
+          group == x[[1]]
+          ,vehicle_type == x[[2]]
+        )
+
+      if (nrow(temp)>0) {
+        temp %>%
+          mapview(label = "label"
+                  ,color = y
+                  ,layer.name = paste0(x[[2]], "_", x[[1]])
+                  ,lwd = 'lwd_rescale'
+                  ,popup = popup_tbl_pretty(temp %>%  select(-c(label, lwd_rescale)))
+                  ,homebutton = F)
+      }
+    }) %>%
+    reduce(`+`)
+
+  map_object@map %>%
+    leaflet::hideGroup(
+      map_chr(cross_items, ~paste0(.x[[2]], "_", .x[[1]]))
+    )
+
+  return(map_object)
+}
+
+#' Make interactive network link volume maps using MapView - maps ANLT network links (Aggregated Network Links by vehicle Type and Origin poly).
+#'
+#' @description This is a helper function that quickly makes an interactive map of aggregated network link volumes.
+#' All functions in the viz_static_ntwrk_map_% function family makes a singular leaflet/mapview object.
+#'
+#' This is another mapping option if you wish to map network links and view link volumes without making an interactive, HTML elements.
+#'
+#' @param spatial_agg_object spatial links objects of aggregated network. Has to be links, centroids will print but aesthetic options in Mapview code are specific to links.
+#'
+#' @return a leaflet object made using MapView API depicting links
+#' @export
+#'
+#' @examples
+#'
+#' data_temp = aggregate_network_links(
+#' agg_count_object = table_agg_by_link_subset_limited
+#' ,network_object = replica_queried_network_links
+#' )
+#'
+#' viz_static_ntwrk_map_anlto(
+#'   spatial_agg_object = data_temp
+#'   )
+viz_static_ntwrk_map_anlto = function(spatial_agg_object){
+  data = spatial_agg_object[["agg_link_vehicle_type_origin"]]  %>%
+    na.omit() %>%
+    filter(origin_poly %in% as.character(poi_list$id)) %>%
+    merge(poi_list %>%
+            mutate(id = as.character(id)), by.x = "origin_poly", by.y = "id", all.x = T) %>%
+    mutate(lwd_rescale = rescale_to(count, 10))
+
+  cross_items = cross(
+    list(unique(data$origin_poly)
+         ,unique(data$vehicle_type)))
+
+  map_object = list(cross_items
+                    ,viridisLite::viridis(length(cross_items))) %>%
+    pmap(function(x, y){
+
+      temp = data %>%
+        filter(
+          origin_poly == x[[1]]
+          ,vehicle_type == x[[2]]
+        )
+
+      if (nrow(temp)>0) {
+        temp %>%
+          mapview(label = "label"
+                  ,color = y
+                  ,layer.name = paste0(x[[2]], "_", x[[1]])
+                  ,lwd = 'lwd_rescale'
+                  ,popup = popup_tbl_pretty(temp %>%  select(-c(label, lwd_rescale)))
+                  ,homebutton = F)
+      }
+    }) %>%
+    reduce(`+`)
+
+  map_object@map %>%
+    leaflet::hideGroup(
+      map_chr(cross_items, ~paste0(.x[[2]], "_", .x[[1]]))
+    )
+
+}
+
+#' Make interactive network link volume maps using MapView - maps ANLTPT network links (Aggregated Network Links by TriP Type ).
+#'
+#' @description This is a helper function that quickly makes an interactive map of aggregated network link volumes.
+#' All functions in the viz_static_ntwrk_map_% function family makes a singular leaflet/mapview object.
+#'
+#' This is another mapping option if you wish to map network links and view link volumes without making an interactive, HTML elements.
+#'
+#' @param spatial_agg_object spatial links objects of aggregated network. Has to be links, centroids will print but aesthetic options in Mapview code are specific to links.
+#'
+#' @return a leaflet object made using MapView API depicting links
+#' @export
+#'
+#' @examples
+#'
+#' data_temp = aggregate_network_links(
+#' agg_count_object = table_agg_by_link_subset_limited
+#' ,network_object = replica_queried_network_links
+#' )
+#'
+#' viz_static_ntwrk_map_anltpt(
+#'   spatial_agg_object = data_temp
+#'   )
+viz_static_ntwrk_map_anltpt = function(spatial_agg_object){
+  data = spatial_agg_object[["agg_link_flag"]] %>%
+    mutate(lwd_rescale = rescale_to(count, 10))
+
+  map_object = list(
+    unique(data$flag_trip_type)
+    ,viridisLite::viridis(length(unique(data$flag_trip_type)))
+  )%>%
+    pmap(function(x, y){
+      temp = data %>%
+        filter(flag_trip_type == x)
+
+      temp %>%
+        mapview(label = "label"
+                ,color = y
+                ,layer.name = x
+                ,lwd = 'lwd_rescale'
+                ,popup = popup_tbl_pretty(temp %>%  select(-c(label, lwd_rescale)))
+                ,homebutton = F)
+    }) %>%
+    reduce(`+`)
+
+  map_object@map %>%
+    leaflet::hideGroup(unique(data$flag_trip_type))
+
+}
 
 
