@@ -252,7 +252,6 @@ get_tigris_polys_from_replica_index = function(
 #' @param folder character string of name where data was automatically saved to from google data download.
 #' @param auto_save Boolean (T/F - default F) indicating if you want the GIS layer to be saved. Default just creates an object without saving.
 #' @param agg_count_object data frame object containing raw link volumes.
-#' @param poi_list data frame object detailing id and group attributes for polygons that network links will be displayed for. These polygons are considered Points-of-Interests and should be within the study area polygon.
 #' @param network_object spatial object of either the network as represented with poly-lines or with network link mid-points.
 #' @return a data frame and/or saved RDS file
 #' @export
@@ -260,17 +259,14 @@ get_tigris_polys_from_replica_index = function(
 #' @examples
 #'
 #' data("table_agg_by_link_subset_limited")
-#' data("poi_list")
 #' data("replica_queried_network_cntds")
 #'
 #' aggregate_network_links(
 #'   agg_count_object = table_agg_by_link_subset_limited
-#'   ,poi_list = poi_list
 #'   ,network_object = replica_queried_network_cntds
 #' )
 aggregate_network_links = function(location, folder, auto_save = F
                                    ,agg_count_object = NULL
-                                   ,aggregate_network_links = NULL
                                    ,network_object = NULL){
   #TODO:make this compatible with other polygon types
   #TODO:review different aggregations - they don't make the most sense
@@ -298,7 +294,7 @@ aggregate_network_links = function(location, folder, auto_save = F
 
   stopifnot("You need to supply an object to merge tabular data with, either network centroids or polylines...." = !is.null(network_object))
   stopifnot("Supplied network object had more than one geometry feature in it, please review and fix...." = (length(unique(st_geometry_type(network_object))) == 1))
-  stopifnot("Supplied network object must be either POINT or LINESTRING, please review and fix...." = (unique(st_geometry_type(network_object))[[1]] %in% c("POINT", "POLYLINE")))
+  stopifnot("Supplied network object must be either POINT or LINESTRING, please review and fix...." = (unique(st_geometry_type(network_object))[[1]] %in% c("POINT", "LINESTRING")))
 
   #pre-process data
   {
