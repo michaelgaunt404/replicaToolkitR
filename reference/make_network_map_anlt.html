@@ -98,7 +98,7 @@ This HTML contains filtering and mapping features that can be used to investigat
 <span class="r-in"><span>  ,poi_list <span class="op">=</span> <span class="va">poi_list</span></span></span>
 <span class="r-in"><span>  ,origin_polys <span class="op">=</span> <span class="va">acquired_sa_polys</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in origin_polys %&gt;% merge(poi_list, by.x = "GEOID10", by.y = "id",     all = T):</span> could not find function "%&gt;%"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in origin_polys %&gt;% merge(poi_list %&gt;% mutate(id = as.character(id)),     by.x = "GEOID10", by.y = "id", all = T):</span> could not find function "%&gt;%"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

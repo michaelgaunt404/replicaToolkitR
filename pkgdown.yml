@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   getting_started: getting_started.html
   replica_hotspot: replica_hotspot.html
-last_built: 2023-02-09T18:15Z
+last_built: 2023-02-09T22:52Z
 urls:
   reference: https://michaelgaunt404.github.io/replicaToolkitR/reference
   article: https://michaelgaunt404.github.io/replicaToolkitR/articles
