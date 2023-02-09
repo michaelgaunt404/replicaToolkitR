@@ -72,7 +72,6 @@ The data contained in `table_agg_by_link_subset_limited` is aggregated by:
 <span>  <span class="va">folder</span>,</span>
 <span>  auto_save <span class="op">=</span> <span class="cn">F</span>,</span>
 <span>  agg_count_object <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  aggregate_network_links <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  network_object <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -98,10 +97,6 @@ The data contained in `table_agg_by_link_subset_limited` is aggregated by:
 <dt>network_object</dt>
 <dd><p>spatial object of either the network as represented with poly-lines or with network link mid-points.</p></dd>
 
-
-<dt>poi_list</dt>
-<dd><p>data frame object detailing id and group attributes for polygons that network links will be displayed for. These polygons are considered Points-of-Interests and should be within the study area polygon.</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -114,15 +109,14 @@ The data contained in `table_agg_by_link_subset_limited` is aggregated by:
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"table_agg_by_link_subset_limited"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"poi_list"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"replica_queried_network_cntds"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">aggregate_network_links</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  agg_count_object <span class="op">=</span> <span class="va">table_agg_by_link_subset_limited</span></span></span>
-<span class="r-in"><span>  ,poi_list <span class="op">=</span> <span class="va">poi_list</span></span></span>
 <span class="r-in"><span>  ,network_object <span class="op">=</span> <span class="va">replica_queried_network_cntds</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in aggregate_network_links(agg_count_object = table_agg_by_link_subset_limited,     poi_list = poi_list, network_object = replica_queried_network_cntds):</span> unused argument (poi_list = poi_list)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Aggregations will be made using supplied network object...</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in agg_count_object %&gt;% mutate(flag_trip_type = str_glue("{flag_sa_origin}-{flag_sa_destination}"),     network_link_ids_unnested = str_trunc(network_link_ids_unnested,         14, "right", "")):</span> could not find function "%&gt;%"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

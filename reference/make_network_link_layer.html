@@ -91,20 +91,27 @@ This function helps converts file from CSV to GIS layer and provides an option t
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'replica_queried_network'</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">replica_queried_network</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   stableEdgeId startLat  startLon   endLat    endLon          streetName</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 3.314086e+18 47.57149 -122.3263 47.57128 -122.3218 West Seattle Bridge</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 1.336408e+19 47.71454 -122.3264 47.71860 -122.3243                 I 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 1.122087e+19 47.67396 -122.3211 47.66535 -122.3220         I 5 Express</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 2.710055e+18 47.65245 -122.3473 47.65227 -122.3473 Aurora Avenue North</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 1.028386e+19 47.56954 -122.3198 47.57020 -122.3199                &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 6.870997e+18 47.61626 -122.3286 47.61645 -122.3283                &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   distance     osmid    speed               flags lanes       highway</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   341000  32289049 51.74856        [ALLOWS_CAR]     2      motorway</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   479000 306194398 88.02476        [ALLOWS_CAR]     6      motorway</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   959000 331932767 88.02476        [ALLOWS_CAR]    -1      motorway</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4    20000 457542648 62.11319 [ALLOWS_PEDESTRIAN]     0         trunk</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5    73000  32222767 72.47782        [ALLOWS_CAR]     2 motorway_link</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6    30000 436165683 72.47782        [ALLOWS_CAR]     1 motorway_link</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           stableEdgeId startLat  startLon   endLat    endLon</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  3314086443153252989 47.57149 -122.3263 47.57128 -122.3218</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 13364080376100105306 47.71454 -122.3264 47.71860 -122.3243</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 11220870802337992971 47.67396 -122.3211 47.66535 -122.3220</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  2710054550801689901 47.65245 -122.3473 47.65227 -122.3473</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 10283859269900203165 47.56954 -122.3198 47.57020 -122.3199</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  6870997489565112252 47.61626 -122.3286 47.61645 -122.3283</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            streetName distance     osmid    speed               flags lanes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 West Seattle Bridge   341000  32289049 51.74856        [ALLOWS_CAR]     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                 I 5   479000 306194398 88.02476        [ALLOWS_CAR]     6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3         I 5 Express   959000 331932767 88.02476        [ALLOWS_CAR]    -1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 Aurora Avenue North    20000 457542648 62.11319 [ALLOWS_PEDESTRIAN]     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                &lt;NA&gt;    73000  32222767 72.47782        [ALLOWS_CAR]     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                &lt;NA&gt;    30000 436165683 72.47782        [ALLOWS_CAR]     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         highway</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      motorway</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      motorway</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3      motorway</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4         trunk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 motorway_link</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 motorway_link</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                                                                                                                  geometry</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1                                                                      LINESTRING(-122.326328 47.571485, -122.326062 47.571474, -122.324805 47.57126, -122.324484 47.57124, -122.324161 47.571232, -122.321796 47.571279)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 LINESTRING(-122.326383 47.714536, -122.32561 47.715517, -122.325202 47.716067, -122.324979 47.716434, -122.324666 47.71707, -122.324502 47.717483, -122.324367 47.717924, -122.324282 47.718343, -122.324258 47.718603)</span>
