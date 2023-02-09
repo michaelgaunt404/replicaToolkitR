@@ -331,8 +331,8 @@ aggregate_network_links = function(location, folder, auto_save = F
         network_object, agg_link_flag
         ,by.x = "stableEdgeId", by.y = "network_link_ids_unnested", all = T)
 
-      nrow(filter(agg_link_flag_mrg, is.na(flag_trip_type)))
-      (nrow(filter(agg_link_flag_mrg, is.na(stableEdgeId))) == 0)
+      # nrow(filter(agg_link_flag_mrg, is.na(flag_trip_type)))
+      # (nrow(filter(agg_link_flag_mrg, is.na(stableEdgeId))) == 0)
 
       agg_link_flag_mrg_pro = agg_link_flag_mrg %>%
         filter(!is.na(flag_trip_type )) %>%
@@ -393,6 +393,7 @@ aggregate_network_links = function(location, folder, auto_save = F
       message(str_glue("Prefiltering makes processing faster and limits size of data object{gauntlet::make_space('-')}"))
 
       agg_link_vehicle_type_origin = network_links %>%
+        filter(!is.na(vehicle_type)) %>%
         filter(origin_poly != "out of study area") %>%
         count_percent_zscore(
           grp_c = c('network_link_ids_unnested', 'vehicle_type', 'origin_poly')
