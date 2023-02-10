@@ -125,6 +125,7 @@ make_network_map_anlto = function(network_cntrd_object
     # data("acquired_sa_polys")
     # origin_polys = acquired_sa_polys
   }
+
   stopifnot("Please supply acquired_sa_polys object, it is included in this map..." = !is.null(origin_polys))
   stopifnot("Please provide Point-of-Interest list of origin polygons...\nIt is required to limit the number data points that are mapped and focuses the analysis" = !is.null(poi_list))
   stopifnot("POI list column names must be 'id' and 'group' (lowercase), please change..." = (sum(names(poi_list) %in% c("id", "group")) == 2))
@@ -137,10 +138,14 @@ make_network_map_anlto = function(network_cntrd_object
   #create poly layer background
   {
     map_poly = origin_polys %>%
-      merge(poi_list, by.x = "GEOID10", by.y = "id", all = T)
+      merge(poi_list %>%
+              mutate(id = as.character(id)), by.x = "GEOID10", by.y = "id", all = T)
 
     query_poly_poi = map_poly %>%
-      filter(!is.na(group))
+      filter(!is.na(group)) %>%
+      na.omit()
+
+    stopifnot("Bad merge between origin_polys and poi_list, check poi_list and make sure there are common ids across data..." = !(nrow(query_poly_poi) == 0))
 
     query_poly_nonpoi = map_poly %>%
       filter(is.na(group))
@@ -167,8 +172,8 @@ make_network_map_anlto = function(network_cntrd_object
   {
   net = network_cntrd_object$agg_link_vehicle_type_origin %>%
     na.omit() %>%
-    filter(origin_poly %in% poi_list$id) %>%
-    merge(poi_list %>%
+      filter(origin_poly %in% as.character(poi_list$id)) %>%
+      merge(poi_list %>%
             mutate(id = as.character(id)), by.x = "origin_poly", by.y = "id", all.x = T)
 
   net_sd = crosstalk::SharedData$new(net)
@@ -277,10 +282,10 @@ make_network_map_anlt = function(network_cntrd_object
                                  ,poi_list = NULL
                                  ,origin_polys = NULL){
   {
-    data("network_centroid_aggregation_list")
-    data("poi_list")
-    data("acquired_sa_polys")
-    origin_polys = acquired_sa_polys
+    # data("network_centroid_aggregation_list")
+    # data("poi_list")
+    # data("acquired_sa_polys")
+    # origin_polys = acquired_sa_polys
   }
 
   stopifnot("Please supply acquired_sa_polys object, it is included in this map..." = !is.null(origin_polys))
@@ -297,7 +302,7 @@ make_network_map_anlt = function(network_cntrd_object
       filter(!is.na(group)) %>%
       na.omit()
 
-    stopifnot("Bad merge between origin_polys and poi_list, check poi_list and make sure there are common ids across data..." = nrow(query_poly_poi) == 0)
+    stopifnot("Bad merge between origin_polys and poi_list, check poi_list and make sure there are common ids across data..." = !(nrow(query_poly_poi) == 0))
 
     query_poly_nonpoi = map_poly %>%
       filter(is.na(group))
@@ -448,7 +453,7 @@ make_network_map_anltpt = function(network_cntrd_object
       filter(!is.na(group)) %>%
       na.omit()
 
-    stopifnot("Bad merge between origin_polys and poi_list, check poi_list and make sure there are common ids across data..." = nrow(query_poly_poi) == 0)
+    stopifnot("Bad merge between origin_polys and poi_list, check poi_list and make sure there are common ids across data..." = !(nrow(query_poly_poi) == 0))
 
     query_poly_nonpoi = map_poly %>%
       filter(is.na(group))
