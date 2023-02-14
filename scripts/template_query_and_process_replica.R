@@ -84,20 +84,20 @@ query_network_trip_using_bbox(
 
 ##create gis layers=============================================================
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-get_tigris_polys_from_replica_index(
+acquired_sa_polys = get_tigris_polys_from_replica_index(
   location = location
   ,folder = folder
   ,states = "STATES THAT YOUR PROJECT TAKES PLACE IN"
   ,auto_save = F
 )
 
-make_network_link_layer(
+aggregated_network_links = make_network_link_layer(
   location = location
   ,folder = folder
   ,auto_save = F
 )
 
-make_network_centroid_layer(
+replica_queried_network_cntds = make_network_centroid_layer(
   location = location
   ,folder = folder
   ,auto_save = F
@@ -125,10 +125,6 @@ inspect_queried_network(
   location = location
   ,folder = folder
 )
-
-data("aggregated_network_links")
-data("poi_list")
-data("acquired_sa_polys")
 
 make_network_map_anlt(
   network_cntrd_object = aggregated_network_links
