@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers_vis_objects.R
 \name{make_network_map_anlt}
 \alias{make_network_map_anlt}
-\title{Create interactive HTML widget displaying network link volumes - ANLT (Agg. Netowrk Links by veh. Type)}
+\title{Create interactive HTML widget displaying network link volumes - ANLT (Agg. Network Links by veh. Type)}
 \usage{
 make_network_map_anlt(
   network_cntrd_object,

@@ -271,13 +271,13 @@ aggregate_network_links = function(location, folder, auto_save = F
   #TODO:make this compatible with other polygon types
   #TODO:review different aggregations - they don't make the most sense
 
-
-  # location = "data/req_dev"
-  # folder = "data_20230125_162034"
-  # agg_count_object = NULL
-  # auto_save = F
-  # network_object = replica_queried_network_cntds
-
+  {
+    # location = "data/req_dev"
+    # folder = "data_20230125_162034"
+    # agg_count_object = NULL
+    # auto_save = F
+    # network_object = replica_queried_network_cntds
+  }
 
   if (is.null(agg_count_object)){
     message("Aggregations will be made using file and location...")
@@ -310,39 +310,27 @@ aggregate_network_links = function(location, folder, auto_save = F
   {
     message(stringr::str_glue("{make_space()}\nStarting aggreagtion by link and study area destination flag...."))
 
-    #ANLTT
+    #ANL
     {
-      agg_link_flag = network_links %>%
-        count_percent_zscore(
-          grp_c = c('network_link_ids_unnested', 'flag_trip_type')
-          ,grp_p = c('network_link_ids_unnested')
-          ,col = count, rnd = 2) %>%
-        group_by(network_link_ids_unnested) %>%
-        mutate(ttl_count_link = sum(count)) %>%
-        ungroup() %>%
-        mutate(count_nrm_prank_ttl = gauntlet::dgt2(percent_rank(ttl_count_link))
-               ,count_nrm_mmax_ttl = gauntlet::dgt2(normalize_min_max(ttl_count_link))) %>%
-        group_by(flag_trip_type) %>%
-        mutate(count_nrm_prank = gauntlet::dgt2(percent_rank(count))
-               ,count_nrm_mmax = gauntlet::dgt2(normalize_min_max(count))) %>%
-        ungroup()
+      message(str_glue("{make_space()}\nStarting aggreagtion by link...."))
 
-      agg_link_flag_mrg = merge(
-        network_object, agg_link_flag
+      agg_link = network_links %>%
+        count_percent_zscore(
+          grp_c = c('network_link_ids_unnested')
+          ,grp_p = c()
+          ,col = count, rnd = 2) %>%
+        mutate(count_nrm_prank_ttl = gauntlet::dgt2(percent_rank(count))
+               ,count_nrm_mmax_ttl = gauntlet::dgt2(normalize_min_max(count)))
+
+      agg_link_mrg = merge(
+        network_object, agg_link
         ,by.x = "stableEdgeId", by.y = "network_link_ids_unnested", all = T)
 
-      # nrow(filter(agg_link_flag_mrg, is.na(flag_trip_type)))
-      # (nrow(filter(agg_link_flag_mrg, is.na(stableEdgeId))) == 0)
-
-      agg_link_flag_mrg_pro = agg_link_flag_mrg %>%
-        filter(!is.na(flag_trip_type )) %>%
+      agg_link_mrg_pro = agg_link_mrg %>%
+        filter(!is.na(count)) %>%
         mutate(label = str_glue(
-          "Link Name: {streetName}
-          <br>TTl Link Volume: {ttl_count_link} - {100*count_nrm_mmax_ttl}% (Min-Max norm.)
-          <hr>
-          Metrics Adj for Trip Type: {flag_trip_type}
-          <br>Link Volume: {count}
-          <br>Link Volume (Min-Max norm.): {100*count_nrm_mmax}%"))
+          "Link Name: {streetName} ({highway})
+          <br>TTl Link Volume: {count} - {100*count_nrm_mmax_ttl}% (Min-Max norm.)"))
 
       message("Aggregation complete....")
     }
@@ -369,16 +357,47 @@ aggregate_network_links = function(location, folder, auto_save = F
         network_object, agg_link_vehicle_type
         ,by.x = "stableEdgeId", by.y = "network_link_ids_unnested", all = T)
 
-      nrow(filter(agg_link_flag_mrg, is.na(flag_trip_type)))
-      (nrow(filter(agg_link_flag_mrg, is.na(stableEdgeId))) == 0)
-
       agg_link_vehicle_type_mrg_pro = agg_link_vehicle_type_mrg %>%
         filter(!is.na(vehicle_type)) %>%
         mutate(label = str_glue(
-          "Link Name: {streetName}
+          "Link Name: {streetName} ({highway})
           <br>TTl Link Volume: {ttl_count_link} - {100*count_nrm_mmax_ttl}% (Min-Max norm.)
           <hr>
           Metrics Adj for Veh. Type: {vehicle_type}
+          <br>Link Volume: {count}
+          <br>Link Volume (Min-Max norm.): {100*count_nrm_mmax}%"))
+
+      message("Aggregation complete....")
+    }
+
+    #ANLTT
+    {
+      agg_link_flag = network_links %>%
+        count_percent_zscore(
+          grp_c = c('network_link_ids_unnested', 'flag_trip_type')
+          ,grp_p = c('network_link_ids_unnested')
+          ,col = count, rnd = 2) %>%
+        group_by(network_link_ids_unnested) %>%
+        mutate(ttl_count_link = sum(count)) %>%
+        ungroup() %>%
+        mutate(count_nrm_prank_ttl = gauntlet::dgt2(percent_rank(ttl_count_link))
+               ,count_nrm_mmax_ttl = gauntlet::dgt2(normalize_min_max(ttl_count_link))) %>%
+        group_by(flag_trip_type) %>%
+        mutate(count_nrm_prank = gauntlet::dgt2(percent_rank(count))
+               ,count_nrm_mmax = gauntlet::dgt2(normalize_min_max(count))) %>%
+        ungroup()
+
+      agg_link_flag_mrg = merge(
+        network_object, agg_link_flag
+        ,by.x = "stableEdgeId", by.y = "network_link_ids_unnested", all = T)
+
+      agg_link_flag_mrg_pro = agg_link_flag_mrg %>%
+        filter(!is.na(flag_trip_type )) %>%
+        mutate(label = str_glue(
+          "Link Name: {streetName} ({highway})
+          <br>TTl Link Volume: {ttl_count_link} - {100*count_nrm_mmax_ttl}% (Min-Max norm.)
+          <hr>
+          Metrics Adj for Trip Type: {flag_trip_type}
           <br>Link Volume: {count}
           <br>Link Volume (Min-Max norm.): {100*count_nrm_mmax}%"))
 
@@ -425,7 +444,8 @@ aggregate_network_links = function(location, folder, auto_save = F
       agg_link_vehicle_type_origin_mrg_pro = agg_link_vehicle_type_origin_mrg %>%
         mutate(label = str_glue(
           "Origin: {origin_poly} - {ttl_count_orgin} (total origin trips)
-          <br>Link name: {streetName} - {ttl_count_link} (tota link trips)
+          <br>Link name: {streetName} ({highway})
+          <br>Link Volume: {ttl_count_link}
           <hr>
           Metrics Adj for Origin and Vehicle Type: {vehicle_type}
           <br>Link Volume: {count} - {100*count_nrm_mmax}% (Min-Max norm.)
@@ -436,7 +456,8 @@ aggregate_network_links = function(location, folder, auto_save = F
 
   #save out
   {
-    list_objects = list(agg_link_flag = agg_link_flag_mrg_pro
+    list_objects = list(agg_link = agg_link_mrg_pro
+                        ,agg_link_flag = agg_link_flag_mrg_pro
                         ,agg_link_vehicle_type = agg_link_vehicle_type_mrg_pro
                         ,agg_link_vehicle_type_origin = agg_link_vehicle_type_origin_mrg_pro)
 

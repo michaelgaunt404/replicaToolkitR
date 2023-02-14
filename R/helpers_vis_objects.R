@@ -1,4 +1,3 @@
-
 #' Quickly map and inspect queried network links
 #'
 #' @description This is a convenience function which maps the network queried given user inputs.
@@ -170,92 +169,90 @@ make_network_map_anlto = function(network_cntrd_object
 
   #process data
   {
-  net = network_cntrd_object$agg_link_vehicle_type_origin %>%
-    na.omit() %>%
+    net = network_cntrd_object$agg_link_vehicle_type_origin %>%
+      na.omit() %>%
       filter(origin_poly %in% as.character(poi_list$id)) %>%
       merge(poi_list %>%
-            mutate(id = as.character(id)), by.x = "origin_poly", by.y = "id", all.x = T)
+              mutate(id = as.character(id)), by.x = "origin_poly", by.y = "id", all.x = T)
 
-  net_sd = crosstalk::SharedData$new(net)
+    net_sd = crosstalk::SharedData$new(net)
 
-  pal_centroids_od = leaflet::colorNumeric(
-    palette = "magma"
-    ,net$count
-    ,reverse = T)
+    pal_centroids_od = leaflet::colorNumeric(
+      palette = "magma"
+      ,net$count
+      ,reverse = T)
   }
 
   #make map
   {
-  crosstalk::bscols(widths = c(3, 9)
-                    ,list(
-                      crosstalk::bscols(
-                        widths = c(12, 12, 12, 6, 6, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12 , 12, 12)
-                        ,htmltools::hr()
-                        ,htmltools::HTML("Rdwy & Veh. Type Filters") %>%  htmltools::strong()
-                        ,htmltools::hr()
-                        ,crosstalk::filter_select("net_group", "Choose Origin Group:"
-                                                  ,net_sd, ~group)
-                        ,crosstalk::filter_select("net_origin_poly", "Choose Origin Poly:"
-                                                  ,net_sd, ~origin_poly)
-                        ,crosstalk::filter_checkbox("net_sd_vehicle_type", "Choose Vehicle Type:"
-                                                    ,net_sd, ~vehicle_type, inline = T)
-                        ,crosstalk::filter_checkbox("net_flag_highway", "Choose Rdwy Flag:"
-                                                     ,net_sd, ~flag_highway, inline = T)
-                        ,crosstalk::filter_checkbox("net_highway", "Choose Rdwy Type:"
-                                                    ,net_sd, ~highway, inline = T)
-                        ,crosstalk::filter_select("net_streetname", "Choose Specific Rdwy:"
-                                                  ,net_sd, ~streetName)
-                        ,htmltools::hr()
-                        ,htmltools::HTML("Network Link Volume Filters") %>%  htmltools::strong()
-                        ,htmltools::hr()
-                        ,crosstalk::filter_slider("net_sd_count", "Link Volume (counts):"
-                                                  ,net_sd, ~count)
-                        ,crosstalk::filter_slider("net_count_nrm_mmax", "Link Volume (Min-Max Norm):"
-                                                  ,net_sd, ~count_nrm_mmax)
-                        ,crosstalk::filter_slider("net_count_nrm_prank", "Link Volume (%Rank Norm):"
-                                                  ,net_sd, ~count_nrm_prank)
-                        ,crosstalk::filter_slider("net_sd_per_util", "Link Utilization by Vehicle Type:"
-                                                  ,net_sd, ~100*gauntlet::dgt2(percent))
+    crosstalk::bscols(widths = c(3, 9)
+                      ,list(
+                        crosstalk::bscols(
+                          widths = c(12, 12, 12, 6, 6, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12 , 12, 12)
+                          ,htmltools::hr()
+                          ,htmltools::HTML("Rdwy & Veh. Type Filters") %>%  htmltools::strong()
+                          ,htmltools::hr()
+                          ,crosstalk::filter_select("net_group", "Choose Origin Group:"
+                                                    ,net_sd, ~group)
+                          ,crosstalk::filter_select("net_origin_poly", "Choose Origin Poly:"
+                                                    ,net_sd, ~origin_poly)
+                          ,crosstalk::filter_checkbox("net_sd_vehicle_type", "Choose Vehicle Type:"
+                                                      ,net_sd, ~vehicle_type, inline = T)
+                          ,crosstalk::filter_checkbox("net_flag_highway", "Choose Rdwy Flag:"
+                                                      ,net_sd, ~flag_highway, inline = T)
+                          ,crosstalk::filter_checkbox("net_highway", "Choose Rdwy Type:"
+                                                      ,net_sd, ~highway, inline = T)
+                          ,crosstalk::filter_select("net_streetname", "Choose Specific Rdwy:"
+                                                    ,net_sd, ~streetName)
+                          ,htmltools::hr()
+                          ,htmltools::HTML("Network Link Volume Filters") %>%  htmltools::strong()
+                          ,htmltools::hr()
+                          ,crosstalk::filter_slider("net_sd_count", "Link Volume (counts):"
+                                                    ,net_sd, ~count)
+                          ,crosstalk::filter_slider("net_count_nrm_mmax", "Link Volume (Min-Max Norm):"
+                                                    ,net_sd, ~count_nrm_mmax)
+                          ,crosstalk::filter_slider("net_count_nrm_prank", "Link Volume (%Rank Norm):"
+                                                    ,net_sd, ~count_nrm_prank)
+                          ,crosstalk::filter_slider("net_sd_per_util", "Link Utilization by Vehicle Type:"
+                                                    ,net_sd, ~100*gauntlet::dgt2(percent))
+                        )
                       )
-                    )
-                    ,leaflet::leaflet(height = 700) %>%
-                      leaflet::addTiles(group = "OSM (default)") %>%
-                      leaflet_default_tiles() %>%
-                      leaflet::addCircleMarkers(data = net_sd
-                                                ,fillColor = ~pal_centroids_od(net$count)
-                                                ,color = "black"
-                                                ,opacity = .8
-                                                ,fillOpacity  = .5
-                                                ,weight = 1
-                                                ,radius = 5
-                                                ,group = "Network Links (mid-points)"
-                                                ,label = net$label %>%
-                                                  purrr::map(htmltools::HTML)
-                      ) %>%
-                      map_elemet_poi() %>%
-                      #layer control----
-                    leaflet::addLayersControl(
-                      baseGroups = leaflet_default_tiles_index()
-                      ,overlayGroups =
-                        c("Network Links (mid-points)"
-                          ,"POI Polygons", "Non-POI Study Area Polygons")
-                      ,options = layersControlOptions(collapsed = F, sortLayers = F)) %>%
-                      hideGroup(c("Network Links (mid-points)", "Non-POI Study Area Polygons")) %>%
-                      leafem::addMouseCoordinates() %>%
-                      ##legends----
-                    leaflet::addLegend(
-                      position = "bottomleft"
-                      ,title = "Link Volume (counts)"
-                      ,group = "Network Links (mid-points)"
-                      ,pal = pal_centroids_od
-                      ,opacity = 0.7
-                      ,values = net$count)
+                      ,leaflet::leaflet(height = 700) %>%
+                        leaflet::addTiles(group = "OSM (default)") %>%
+                        leaflet_default_tiles() %>%
+                        leaflet::addCircleMarkers(data = net_sd
+                                                  ,fillColor = ~pal_centroids_od(net$count)
+                                                  ,color = "black"
+                                                  ,opacity = .8
+                                                  ,fillOpacity  = .5
+                                                  ,weight = 1
+                                                  ,radius = 5
+                                                  ,group = "Network Links (mid-points)"
+                                                  ,label = net$label %>%
+                                                    purrr::map(htmltools::HTML)
+                        ) %>%
+                        map_elemet_poi() %>%
+                        leaflet::addLayersControl(
+                          baseGroups = leaflet_default_tiles_index()
+                          ,overlayGroups =
+                            c("Network Links (mid-points)"
+                              ,"POI Polygons", "Non-POI Study Area Polygons")
+                          ,options = layersControlOptions(collapsed = F, sortLayers = F)) %>%
+                        hideGroup(c("Network Links (mid-points)", "Non-POI Study Area Polygons")) %>%
+                        leafem::addMouseCoordinates() %>%
+                        leaflet::addLegend(
+                          position = "bottomleft"
+                          ,title = "Link Volume (counts)"
+                          ,group = "Network Links (mid-points)"
+                          ,pal = pal_centroids_od
+                          ,opacity = 0.7
+                          ,values = net$count)
 
-  )
+    )
   }
 }
 
-#' Create interactive HTML widget displaying network link volumes - ANLT (Agg. Netowrk Links by veh. Type)
+#' Create interactive HTML widget displaying network link volumes - ANLT (Agg. Network Links by veh. Type)
 #'
 #' @description This function creates an interactive HTML widget which displays network volumes aggregated by vehicle type.
 #' This HTML contains filtering and mapping features that can be used to investigate the data.
@@ -383,30 +380,28 @@ make_network_map_anlt = function(network_cntrd_object
                                                     purrr::map(htmltools::HTML)
                         ) %>%
                         map_elemet_poi() %>%
-                        #layer control----
-                      leaflet::addLayersControl(
-                        baseGroups = leaflet_default_tiles_index()
-                        ,overlayGroups =
-                          c("Network Links (mid-points)"
-                            ,"POI Polygons", "Non-POI Study Area Polygons")
-                        ,options = layersControlOptions(collapsed = F, sortLayers = F)) %>%
+                        leaflet::addLayersControl(
+                          baseGroups = leaflet_default_tiles_index()
+                          ,overlayGroups =
+                            c("Network Links (mid-points)"
+                              ,"POI Polygons", "Non-POI Study Area Polygons")
+                          ,options = layersControlOptions(collapsed = F, sortLayers = F)) %>%
                         hideGroup(c("Network Links (mid-points)", "Non-POI Study Area Polygons")) %>%
                         leafem::addMouseCoordinates() %>%
-                        ##legends----
-                      leaflet::addLegend(
-                        position = "bottomleft"
-                        ,title = "Link Volume (counts)"
-                        ,group = "Network Links (mid-points)"
-                        ,pal = pal_centroids_od
-                        ,opacity = 0.7
-                        ,values = net$count)
+                        leaflet::addLegend(
+                          position = "bottomleft"
+                          ,title = "Link Volume (counts)"
+                          ,group = "Network Links (mid-points)"
+                          ,pal = pal_centroids_od
+                          ,opacity = 0.7
+                          ,values = net$count)
 
     )
   }
 
 }
 
-#' Create interactive HTML widget displaying network link volumes - ANLT (Agg. Netowrk Links by veh. Type)
+#' Create interactive HTML widget displaying network link volumes - ANLT (Agg. Network Links by veh. Type)
 #'
 #' @description This function creates an interactive HTML widget which displays network volumes aggregated by vehicle type.
 #' This HTML contains filtering and mapping features that can be used to investigate the data.
@@ -430,8 +425,8 @@ make_network_map_anlt = function(network_cntrd_object
 #'   ,origin_polys = acquired_sa_polys
 #' )
 make_network_map_anltpt = function(network_cntrd_object
-                                 ,poi_list = NULL
-                                 ,origin_polys = NULL){
+                                   ,poi_list = NULL
+                                   ,origin_polys = NULL){
   {
     # data("network_centroid_aggregation_list")
     # data("poi_list")
@@ -534,23 +529,168 @@ make_network_map_anltpt = function(network_cntrd_object
                                                     purrr::map(htmltools::HTML)
                         ) %>%
                         map_elemet_poi() %>%
-                        #layer control----
-                      leaflet::addLayersControl(
-                        baseGroups = leaflet_default_tiles_index()
-                        ,overlayGroups =
-                          c("Network Links (mid-points)"
-                            ,"POI Polygons", "Non-POI Study Area Polygons")
-                        ,options = layersControlOptions(collapsed = F, sortLayers = F)) %>%
+                        leaflet::addLayersControl(
+                          baseGroups = leaflet_default_tiles_index()
+                          ,overlayGroups =
+                            c("Network Links (mid-points)"
+                              ,"POI Polygons", "Non-POI Study Area Polygons")
+                          ,options = layersControlOptions(collapsed = F, sortLayers = F)) %>%
                         hideGroup(c("Network Links (mid-points)", "Non-POI Study Area Polygons")) %>%
                         leafem::addMouseCoordinates() %>%
-                        ##legends----
-                      leaflet::addLegend(
-                        position = "bottomleft"
-                        ,title = "Link Volume (counts)"
-                        ,group = "Network Links (mid-points)"
-                        ,pal = pal_centroids_od
-                        ,opacity = 0.7
-                        ,values = net$count)
+                        leaflet::addLegend(
+                          position = "bottomleft"
+                          ,title = "Link Volume (counts)"
+                          ,group = "Network Links (mid-points)"
+                          ,pal = pal_centroids_od
+                          ,opacity = 0.7
+                          ,values = net$count)
+
+    )
+  }
+
+}
+
+#' Create interactive HTML widget displaying network link volumes - ANL (Agg. Network Links)
+#'
+#' @description This function creates an interactive HTML widget which displays network volumes aggregated by vehicle type.
+#' This HTML contains filtering and mapping features that can be used to investigate the data.
+#'
+#' @param network_cntrd_object list object containing aggregated link centroid networks.
+#' @param poi_list data frame object detailing id and group attributes for polygons that network links will be displayed for. These polygons are considered Points-of-Interests and should be within the study area polygon.
+#' @param origin_polys processed acquired_sa_polys object created for this study.
+#'
+#' @return an HTML widget map of network volumes
+#' @export
+#'
+#' @examples
+#'
+#' data("acquired_sa_polys")
+#' data("poi_list")
+#' data("network_centroid_aggregation_list")
+#'
+#' make_network_map_anlt(
+#'   network_cntrd_object = network_centroid_aggregation_list
+#'   ,poi_list = poi_list
+#'   ,origin_polys = acquired_sa_polys
+#' )
+make_network_map_anl = function(network_cntrd_object
+                                ,poi_list = NULL
+                                ,origin_polys = NULL){
+  {
+    # data("network_centroid_aggregation_list")
+    # data("poi_list")
+    # data("acquired_sa_polys")
+    # origin_polys = acquired_sa_polys
+  }
+
+  stopifnot("Please supply acquired_sa_polys object, it is included in this map..." = !is.null(origin_polys))
+  stopifnot("Please provide Point-of-Interest list of origin polygons...\nIt is required to limit the number data points that are mapped and focuses the analysis" = !is.null(poi_list))
+  stopifnot("POI list column names must be 'id' and 'group' (lowercase), please change..." = (sum(names(poi_list) %in% c("id", "group")) == 2))
+
+  #create poly layer background
+  {
+    map_poly = origin_polys %>%
+      merge(poi_list %>%
+              mutate(id = as.character(id)), by.x = "GEOID10", by.y = "id", all = T)
+
+    query_poly_poi = map_poly %>%
+      filter(!is.na(group)) %>%
+      na.omit()
+
+    stopifnot("Bad merge between origin_polys and poi_list, check poi_list and make sure there are common ids across data..." = !(nrow(query_poly_poi) == 0))
+
+    query_poly_nonpoi = map_poly %>%
+      filter(is.na(group))
+
+    map_elemet_poi = function(base_map){
+      base_map %>%
+        leaflet::addPolygons(data = query_poly_poi
+                             ,fillColor = "blue"
+                             ,fillOpacity = .4
+                             ,color = "black", opacity = .5,weight = 2
+                             ,group = "POI Polygons"
+                             # ,label = query_poly_poi$label %>%
+                             #   map(htmltools::HTML)
+        ) %>%
+        leaflet::addPolygons(data = query_poly_nonpoi
+                             ,fillColor = "green", fillOpacity = .1
+                             ,opacity = .4, weight = 1, color = "grey"
+                             ,group = "Non-POI Study Area Polygons"
+        )
+    }
+  }
+
+  #process data
+  {
+    net = network_cntrd_object$agg_link %>%
+      na.omit()
+
+    net_sd = crosstalk::SharedData$new(net)
+
+    pal_centroids_od = leaflet::colorNumeric(
+      palette = "magma"
+      ,net$count
+      ,reverse = T)
+  }
+
+  #make map
+  {
+    crosstalk::bscols(widths = c(3, 9)
+                      ,list(
+                        crosstalk::bscols(
+                          widths = c(12)
+                          ,htmltools::hr()
+                          ,htmltools::HTML("RdwyFilters") %>%  htmltools::strong()
+                          ,htmltools::hr()
+                          ,crosstalk::filter_checkbox("net_flag_highway", "Choose Rdwy Flag:"
+                                                      ,net_sd, ~flag_highway, inline = T)
+                          ,crosstalk::filter_checkbox("net_highway", "Choose Rdwy Type:"
+                                                      ,net_sd, ~highway, inline = T)
+                          ,crosstalk::filter_select("net_streetname", "Choose Specific Rdwy:"
+                                                    ,net_sd, ~streetName)
+                          ,htmltools::hr()
+                          ,htmltools::HTML("Network Link Volume Filters") %>%  htmltools::strong()
+                          ,htmltools::hr()
+                          ,crosstalk::filter_slider("net_sd_count", "Link Volume (counts):"
+                                                    ,net_sd, ~count)
+                          ,crosstalk::filter_slider("net_count_nrm_mmax", "Link Volume (Min-Max Norm):"
+                                                    ,net_sd, ~count_nrm_mmax_ttl)
+                          ,crosstalk::filter_slider("net_count_nrm_prank", "Link Volume (%Rank Norm):"
+                                                    ,net_sd, ~count_nrm_prank_ttl)
+                          ,crosstalk::filter_slider("net_sd_per_util", "Link Utilization by Vehicle Type:"
+                                                    ,net_sd, ~100*gauntlet::dgt2(percent))
+                        )
+                      )
+                      ,leaflet::leaflet(height = 700) %>%
+                        leaflet::addTiles(group = "OSM (default)") %>%
+                        leaflet_default_tiles() %>%
+                        leaflet::addCircleMarkers(data = net_sd
+                                                  ,fillColor = ~pal_centroids_od(net$count)
+                                                  ,color = "black"
+                                                  ,opacity = .8
+                                                  ,fillOpacity  = .5
+                                                  ,weight = 1
+                                                  ,radius = 5
+                                                  ,group = "Network Links (mid-points)"
+                                                  ,label = net$label %>%
+                                                    purrr::map(htmltools::HTML)
+                        ) %>%
+                        map_elemet_poi() %>%
+                        leaflet::addLayersControl(
+                          baseGroups = leaflet_default_tiles_index()
+                          ,overlayGroups =
+                            c("Network Links (mid-points)"
+                              ,"POI Polygons", "Non-POI Study Area Polygons")
+                          ,options = layersControlOptions(collapsed = F, sortLayers = F)) %>%
+                        hideGroup(c("Network Links (mid-points)", "Non-POI Study Area Polygons")) %>%
+                        leafem::addMouseCoordinates() %>%
+                        leaflet::addLegend(
+                          position = "bottomleft"
+                          ,title = "Link Volume (counts)"
+                          ,group = "Network Links (mid-points)"
+                          ,pal = pal_centroids_od
+                          ,opacity = 0.7
+                          ,values = net$count)
 
     )
   }
@@ -782,4 +922,41 @@ viz_static_ntwrk_map_anltpt = function(spatial_agg_object){
 
 }
 
+#' Make interactive network link volume maps using MapView.
+#'
+#' ANLT (Aggregated Network Links).
+#'
+#' @description This is a helper function that quickly makes an interactive map of aggregated network link volumes.
+#' All functions in the viz_static_ntwrk_map_% function family makes a singular leaflet/mapview object.
+#'
+#' This is another mapping option if you wish to map network links and view link volumes without making an interactive, HTML elements.
+#'
+#' @param spatial_agg_object spatial links objects of aggregated network. Has to be links, centroids will print but aesthetic options in Mapview code are specific to links.
+#'
+#' @return a leaflet object made using MapView API depicting links
+#' @export
+#'
+#' @examples
+#'
+#' data_temp = aggregate_network_links(
+#' agg_count_object = table_agg_by_link_subset_limited
+#' ,network_object = replica_queried_network_links
+#' )
+#'
+#' viz_static_ntwrk_map_anltpt(
+#'   spatial_agg_object = data_temp
+#'   )
+viz_static_ntwrk_map_anl = function(spatial_agg_object){
+  data = spatial_agg_object[["agg_link"]] %>%
+    mutate(lwd_rescale = rescale_to(count, 10))
 
+  map_object = data %>%
+    mapview(label = "label"
+            ,layer.name = "Network Link Volumes"
+            ,lwd = 'lwd_rescale'
+            ,popup = popup_tbl_pretty(data %>%  select(-c(label, lwd_rescale)))
+            ,homebutton = F)
+
+  map_object@map %>%
+    leaflet::hideGroup(unique(data$flag_trip_type))
+}
