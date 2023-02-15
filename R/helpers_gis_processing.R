@@ -273,9 +273,10 @@ aggregate_network_links = function(location, folder, auto_save = F
 
   {
     # location = "data/req_dev"
-    # folder = "data_20230125_162034"
+    # folder = "data_20230207_161636"
     # agg_count_object = NULL
     # auto_save = F
+    # data('replica_queried_network_cntds')
     # network_object = replica_queried_network_cntds
   }
 
@@ -410,28 +411,25 @@ aggregate_network_links = function(location, folder, auto_save = F
       message("INFO:\nBy default external-external and external-internal trips are removed before aggregation")
       message("This is because origin based visualizations and calcultions display locations WITHIN/INTERNAL TO the user provided study area...")
       message(str_glue("Prefiltering makes processing faster and limits size of data object{gauntlet::make_space('-')}"))
+#NOTE: total link volume calculated here will be less than previous
+      #--this is because it only counts int-int, and int-ext trips
+
 
       agg_link_vehicle_type_origin = network_links %>%
         filter(!is.na(vehicle_type)) %>%
         filter(origin_poly != "out of study area") %>%
         count_percent_zscore(
-          grp_c = c('network_link_ids_unnested', 'vehicle_type', 'origin_poly')
-          ,grp_p = c('network_link_ids_unnested', 'origin_poly')
+          grp_c = c('network_link_ids_unnested', 'vehicle_type', "origin_poly")
+          ,grp_p = c('network_link_ids_unnested', "origin_poly")
           ,col = count, rnd = 2) %>%
         group_by(network_link_ids_unnested) %>%
         mutate(ttl_count_link = sum(count)) %>%
         ungroup() %>%
         mutate(count_nrm_prank_ttl = gauntlet::dgt2(percent_rank(ttl_count_link))
                ,count_nrm_mmax_ttl = gauntlet::dgt2(normalize_min_max(ttl_count_link))) %>%
-        group_by(origin_poly) %>%
-        mutate(ttl_count_orgin = sum(count)) %>%
-        ungroup() %>%
         group_by(origin_poly, vehicle_type) %>%
         mutate(count_nrm_prank = dgt2(percent_rank(count))
                ,count_nrm_mmax = dgt2(normalize_min_max(count))) %>%
-        ungroup() %>%
-        group_by(origin_poly, vehicle_type) %>%
-        mutate(ttl_count_orgin_type = sum(count)) %>%
         ungroup()
 
       agg_link_vehicle_type_origin_mrg = merge(
@@ -442,14 +440,14 @@ aggregate_network_links = function(location, folder, auto_save = F
       (nrow(filter(agg_link_flag_mrg, is.na(stableEdgeId))) == 0)
 
       agg_link_vehicle_type_origin_mrg_pro = agg_link_vehicle_type_origin_mrg %>%
+        filter(!is.na(origin_poly)) %>%
         mutate(label = str_glue(
-          "Origin: {origin_poly} - {ttl_count_orgin} (total origin trips)
+          "Origin: {origin_poly}
           <br>Link name: {streetName} ({highway})
-          <br>Link Volume: {ttl_count_link}
+          <br>Link Volume: {ttl_count_link} (int-int/ext trips)
           <hr>
           Metrics Adj for Origin and Vehicle Type: {vehicle_type}
-          <br>Link Volume: {count} - {100*count_nrm_mmax}% (Min-Max norm.)
-          <br>TTl Trips from Origin by Veh. Type: {ttl_count_orgin_type} ({100*gauntlet::dgt2(ttl_count_orgin_type/ttl_count_orgin)})"))
+          <br>Link Volume: {count} - {100*count_nrm_mmax}% (Min-Max norm.)"))
 
       message("Aggregation complete....")}
   }
