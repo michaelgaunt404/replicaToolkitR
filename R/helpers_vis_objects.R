@@ -170,7 +170,7 @@ make_network_map_anlto = function(network_cntrd_object
   #process data
   {
     net = network_cntrd_object$agg_link_vehicle_type_origin %>%
-      na.omit() %>%
+      filter(!is.na(count)) %>%
       filter(origin_poly %in% as.character(poi_list$id)) %>%
       merge(poi_list %>%
               mutate(id = as.character(id)), by.x = "origin_poly", by.y = "id", all.x = T)
@@ -325,7 +325,7 @@ make_network_map_anlt = function(network_cntrd_object
   #process data
   {
     net = network_cntrd_object$agg_link_vehicle_type %>%
-      na.omit()
+      filter(!is.na(count))
 
     net_sd = crosstalk::SharedData$new(net)
 
@@ -474,7 +474,7 @@ make_network_map_anltpt = function(network_cntrd_object
   #process data
   {
     net = network_cntrd_object$agg_link_flag %>%
-      na.omit()
+      filter(!is.na(count))
 
     net_sd = crosstalk::SharedData$new(net)
 
@@ -623,7 +623,8 @@ make_network_map_anl = function(network_cntrd_object
   #process data
   {
     net = network_cntrd_object$agg_link %>%
-      na.omit()
+      filter(!is.na(count))
+
 
     net_sd = crosstalk::SharedData$new(net)
 
@@ -706,6 +707,7 @@ make_network_map_anl = function(network_cntrd_object
 #' This is another mapping option if you wish to map network links and view link volumes without making an interactive, HTML elements.
 #'
 #' @param spatial_agg_object spatial links objects of aggregated network. Has to be links, centroids will print but aesthetic options in Mapview code are specific to links.
+#' @param return_leaflet Boolean (T/F) indicating if a leaflet or Mapview object should be returned. Default F returns a Mapview object, these can be added together.
 #'
 #' @return a leaflet object made using MapView API depicting links
 #' @export
@@ -720,8 +722,10 @@ make_network_map_anl = function(network_cntrd_object
 #' viz_static_ntwrk_map_anlt(
 #'   spatial_agg_object = data_temp
 #'   )
-viz_static_ntwrk_map_anlt = function(spatial_agg_object){
+viz_static_ntwrk_map_anlt = function(spatial_agg_object
+                                     ,return_leaflet = F){
   data = spatial_agg_object[["agg_link_vehicle_type"]] %>%
+    filter(!is.na(count)) %>%
     mutate(lwd_rescale = rescale_to(count, 10))
 
   map_object = list(
@@ -742,8 +746,13 @@ viz_static_ntwrk_map_anlt = function(spatial_agg_object){
     }) %>%
     reduce(`+`)
 
-  map_object@map %>%
-    leaflet::hideGroup(unique(data$vehicle_type))
+  if (return_leaflet){
+    map_object@map %>%
+      leaflet::hideGroup(unique(data$vehicle_type))
+  } else {
+    map_object
+  }
+
 }
 
 #' Make interactive network link volume maps using MapView - maps ANLT network links (Aggregated Network Links by vehicle Type and Origin poly).
@@ -754,6 +763,8 @@ viz_static_ntwrk_map_anlt = function(spatial_agg_object){
 #' This is another mapping option if you wish to map network links and view link volumes without making an interactive, HTML elements.
 #'
 #' @param spatial_agg_object spatial links objects of aggregated network. Has to be links, centroids will print but aesthetic options in Mapview code are specific to links.
+#' @param poi_list data frame object detailing id and group attributes for polygons that network links will be displayed for. These polygons are considered Points-of-Interests and should be within the study area polygon.
+#' @param return_leaflet Boolean (T/F) indicating if a leaflet or Mapview object should be returned. Default F returns a Mapview object, these can be added together.
 #'
 #' @return a leaflet object made using MapView API depicting links
 #' @export
@@ -768,9 +779,9 @@ viz_static_ntwrk_map_anlt = function(spatial_agg_object){
 #' viz_static_ntwrk_map_anlto_grp(
 #'   spatial_agg_object = data_temp
 #'   )
-viz_static_ntwrk_map_anlto_grp = function(spatial_agg_object){
+viz_static_ntwrk_map_anlto_grp = function(spatial_agg_object, poi_list, return_leaflet){
   data = spatial_agg_object[["agg_link_vehicle_type_origin"]]  %>%
-    na.omit() %>%
+    filter(!is.na(count)) %>%
     filter(origin_poly %in% as.character(poi_list$id)) %>%
     merge(poi_list %>%
             mutate(id = as.character(id)), by.x = "origin_poly", by.y = "id", all.x = T) %>%
@@ -802,12 +813,14 @@ viz_static_ntwrk_map_anlto_grp = function(spatial_agg_object){
     }) %>%
     reduce(`+`)
 
-  map_object@map %>%
-    leaflet::hideGroup(
-      map_chr(cross_items, ~paste0(.x[[2]], "_", .x[[1]]))
-    )
-
-  return(map_object)
+  if (return_leaflet){
+    map_object@map %>%
+      leaflet::hideGroup(
+        map_chr(cross_items, ~paste0(.x[[2]], "_", .x[[1]]))
+      )
+  } else {
+    map_object
+  }
 }
 
 #' Make interactive network link volume maps using MapView - maps ANLT network links (Aggregated Network Links by vehicle Type and Origin poly).
@@ -818,6 +831,8 @@ viz_static_ntwrk_map_anlto_grp = function(spatial_agg_object){
 #' This is another mapping option if you wish to map network links and view link volumes without making an interactive, HTML elements.
 #'
 #' @param spatial_agg_object spatial links objects of aggregated network. Has to be links, centroids will print but aesthetic options in Mapview code are specific to links.
+#' @param poi_list data frame object detailing id and group attributes for polygons that network links will be displayed for. These polygons are considered Points-of-Interests and should be within the study area polygon.
+#' @param return_leaflet Boolean (T/F) indicating if a leaflet or Mapview object should be returned. Default F returns a Mapview object, these can be added together.
 #'
 #' @return a leaflet object made using MapView API depicting links
 #' @export
@@ -832,9 +847,9 @@ viz_static_ntwrk_map_anlto_grp = function(spatial_agg_object){
 #' viz_static_ntwrk_map_anlto(
 #'   spatial_agg_object = data_temp
 #'   )
-viz_static_ntwrk_map_anlto = function(spatial_agg_object){
+viz_static_ntwrk_map_anlto = function(spatial_agg_object, poi_list, return_leaflet){
   data = spatial_agg_object[["agg_link_vehicle_type_origin"]]  %>%
-    na.omit() %>%
+    filter(!is.na(count)) %>%
     filter(origin_poly %in% as.character(poi_list$id)) %>%
     merge(poi_list %>%
             mutate(id = as.character(id)), by.x = "origin_poly", by.y = "id", all.x = T) %>%
@@ -866,10 +881,14 @@ viz_static_ntwrk_map_anlto = function(spatial_agg_object){
     }) %>%
     reduce(`+`)
 
-  map_object@map %>%
-    leaflet::hideGroup(
-      map_chr(cross_items, ~paste0(.x[[2]], "_", .x[[1]]))
-    )
+  if (return_leaflet){
+    map_object@map %>%
+      leaflet::hideGroup(
+        map_chr(cross_items, ~paste0(.x[[2]], "_", .x[[1]]))
+      )
+  } else {
+    map_object
+  }
 
 }
 
@@ -881,6 +900,7 @@ viz_static_ntwrk_map_anlto = function(spatial_agg_object){
 #' This is another mapping option if you wish to map network links and view link volumes without making an interactive, HTML elements.
 #'
 #' @param spatial_agg_object spatial links objects of aggregated network. Has to be links, centroids will print but aesthetic options in Mapview code are specific to links.
+#' @param return_leaflet Boolean (T/F) indicating if a leaflet or Mapview object should be returned. Default F returns a Mapview object, these can be added together.
 #'
 #' @return a leaflet object made using MapView API depicting links
 #' @export
@@ -895,8 +915,9 @@ viz_static_ntwrk_map_anlto = function(spatial_agg_object){
 #' viz_static_ntwrk_map_anltpt(
 #'   spatial_agg_object = data_temp
 #'   )
-viz_static_ntwrk_map_anltpt = function(spatial_agg_object){
+viz_static_ntwrk_map_anltpt = function(spatial_agg_object, return_leaflet){
   data = spatial_agg_object[["agg_link_flag"]] %>%
+    filter(!is.na(count)) %>%
     mutate(lwd_rescale = rescale_to(count, 10))
 
   map_object = list(
@@ -917,9 +938,12 @@ viz_static_ntwrk_map_anltpt = function(spatial_agg_object){
     }) %>%
     reduce(`+`)
 
-  map_object@map %>%
-    leaflet::hideGroup(unique(data$flag_trip_type))
-
+  if (return_leaflet){
+    map_object@map %>%
+      leaflet::hideGroup(unique(data$flag_trip_type))
+  } else {
+    map_object
+  }
 }
 
 #' Make interactive network link volume maps using MapView.
@@ -932,6 +956,7 @@ viz_static_ntwrk_map_anltpt = function(spatial_agg_object){
 #' This is another mapping option if you wish to map network links and view link volumes without making an interactive, HTML elements.
 #'
 #' @param spatial_agg_object spatial links objects of aggregated network. Has to be links, centroids will print but aesthetic options in Mapview code are specific to links.
+#' @param return_leaflet Boolean (T/F) indicating if a leaflet or Mapview object should be returned. Default F returns a Mapview object, these can be added together.
 #'
 #' @return a leaflet object made using MapView API depicting links
 #' @export
@@ -946,8 +971,9 @@ viz_static_ntwrk_map_anltpt = function(spatial_agg_object){
 #' viz_static_ntwrk_map_anltpt(
 #'   spatial_agg_object = data_temp
 #'   )
-viz_static_ntwrk_map_anl = function(spatial_agg_object){
+viz_static_ntwrk_map_anl = function(spatial_agg_object, return_leaflet){
   data = spatial_agg_object[["agg_link"]] %>%
+    filter(!is.na(count)) %>%
     mutate(lwd_rescale = rescale_to(count, 10))
 
   map_object = data %>%
@@ -957,6 +983,10 @@ viz_static_ntwrk_map_anl = function(spatial_agg_object){
             ,popup = popup_tbl_pretty(data %>%  select(-c(label, lwd_rescale)))
             ,homebutton = F)
 
-  map_object@map %>%
-    leaflet::hideGroup(unique(data$flag_trip_type))
+  if (return_leaflet){
+    map_object@map %>%
+      leaflet::hideGroup(unique(data$flag_trip_type))
+  } else {
+    map_object
+  }
 }

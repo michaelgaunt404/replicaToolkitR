@@ -4,10 +4,14 @@
 \alias{viz_static_ntwrk_map_anlto}
 \title{Make interactive network link volume maps using MapView - maps ANLT network links (Aggregated Network Links by vehicle Type and Origin poly).}
 \usage{
-viz_static_ntwrk_map_anlto(spatial_agg_object)
+viz_static_ntwrk_map_anlto(spatial_agg_object, poi_list, return_leaflet)
 }
 \arguments{
 \item{spatial_agg_object}{spatial links objects of aggregated network. Has to be links, centroids will print but aesthetic options in Mapview code are specific to links.}
+
+\item{poi_list}{data frame object detailing id and group attributes for polygons that network links will be displayed for. These polygons are considered Points-of-Interests and should be within the study area polygon.}
+
+\item{return_leaflet}{Boolean (T/F) indicating if a leaflet or Mapview object should be returned. Default F returns a Mapview object, these can be added together.}
 }
 \value{
 a leaflet object made using MapView API depicting links
