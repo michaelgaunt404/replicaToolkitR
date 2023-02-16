@@ -61,13 +61,21 @@ All functions in the viz_static_ntwrk_map_<!-- % function family makes a singula
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">viz_static_ntwrk_map_anlto</span><span class="op">(</span><span class="va">spatial_agg_object</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">viz_static_ntwrk_map_anlto</span><span class="op">(</span><span class="va">spatial_agg_object</span>, <span class="va">poi_list</span>, <span class="va">return_leaflet</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>spatial_agg_object</dt>
 <dd><p>spatial links objects of aggregated network. Has to be links, centroids will print but aesthetic options in Mapview code are specific to links.</p></dd>
+
+
+<dt>poi_list</dt>
+<dd><p>data frame object detailing id and group attributes for polygons that network links will be displayed for. These polygons are considered Points-of-Interests and should be within the study area polygon.</p></dd>
+
+
+<dt>return_leaflet</dt>
+<dd><p>Boolean (T/F) indicating if a leaflet or Mapview object should be returned. Default F returns a Mapview object, these can be added together.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -90,7 +98,7 @@ All functions in the viz_static_ntwrk_map_<!-- % function family makes a singula
 <span class="r-in"><span><span class="fu">viz_static_ntwrk_map_anlto</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  spatial_agg_object <span class="op">=</span> <span class="va">data_temp</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in spatial_agg_object[["agg_link_vehicle_type_origin"]] %&gt;% na.omit() %&gt;%     filter(origin_poly %in% as.character(poi_list$id)) %&gt;% merge(poi_list %&gt;%     mutate(id = as.character(id)), by.x = "origin_poly", by.y = "id",     all.x = T) %&gt;% mutate(lwd_rescale = rescale_to(count, 10)):</span> could not find function "%&gt;%"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in spatial_agg_object[["agg_link_vehicle_type_origin"]] %&gt;% filter(!is.na(count)) %&gt;%     filter(origin_poly %in% as.character(poi_list$id)) %&gt;% merge(poi_list %&gt;%     mutate(id = as.character(id)), by.x = "origin_poly", by.y = "id",     all.x = T) %&gt;% mutate(lwd_rescale = rescale_to(count, 10)):</span> could not find function "%&gt;%"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
