@@ -94,7 +94,10 @@ Below is an example of the POI list. You will need to have both the **id** and *
 ```{r}
 data("poi_list")
 
-reactable(poi_list)
+poi_list %>%  
+  select(group, id) %>% 
+  reactable(bordered = TRUE, wrap = FALSE, style = list(minWidth = 300)
+            ,striped = TRUE, highlight = TRUE, fullWidth = F)
 ```
 
 
@@ -152,8 +155,10 @@ It will be saved as a CSV with a Well-known Text (WKT) attribute that spatially 
 ```{r echo=FALSE}
 data("replica_queried_network")
 
-reactable(replica_queried_network %>% 
-            head(10), height = 300)
+replica_queried_network %>% 
+  head(10) %>% 
+  reactable(bordered = TRUE, wrap = FALSE, style = list(minWidth = 300)
+            ,striped = TRUE, highlight = TRUE, fullWidth = T, height = 300)
 ```
 
 #### replica_sa_poly_index
@@ -164,8 +169,10 @@ It is used later on to query the polygons using the [TIGRIS API](https://github.
 ```{r echo=FALSE}
 data("replica_sa_poly_index")
 
-reactable(replica_sa_poly_index %>% 
-            head(10), height = 300)
+replica_sa_poly_index %>% 
+  head(10) %>% 
+  reactable(bordered = TRUE, wrap = FALSE, style = list(minWidth = 300)
+            ,striped = TRUE, highlight = TRUE, fullWidth = T, height = 300)
 ```
 
 #### replica_trip_origin_destination
@@ -176,8 +183,10 @@ Again, origins and destinations outside of the study area are collapsed into sin
 ```{r echo=FALSE}
 data("replica_trip_origin_links")
 
-reactable(replica_trip_origin_links %>% 
-            head(10), height = 300)
+replica_trip_origin_links %>% 
+            head(10) %>% 
+  reactable(bordered = TRUE, wrap = FALSE, style = list(minWidth = 300)
+            ,striped = TRUE, highlight = TRUE, fullWidth = T, height = 300)
 ```
 
 #### replica_trip_origin_links
@@ -192,8 +201,10 @@ This is useful for a number of reasons.
 ```{r echo=FALSE}
 data("replica_trip_origin_links")
 
-reactable(replica_trip_origin_links %>% 
-            head(10), height = 300)
+replica_trip_origin_links %>% 
+  head(10) %>% 
+  reactable(bordered = TRUE, wrap = FALSE, style = list(minWidth = 300)
+            ,striped = TRUE, highlight = TRUE, fullWidth = T, height = 300)
 ```
    
 #### table_agg_by_link_subset_limited
@@ -205,8 +216,10 @@ Again, this table is a saved as a CSV and is merged with the queried network lin
 ```{r echo=FALSE}
 data("table_agg_by_link_subset_limited")
 
-reactable(table_agg_by_link_subset_limited %>% 
-            head(10), height = 300)
+table_agg_by_link_subset_limited %>% 
+  head(10) %>% 
+  reactable(bordered = TRUE, wrap = FALSE, style = list(minWidth = 300)
+            ,striped = TRUE, highlight = TRUE, fullWidth = T, height = 300)
 ```
 
 > **_NOTE:_** `table_agg_by_link_subset_limited` will likely be the focus of your analysis as it contains network links. `replicaToolkitR` provides helper functions that aggregate network links a number of pre-set ways but they may not help you in your analysis or you may want to aggregte them differently. 
