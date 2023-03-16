@@ -22,10 +22,10 @@
 #' )
 inspect_queried_network = function(location,folder,network_links_object = NULL){
 
-  location = "data/req_dev"
-  folder = "data_20230207_161636"
-  network_links_object = NULL
-  auto_save = F
+  # location = "data/req_dev"
+  # folder = "data_20230207_161636"
+  # network_links_object = NULL
+  # auto_save = F
 
   message(stringr::str_glue("{gauntlet::make_space('-')}\nW A R N I N G{gauntlet::make_space('-')}\nNetwork links are converted to LINK CENTROIDS and displayed in the map....\nPolylines cannot be filtered using the packages that create this feature{gauntlet::make_space()}"))
 
