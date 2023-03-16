@@ -1,4 +1,4 @@
-export_agg_links_to_spatial = function(data, location, folder){
+export_agg_links_to_spatial = function(data, location, folder, file_extension = "gpkg"){
   # data = aggregated_network_links
 
   index_names = names(data)
@@ -15,7 +15,7 @@ export_agg_links_to_spatial = function(data, location, folder){
     purrr::map(~{
       write_sf(
         data[[.x]]
-        ,here::here(location, folder, "spatial_output", stringr::str_glue("{.x}.gpkg"))
+        ,here::here(location, folder, "spatial_output", stringr::str_glue("{.x}.{file_extension}"))
       )
 
     })
