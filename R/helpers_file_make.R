@@ -20,11 +20,9 @@ make_query_and_process_replica_script = function(folder = "code", file_name = NU
             ,"Folder location does not exist, please make it first..." = !exists(folder_location))
 
   file.copy(
-    system.file("scripts", "template_query_and_process_replica.r", package="replicaToolkitR")
+    system.file("scripts", "template_query_and_process_replica_data.R", package="replicaToolkitR")
     ,file_location
   )
 
   file.edit(file_location)
 }
-
-

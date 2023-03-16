@@ -22,10 +22,10 @@
 #' )
 inspect_queried_network = function(location,folder,network_links_object = NULL){
 
-  # location = "data/req_dev"
-  # folder = "data_20230117_092037"
-  # network_object = NULL
-  # auto_save = F
+  location = "data/req_dev"
+  folder = "data_20230207_161636"
+  network_links_object = NULL
+  auto_save = F
 
   message(stringr::str_glue("{gauntlet::make_space('-')}\nW A R N I N G{gauntlet::make_space('-')}\nNetwork links are converted to LINK CENTROIDS and displayed in the map....\nPolylines cannot be filtered using the packages that create this feature{gauntlet::make_space()}"))
 
@@ -43,52 +43,60 @@ inspect_queried_network = function(location,folder,network_links_object = NULL){
   network_raw = network_raw %>%
     mutate(label = stringr::str_glue("Link Type: {highway}<br>Name: {streetName}"))
 
-  pal = leaflet::colorFactor(
-    rev(viridisLite::viridis(length(unique(network_raw$highway)),
-    )),
-    network_raw$highway)
+  map_1 = network_raw %>%
+    mapview(zcol = "highway", burst = T, homebutton = F, lwd = 4)
 
-  network_rawsd = crosstalk::SharedData$new(gauntlet::st_true_midpoint(network_raw))
+  map_1@map = map_1@map %>%
+    leaflet::hideGroup(group = unique(network_raw$highway))
 
-  crosstalk::bscols(
-    widths = c(9, 3, 4, 5)
-    ,leaflet::leaflet(height = 500) %>%
-      leaflet::addTiles() %>%
-      leaflet::addCircleMarkers(data = network_rawsd
-                                ,fillColor = ~pal(network_raw$highway)
-                                ,color = "black"
-                                ,opacity = .8
-                                ,fillOpacity  = .5
-                                ,weight = 1
-                                ,radius = 5
-                                ,label = network_raw$label %>%
-                                  map(htmltools::HTML)
-                                ,labelOptions = leaflet::labelOptions(noHide = F, textOnly = F))
-    ,list(
-      crosstalk::filter_checkbox("network_rawsd", "Select link element:", network_rawsd, ~highway)
-      ,crosstalk::filter_select("network_rawsd_name", "Select specific street:", network_rawsd, ~streetName)
-    )
-    ,reactable::reactable(network_raw %>%
-                            mutate(count = 1) %>%
-                            st_drop_geometry() %>%
-                            gauntlet::count_percent_zscore(grp_c = c(highway), grp_p = c(), rnd = 2, col = count) %>%
-                            arrange(desc(count))
-                          ,filterable = T, highlight = TRUE
-                          ,compact = TRUE, fullWidth = T
-                          ,wrap = FALSE, resizable = TRUE
-                          , height = 400
-                          ,striped = TRUE)
-    ,reactable::reactable(network_raw %>%
-                            mutate(count = 1) %>%
-                            st_drop_geometry() %>%
-                            gauntlet::count_percent_zscore(grp_c = c(streetName), grp_p = c(), rnd = 2, col = count) %>%
-                            arrange(desc(count))
-                          ,filterable = T, highlight = TRUE
-                          ,compact = TRUE, fullWidth = T
-                          ,wrap = FALSE, resizable = TRUE
-                          ,pagination = F, height = 400
-                          ,striped = TRUE)
-  )
+  map_1
+
+  # pal = leaflet::colorFactor(
+  #   rev(viridisLite::viridis(length(unique(network_raw$highway)),
+  #   )),
+  #   network_raw$highway)
+  #
+  # network_rawsd = crosstalk::SharedData$new(gauntlet::st_true_midpoint(network_raw))
+  #
+  # crosstalk::bscols(
+  #   widths = c(9, 3, 4, 5)
+  #   ,leaflet::leaflet(height = 500) %>%
+  #     leaflet::addTiles() %>%
+  #     leaflet::addCircleMarkers(data = network_rawsd
+  #                               ,fillColor = ~pal(network_raw$highway)
+  #                               ,color = "black"
+  #                               ,opacity = .8
+  #                               ,fillOpacity  = .5
+  #                               ,weight = 1
+  #                               ,radius = 5
+  #                               ,label = network_raw$label %>%
+  #                                 map(htmltools::HTML)
+  #                               ,labelOptions = leaflet::labelOptions(noHide = F, textOnly = F))
+  #   ,list(
+  #     crosstalk::filter_checkbox("network_rawsd", "Select link element:", network_rawsd, ~highway)
+  #     ,crosstalk::filter_select("network_rawsd_name", "Select specific street:", network_rawsd, ~streetName)
+  #   )
+  #   ,reactable::reactable(network_raw %>%
+  #                           mutate(count = 1) %>%
+  #                           st_drop_geometry() %>%
+  #                           gauntlet::count_percent_zscore(grp_c = c(highway), grp_p = c(), rnd = 2, col = count) %>%
+  #                           arrange(desc(count))
+  #                         ,filterable = T, highlight = TRUE
+  #                         ,compact = TRUE, fullWidth = T
+  #                         ,wrap = FALSE, resizable = TRUE
+  #                         , height = 400
+  #                         ,striped = TRUE)
+  #   ,reactable::reactable(network_raw %>%
+  #                           mutate(count = 1) %>%
+  #                           st_drop_geometry() %>%
+  #                           gauntlet::count_percent_zscore(grp_c = c(streetName), grp_p = c(), rnd = 2, col = count) %>%
+  #                           arrange(desc(count))
+  #                         ,filterable = T, highlight = TRUE
+  #                         ,compact = TRUE, fullWidth = T
+  #                         ,wrap = FALSE, resizable = TRUE
+  #                         ,pagination = F, height = 400
+  #                         ,striped = TRUE)
+  # )
 }
 
 
