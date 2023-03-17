@@ -303,9 +303,9 @@ Once you create `replica_queried_network_links`, you can inspect it using the he
 > **Note:** This is a standalone HTML widget that will open up in your RStudio viewer, I have embedded in this documnet for clarity.
 
 ```{r fig.width=5, fig.height=4}
-inspect_queried_network(
-  network_links_object = replica_queried_network_links
-)
+# inspect_queried_network(
+#   network_links_object = replica_queried_network_links
+# )
 ```
 
 #### aggregated_network_links
