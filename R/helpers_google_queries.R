@@ -257,8 +257,7 @@ where mode in ({mode_type_pro})
 )
 where
 1 = 1
-and network_link_ids in (select stableEdgeId from {replica_temp_tbl_name(table_network)});")
-      )
+and network_link_ids in (select stableEdgeId from {replica_temp_tbl_name(table_network)});"))
 
       log4r::info(logger,stringr::str_glue("table_trip_network_match: {replica_temp_tbl_name(table_trip_network_match)}"))
     }
@@ -269,7 +268,15 @@ and network_link_ids in (select stableEdgeId from {replica_temp_tbl_name(table_n
     {
       message(stringr::str_glue("{make_space()}\nCreating trips through zone table now...."))
 
-      table_trips_thru_zone = bigrquery::bq_project_query(
+      # table_trips_from_spec_polys = bigrquery::bq_project_query(
+      #   customer_name
+      #   ,stringr::str_glue("select * from `{trip_table}`
+      #   where 1=1
+      #   AND mode in ({mode_type_pro})
+      #   AND ((origin_bgrp in (select raw_id from {replica_temp_tbl_name(table_sa_poly_index)})) OR
+      #                      (destination_bgrp in (select raw_id from {replica_temp_tbl_name(table_sa_poly_index)})))"))
+
+      table_trips_from_spec_polys = bigrquery::bq_project_query(
         customer_name
         ,stringr::str_glue("select *
 ,case
@@ -288,11 +295,11 @@ END as flag_sa_origin
 when destination_bgrp in (select raw_id from {replica_temp_tbl_name(table_sa_poly_index)}) then 'internal'
 else 'external'
 END as flag_sa_destination
-from (select *
 from `{trip_table}`
-where 1 = 1
-and activity_id in (select activity_id from {replica_temp_tbl_name(table_trip_network_match)}))")
-        )
+        where 1=1
+        AND mode in ({mode_type_pro})
+        AND ((origin_bgrp in (select raw_id from {replica_temp_tbl_name(table_sa_poly_index)})) OR
+                           (destination_bgrp in (select raw_id from {replica_temp_tbl_name(table_sa_poly_index)})))"))
 
       log4r::info(logger,stringr::str_glue("table_trips_thru_zone: {replica_temp_tbl_name(table_trips_thru_zone)}"))
 
@@ -303,17 +310,17 @@ and activity_id in (select activity_id from {replica_temp_tbl_name(table_trip_ne
     {
       message(stringr::str_glue("{make_space()}\nOrigin and Destination aggreations commencing...."))
 
-      table_simple_origin_destination = bigrquery::bq_project_query(
-        customer_name
-        ,stringr::str_glue("select mode
-      ,vehicle_type
-      ,origin_poly, flag_sa_origin
-      ,destination_poly, flag_sa_destination
-      ,count(*) as count
-      from {replica_temp_tbl_name(table_trips_thru_zone)}
-      group by mode, vehicle_type
-           ,origin_poly, flag_sa_origin
-      ,destination_poly, flag_sa_destination;"))
+      # table_simple_origin_destination = bigrquery::bq_project_query(
+      #   customer_name
+      #   ,stringr::str_glue("select mode
+      # ,vehicle_type
+      # ,origin_poly, flag_sa_origin
+      # ,destination_poly, flag_sa_destination
+      # ,count(*) as count
+      # from {replica_temp_tbl_name(table_trips_thru_zone)}
+      # group by mode, vehicle_type
+      #      ,origin_poly, flag_sa_origin
+      # ,destination_poly, flag_sa_destination;"))
 
       log4r::info(logger,stringr::str_glue("table_simple_origin_destination: {replica_temp_tbl_name(table_simple_origin_destination)}"))
 
@@ -326,7 +333,7 @@ and activity_id in (select activity_id from {replica_temp_tbl_name(table_trip_ne
     ,network_link_ids_unnested
     ,ROW_NUMBER ()
     OVER (PARTITION BY activity_id) AS index
-    from {replica_temp_tbl_name(table_trips_thru_zone)}
+    from {replica_temp_tbl_name(table_trips_from_spec_polys)}
                           ,unnest(network_link_ids) as network_link_ids_unnested;"))
 
       log4r::info(logger,stringr::str_glue("table_ordered_trip_links: {replica_temp_tbl_name(table_ordered_trip_links)}"))
@@ -535,5 +542,30 @@ where network_link_ids_unnested in
 }
 
 
-
-
+#' @title Easily query and download Replica trip and network data using the extent of a map layer.
+#'
+#' @description This function takes a bounding box and google big query inputs and returns data back to you.
+#' Function currently only works for data using block groups as it is hardcoded in some of the queries. Changes can be made to the query such that other polygon shapes can be used.
+#'
+#' This function creates a log file that records inputs, the query sent to Google, and IDs for each Google table that is created in the multi-step query. All of this information can be accessed at later points in time. Table IDs in log file can be used for auditing purposes or copy and pasted and used in the Google Big Query console GUI.
+#'
+#'
+#' @param bb_network_layer a string of the relative path to the bounding box object detailing extent of road network. This will be used to query trips with. This should be made using sf::st_bbox().
+#' @param bb_sa_layer a string of the relative path to the bounding box object detailing extent of the study area. This will be used to perform aggregations. This should be made using sf::st_bbox(). This input is gernerally larger or identical to [bb_network_layer].
+#' @param query_links vector of character strings detailing which type of network links to use in the query. These will be used 1) to depict any network link volume graphics with 2) to filter trips with. For the latter, any trip that uses these road within the study area will be including in any reporting.
+#' @param customer_name character string indicating Google account that will be billed
+#' @param trip_table character string indicating which trip table should be queried - location, year, quarter, day, etc should match network_table. Please include entire table name as well '[customer_name].[trip_table]'
+#' @param network_table character string indicating which trip table should be queried - location, year, quarter, day, etc should match trip_table. Please include entire table name as well '[customer_name].[network_table]'
+#' @param file_destination character string indicating a directory where you want log files and data to be saved to. A new folder containg function outputs will be made there named using the convention 'data_[sys.datetime]'
+#' @param query_network boolean (T/F) indicating if the network should be downloaded at function runtime. Default is 'T'. It can be beneficial to wait and see how many links will be downloaded before netowrk is downloaded, it can also be downloaded latter as log files record big query table IDs.
+#' @param max_record integer indicating max number of records will be written out for each data acquired by Google - default is 1000, use Inf if you do not want to limit download. Useful if you want to check the data out first before downloading large amounts of data. Google tables are still made in full so they can be manually acquired without rerunning this function - see log files.
+#'
+#' @return does not return any objects in R. Function creates a log file and data to folder destination in CSV format.
+#' @export
+#'
+#' @examples
+#'
+#' #none
+#'
+#'
+#'
