@@ -1,47 +1,18 @@
-
-library(crosstalk)
-library(data.table)
-library(dplyr)
-library(forcats)
-library(gauntlet)
-library(here)
-library(leafem)
-library(leaflet)
-library(leaflet.extras2)
-library(log4r)
-library(magrittr)
-library(mapview)
-library(purrr)
-library(reactable)
-library(readr)
-library(sf)
-library(sfhotspot)
-library(SpatialKDE)
-library(stringr)
-library(tigris)
-library(tidyr)
-library(wellknown)
-
-library(replicaToolkitR)
-mapviewOptions(homebutton = F)
-
-
-robust_prompt_used = function(prompt) {
-  message(str_glue("Do you want to {prompt}? Y/N"))
-  response <- toupper(readline())
-
-  if (response == "Y") {
-    message(str_glue('You elected to {prompt}...'))
-    return(response == "Y")
-  } else if (response == "N") {
-    message(str_glue('You did not elect to {prompt}...'))
-    return(response == "Y")
-  } else {
-    message("Invalid response. Please enter Y or N.")
-    robust_prompt_used(prompt = prompt)
-  }
-}
-
+#' Prompt User for Jitter Factor
+#'
+#' This function prompts the user to enter a jitter factor value between 0.00001
+#' and 0.01. The function accepts the user's input and handles invalid input by
+#' prompting the user again.
+#'
+#' @return A numeric value indicating the jitter factor entered by the user.
+#'
+#' @examples
+#' prompt_jitter_factor()
+#'
+#' @export
+#'
+#' @keywords prompt, jitter factor, user input
+#'
 prompt_jitter_factor <- function() {
   while(TRUE) {
     jitter <- as.numeric(readline(prompt = "Provide jitter value: "))
@@ -55,25 +26,34 @@ prompt_jitter_factor <- function() {
 }
 
 
-flatten_named_list <- function(lst, parent_name = "") {
-  # If input is not a list, return a data frame with the single value
-  if (!is.list(lst)) {
-    return(data.frame(name = parent_name, value = lst))
-  }
-  # If input is a list, recursively flatten its elements and combine into a data frame
-  else {
-    child_dfs <- lapply(names(lst), function(name) {
-      child_name <- if (parent_name == "") name else paste0(parent_name, ".", name)
-      flatten_named_list(lst[[name]], child_name)
-    })
-    do.call(rbind, child_dfs)
-  }
-}
-
-index_network_name_strip = c("Street", "Road", "Boulevard") %>%
-  paste0(collapse = "|")
-
-
+#' Merge Columns and Create Movement Descriptions
+#'
+#' This function takes a data frame as input and merges all columns whose names
+#' start with "seq_" with a separate table called "table_network_data_simp".
+#' For each merged column, it also creates a new column with a concatenated
+#' string of the corresponding "streetName" values from the "table_network_data_simp"
+#' table. Finally, the function creates two new columns in the input data frame:
+#' "mvmnt_desc" and "mvmnt_desc_fl". The "mvmnt_desc" column contains a concatenated
+#' string of all street names for each row, and the "mvmnt_desc_fl" column
+#' contains a concatenated string of only the first and last street names for each row.
+#'
+#' @param data A data frame to be processed.
+#'
+#' @return A processed data frame with additional "mvmnt_desc" and "mvmnt_desc_fl"
+#' columns.
+#'
+#' @examples
+#' my_data <- data.frame(seq_1 = c(1,2,3), seq_2 = c(4,5,6), seq_3 = c(7,8,9),
+#'                       stableEdgeId = c(1,2,3), streetName = c("First Street",
+#'                       "Second Street", "Third Street"))
+#' merge_cols(my_data)
+#'
+#' @export
+#'
+#' @import dplyr
+#' @importFrom glue str_glue
+#' @importFrom rlang parse_expr
+#'
 merge_cols <- function(data) {
   tmp_colnames = colnames(select(data, starts_with("seq_")))
 
@@ -99,7 +79,24 @@ merge_cols <- function(data) {
   return(data)
 }
 
-
+#' Bind columns with a specified prefix into a single data frame
+#'
+#' Given a data frame, this function binds together all columns with a specified
+#' prefix, while maintaining their order, and returns the resulting data frame.
+#'
+#' @param data The input data frame.
+#' @param prefix A character string representing the prefix of the columns to be bound.
+#'               Default is "seq_".
+#'
+#' @return A data frame consisting of the columns with the specified prefix bound together.
+#'
+#' @examples
+#' data <- data.frame(seq_1_link_id = 1, seq_1_streetName = "A",
+#'                    seq_2_link_id = 2, seq_2_streetName = "B",
+#'                    count = 5)
+#' bind_cols_prefix(data)
+#'
+#' @export
 bind_cols_prefix = function(data, prefix = "seq_"){
 
   tmp_colnames = colnames(select(data, starts_with(prefix))) %>%
@@ -123,8 +120,29 @@ bind_cols_prefix = function(data, prefix = "seq_"){
   return(tmp_object)
 }
 
-
-view_replica_network = function(network_table
+#' Query Replica's roadway network given a user defined study area
+#'
+#' This function prompts the user to draw a study area using the \code{mapedit::drawFeatures()} function, and returns a data frame of the roadway network data that intersects with the study area.
+#'
+#' @param network_table The name of the table containing the roadway network data to be queried.
+#' @param customer_name The name of the customer whose project contains the \code{network_table} table.
+#'
+#' @return A data frame of the roadway network data that intersects with the study area.
+#'
+#' @import mapedit
+#' @importFrom stringr str_glue
+#' @importFrom wellknown sf_convert
+#' @importFrom bigrquery bq_project_query bq_table_nrow bq_table_download
+#' @importFrom dplyr arrange
+#' @importFrom rlang parse_expr
+#' @importFrom sf st_transform st_union
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' view_replica_study_area_network("network_table", "customer_name")
+#' }
+view_replica_study_area_network = function(network_table
                                 ,customer_name){
   message("Please draw a study area that will be used to query Replica's roadway network...")
   message("Draw it as small and parsimonious as possible")
@@ -156,14 +174,23 @@ view_replica_network = function(network_table
   return(table_network_data)
 }
 
-mvmnt_df = data.frame(
-  mvmnt_desc = c("int_15th_to_onramp205"
-                 ,"int_15th_to_99E"
-                 ,"into_99E_14th_main"
-                 ,"int_main_14th_99E")
-  ,ttl_seq = c(2, 2, 3, 3)
-)
 
+#' Create a string of repeated characters for indentation purposes
+#'
+#' This function creates a string of a specified length containing a specified character. It is commonly used to create indentation in printed output.
+#'
+#' @param with A character to repeat.
+#' @param n An integer specifying the number of times to repeat the character.
+#' @param c A string to separate each repeated character. Defaults to an empty string.
+#' @param last A boolean indicating whether the resulting string should end with a newline character. Defaults to TRUE.
+#'
+#' @return A string of repeated characters separated by the specified separator string.
+#'
+#' @examples
+#' make_space_2(n = 5, with = " ")
+#' make_space_2(n = 5, with = "-", c = "", last = FALSE)
+#'
+#' @export
 make_space_2 = function(with = "+", n = 50, c = "", last = T){
   if (last){
     paste0(rep(with, n), collapse = c) %>% paste0(., "\n")
@@ -179,26 +206,48 @@ make_space_2 = function(with = "+", n = 50, c = "", last = T){
 # jitter_factor = 0.003
 
 
-
-#' Download and visualize a map of the selected study area
+#' Query movement patterns for a replica network
 #'
-#' @param network_table Name of the network table in the bigquery project
-#' @param trip_table Name of the trip table in the bigquery project
-#' @param mode_type Character vector specifying the mode types to include in the analysis
-#' @param customer_name Name of the bigquery project
-#' @param jitter_factor A factor that determines how much the network data is jittered to improve visualization
-#' @param mvmnt_df A dataframe containing movements to get data for
-#' @return A mapview object showing the network data in the selected study area
+#' This function queries movement patterns  replica network using a specified \code{network_table},
+#' \code{trip_table}, \code{mode_type}, \code{customer_name}, and \code{jitter_factor}. It uses
+#' the \code{view_replica_network} function to retrieve the network data, applies a jitter factor to
+#' display the network, prompts the user to select links for each movement, performs a table query, and
+#' performs quality control and processing operations.
+#'
+#' @param network_table A character string specifying the name of the table containing network data
+#' @param trip_table A character string specifying the name of the table containing trip data
+#' @param mode_type A character string specifying the type of mode to query
+#' @param customer_name A character string specifying the name of the customer
+#' @param jitter_factor A numeric value specifying the amount of jitter to apply to the network display
+#'
+#' @return A processed data frame of movement patterns
 #'
 #' @examples
-download_and_visualize_map("replica-customer.northwest.northwest_2021_Q4_network_segments",
-                           "replica-customer.northwest.northwest_2021_Q4_thursday_trip",
-                           c('PRIVATE_AUTO'),
-                           "replica-customer",
-                           0.003, mvmnt_df
-)
-download_and_visualize_map <- function(network_table, trip_table, mode_type, customer_name, jitter_factor) {
+#' query_replica_mvmnt_patterns(network_table = "network_data", trip_table = "trip_data",
+#'                              mode_type = "PRIVATE_AUTO", customer_name = "ACME",
+#'                              jitter_factor = 0.05)
+#'
+#' @importFrom dplyr %>%
+#' @importFrom sf st_as_sf st_jitter selectFeatures pull filter setNames
+#' @importFrom mapview mapedit
+#' @importFrom glue str_glue
+#' @importFrom hcl.colors hcl.colors
+#' @importFrom tidyr separate flatten
+#' @importFrom magrittr %>%
+#' @importFrom purrr pmap reduce
+#' @importFrom bigrquery bq_project_query bq_table_nrow bq_table_download
+#' @importFrom stringr str_extract_all
+#' @importFrom stats runif
+#' @importFrom utils readRDS
+#' @importFrom here here
+#' @importFrom tibble as_tibble
+#' @importFrom lubridate parse_date_time
+query_replica_mvmnt_patterns <- function(network_table, trip_table, mode_type, customer_name, jitter_factor) {
   mode_type_pro = paste0("'", mode_type, "'", collapse = ", ")
+
+
+  index_network_name_strip = c("Street", "Road", "Boulevard") %>%
+    paste0(collapse = "|")
 
   table_network_data = view_replica_network(
     network_table = network_table
@@ -388,7 +437,7 @@ turning_links = bigrquery::bq_table_download(table_pro
                 ,by.x = "stableEdgeId", by.y = "link_id") %>%
           mutate(label = str_glue("<b>{mvmnt_desc_fl}</b><br>Full Link List: {mvmnt_desc}<br>Count: {count}<br>Street Name: {streetName}<br>Link Order: {order}")
                  ,order = as.factor(order)) %>%
-          mutate(glag_grp = str_glue("{mvmnt_desc}_{count}")) %>%
+          mutate(flag_grp = str_glue("{mvmnt_desc}_{count}")) %>%
           st_as_sf(wkt = "geometry", crs = 4326) %>%
           arrange(mvmnt_desc, count, order)
       }, .progress = "Perfroming intersection quality checks")
@@ -397,217 +446,36 @@ turning_links = bigrquery::bq_table_download(table_pro
   return(processed_mvmnt_links)
 }
 
-
-
-
-
-
-
-
-map = unique(yolo_2$glag_grp) %>%
-  map(~{
-    yolo_2 %>%
-      filter(glag_grp  == .x) %>%
-      mutate(order = as.factor(order)) %>%
-      mapview(zcol = "order", layer.name = .x
-              ,label = "label"
-              ,color = hcl.colors(5, palette = "viridis")
-      )
-  }) %>%
-  reduce(`+`)
-
-
-
-
-
-
-# items = turning_links %>%
-#   filter(network_links == "8017584530681808495"
-#          ,seq_ord == 1) %>%  pull(activity_id)
-#
-# item_1 = turning_links %>%
-#   filter(network_links == "8017584530681808495"
-#          ,seq_ord == 1) %>%  pull(activity_id)
-#
-# item_2 = turning_links %>%
-#   filter((network_links == "16808743366416082416" |
-#             network_links == "2795330410658213329")
-#          ,seq_ord == 2) %>%  pull(activity_id)
-#
-# intersect(items, item_2)
-#
-# here::here("req_portland_205/data", 'turning_links_20230419.csv') %>%
-#   write_csv(turning_links, .)
-
-
-
-
-
-
-
-
-tl = here::here("req_portland_205/data", 'turning_links_20230419.csv') %>%
-  fread() %>%
-  mutate(seq_ord = str_glue("seq_{seq_ord}_link_id"))
-
-# table_network_data %>%  saveRDS(here::here("req_portland_205/data", 'table_network_data.rds'))
-
-# table_network_data = readRDS(here::here("req_portland_205/data", 'table_network_data.rds'))
-
-table_network_data_simp = table_network_data %>%
-  select(stableEdgeId, streetName) %>%
-  mutate(streetName = replace_na(streetName, "NoName") %>%
-           str_remove_all(index_network_name_strip) %>%
-           str_trim())
-
-table_network_data %>%
-  filter(stableEdgeId == "8017584530681808495")
-
-link_sub %>%
-  filter(value == "8017584530681808495")
-
-tl %>%
-  filter(network_links == "8017584530681808495")
-
-tl_sub %>%
-  filter(network_links == "8017584530681808495") %>%
-  count(network_links, act_link_count, seq_ord_rltv)
-
-tl_sub %>%
-  filter(network_links == "8017584530681808495") %>%
-  filter(act_link_count == 2)
-
-tl_sub %>%
-  filter(activity_id == "12043381266702287857" )
-
-tl_sub %>%
-  ungroup() %>%
-  filter(network_links == "8017584530681808495"
-         ,seq_ord_rltv == 1
-         ,act_link_count == 3) %>%
-  pull(activity_id)
-arrange(activity_id, seq_ord_rltv) %>%
-  head(1000) %>%  View()
-
-
-x = unique(link_selections_df$intersection)[3]
-
-
-tmp_tl_agg_comb_sf %>%
-  mutate(order = as.factor(order)) %>%
-  st_jitter(.0001) %>%
-  mapview(zcol = "order"
-          ,label = "label"
-          ,color = hcl.colors(5, palette = "viridis"))
-
-
-yolo_2 = yolo %>%
-  mutate(glag_grp = str_glue("{mvmnt_desc}_{count}"))
-
-map = unique(yolo_2$glag_grp) %>%
-  map(~{
-    yolo_2 %>%
-      filter(glag_grp  == .x) %>%
-      mutate(order = as.factor(order)) %>%
-      mapview(zcol = "order", layer.name = .x
-              ,label = "label"
-              ,color = hcl.colors(5, palette = "viridis")
-      )
-  }) %>%
-  reduce(`+`)
-
-map@map %>%  htmlwidgets::saveWidget(here::here("req_portland_205/data", 'oregon_city_turn_counts_2023.html'))
-
-mapview(tmp_tl_agg_comb_sf
-        ,color = hcl.colors(5, palette = "viridis")
-        ,zcol = "order")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# unique(tl$act_link_count) %>%
-combined_link_mvmnts = c(4, 5) %>%
-  map_df(~{
-    tmp_tl = tl %>%
-      filter(act_link_count == .x) %>%
-      arrange(activity_id, seq_ord) %>%
-      select(activity_id, mode, network_links, seq_ord)
-
-    index_seq = unique(tmp_tl$seq_ord) %>%
-      sort()
-
-    tmp_tl_agg = tmp_tl %>%
-      pivot_wider(names_from = "seq_ord", values_from = "network_links") %>%
-      mutate(count = 1) %>%
-      group_by(mode, across(starts_with("seq_"))) %>%
-      summarise(count = sum(count)) %>%
-      ungroup()
-
-    tmp_tl_agg_comb_sf = tmp_tl_agg %>%
-      merge_cols() %>%
-      bind_cols_prefix() %>%
-      merge(table_network_data %>%
-              select(stableEdgeId, geometry), .
-            ,by.x = "stableEdgeId", by.y = "link_id") %>%
-      st_as_sf(wkt = "geometry", crs = 4326) %>%
-      arrange(mvmnt_desc, order)
-
-  })
-
-
-unique(combined_link_mvmnts$mvmnt_desc ) %>%
-  map(~{
-    combined_link_mvmnts %>%
-      filter(mvmnt_desc  == .x) %>%
-      mutate(order = as.factor(order)) %>%
-      mapview(zcol = "order", layer.name = .x)
-  }) %>%
-  reduce(`+`)
-
-
-
-
-
-
-
-
-
-
-
-
-
-x <- "MULTILINESTRING ((-122.6009 45.36302, -122.6015 45.3633), (-122.6015 45.36344, -122.6018 45.36309, -122.6022 45.36267))"
-multilinestring(x)
-
-
-check = tmp_tl_agg_comb %>%
-  mutate(test = str_glue("({seq_1_geometry}, {seq_2_geometry})") %>%
-           str_remove_all("LINESTRING") %>%
-           paste0("MULTILINESTRING", .)) %>%
-  st_as_sf(wkt = test, crs = 4326)
-
-
-
-
-
-
-
-
+#' Maps discrete movement patterns from Replica
+#'
+#' This function takes a data frame and creates a map using the mapview package.
+#' The map shows the distribution of the 'order' column values, grouped by the 'flag_grp' column values.
+#'
+#' @param data a data frame
+#'
+#' @return A map object created using mapview package
+#'
+#' @import dplyr
+#' @import mapview
+#' @import magritter
+#'
+#' @examples
+#' order_map(data)
+#'
+#' @export
+order_map <- function(data) {
+   unique(data$flag_grp) %>%
+    map(~{
+      data %>%
+        filter(flag_grp  == .x) %>%
+        mutate(order = as.factor(order)) %>%
+        mapview(zcol = "order", layer.name = .x
+                ,label = "label"
+                ,color = hcl.colors(5, palette = "viridis")
+        )
+    }) %>%
+    reduce(`+`)
+
+}
 
 
