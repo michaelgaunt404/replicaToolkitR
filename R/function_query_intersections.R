@@ -144,9 +144,9 @@ bind_cols_prefix = function(data, prefix = "seq_"){
 #' }
 view_replica_study_area_network = function(network_table
                                 ,customer_name){
-  message("Please draw a study area that will be used to query Replica's roadway network...")
+  message(str_glue("{gauntlet::strg_make_space_2()}Please draw a study area that will be used to query Replica's roadway network..."))
   message("Draw it as small and parsimonious as possible")
-  message("You can draw mulitple, discrete objects if you wish")
+  message(str_glue("You can draw mulitple, discrete objects if you wish{gauntlet::strg_make_space_2(last = F)}"))
 
   study_area = mapedit::drawFeatures() %>% st_transform(4326)
   study_area_wkt = wellknown::sf_convert(st_union(study_area))
@@ -171,32 +171,10 @@ view_replica_study_area_network = function(network_table
   table_network_data = bigrquery::bq_table_download(table_network) %>%
     arrange(stableEdgeId)
 
-  return(table_network_data)
-}
-
-
-#' Create a string of repeated characters for indentation purposes
-#'
-#' This function creates a string of a specified length containing a specified character. It is commonly used to create indentation in printed output.
-#'
-#' @param with A character to repeat.
-#' @param n An integer specifying the number of times to repeat the character.
-#' @param c A string to separate each repeated character. Defaults to an empty string.
-#' @param last A boolean indicating whether the resulting string should end with a newline character. Defaults to TRUE.
-#'
-#' @return A string of repeated characters separated by the specified separator string.
-#'
-#' @examples
-#' make_space_2(n = 5, with = " ")
-#' make_space_2(n = 5, with = "-", c = "", last = FALSE)
-#'
-#' @export
-make_space_2 = function(with = "+", n = 50, c = "", last = T){
-  if (last){
-    paste0(rep(with, n), collapse = c) %>% paste0(., "\n")
-  } else {
-    paste0(rep(with, n), collapse = c) %>% paste0("\n", .)
-  }
+  return(
+    list(table_network = table_network
+         ,table_network_data = table_network_data)
+  )
 }
 
 # network_table = "replica-customer.northwest.northwest_2021_Q4_network_segments"
@@ -204,7 +182,7 @@ make_space_2 = function(with = "+", n = 50, c = "", last = T){
 # mode_type = c('PRIVATE_AUTO')
 # customer_name = "replica-customer"
 # jitter_factor = 0.003
-
+# user_provided_save_location = "data/req_zz"
 
 #' Query movement patterns for a replica network
 #'
@@ -219,6 +197,7 @@ make_space_2 = function(with = "+", n = 50, c = "", last = T){
 #' @param mode_type A character string specifying the type of mode to query
 #' @param customer_name A character string specifying the name of the customer
 #' @param jitter_factor A numeric value specifying the amount of jitter to apply to the network display
+#' @param mvmnt_df A dataframe describing the turning movements the query will acquire data for and the number of discrete links needed for each movement.
 #'
 #' @return A processed data frame of movement patterns
 #'
@@ -242,20 +221,80 @@ make_space_2 = function(with = "+", n = 50, c = "", last = T){
 #' @importFrom here here
 #' @importFrom tibble as_tibble
 #' @importFrom lubridate parse_date_time
-query_replica_mvmnt_patterns <- function(network_table, trip_table, mode_type, customer_name, jitter_factor) {
+query_replica_mvmnt_patterns <- function(network_table, trip_table
+                                         ,mode_type, customer_name, jitter_factor
+                                         ,mvmnt_df
+                                         ,save_location) {
+  mapviewOptions(homebutton = F)
+  message("Starting query to get movement pattern data from Replica")
+
   mode_type_pro = paste0("'", mode_type, "'", collapse = ", ")
 
+  {
+    # network_table = "replica-customer.northwest.northwest_2021_Q4_network_segments"
+    # trip_table = "replica-customer.northwest.northwest_2021_Q4_thursday_trip"
+    # mode_type = c('PRIVATE_AUTO')
+    # customer_name = "replica-customer"
+    # jitter_factor = 0.003
+    # save_location = "data/req_zz"
+    # mvmnt_df = data.frame(mvmnt_desc = c("int_15th_to_onramp205","int_15th_to_99E"
+    #                                        #,"into_99E_14th_main","int_main_14th_99E"
+    #                                        )
+    #                       ,ttl_seq = c(2, 2))
+  }
 
-  index_network_name_strip = c("Street", "Road", "Boulevard") %>%
+  {
+    check_dir_path(save_location)
+    directory_path = make_dir_prfx_date(save_location, "mvmnt_data_")
+    logger = log4r::logger("DEBUG"
+                           ,appenders = log4r::file_appender(
+                             here::here(directory_path, "log_file.txt")))
+    gauntlet::log_and_info("Directories and log file created", logger)
+    gauntlet::log_and_info(
+      list(
+        network_table = network_table
+        ,trip_table = trip_table
+        ,mode_type = mode_type
+        ,customer_name = customer_name
+        ,jitter_factor = jitter_factor
+        ,user_provided_save_location = save_location
+        ,directory_path = directory_path) %>%
+        print_named_list() %>%
+        paste0("\n", gauntlet::strg_make_space_2(), "Recording user inputs....\n", ., gauntlet::strg_make_space_2(last = T))
+      ,logger
+    )
+  }
+
+  index_network_name_strip = c("Drive", "Boulevard", 'Broadway', 'Center', 'Circle', 'Lane', 'Loop'
+                               ,'Park', 'Parkway', 'Place', 'Route', 'Road', 'Square', 'Street', 'View', 'Way') %>%
     paste0(collapse = "|")
 
-  table_network_data = view_replica_network(
+  table_network_data = view_replica_study_area_network(
     network_table = network_table
     ,customer_name = customer_name)
 
-  table_network_data_sf =  table_network_data %>%
+  info(logger, "User elected to acquire links... successful")
+  info(logger, str_glue("table_network: {replica_temp_tbl_name(table_network_data$table_network)}"))
+
+  table_network_data_sf =  table_network_data[[2]] %>%
     st_as_sf(wkt = "geometry", crs = 4326)
 
+  table_network_data_simp =  table_network_data_sf %>%
+    st_drop_geometry() %>%
+    select(stableEdgeId, streetName) %>%
+    mutate(steetName = str_remove(streetName, index_network_name_strip) %>%
+             str_trim())
+
+  check_save_net = robust_prompt_used("to save the network at this point")
+  if (check_save_net){
+    write_sf(table_network_data_sf, here::here(directory_path, "network_sf.gpkg"))
+    message("Network saved..")
+  } else {
+    message("Table network has been saved to log file\nif you want to download the network at a later point in time..")
+  }
+
+  message(str_glue("{gauntlet::strg_make_space_2()}Starting link selection process..."))
+  log4r::info(logger, "started link selection")
   message(str_glue("The network you queried will be displayed with a {jitter_factor} jitter factor..."))
 
   table_network_data_sf_jit = table_network_data_sf %>%
@@ -263,21 +302,21 @@ query_replica_mvmnt_patterns <- function(network_table, trip_table, mode_type, c
 
   mapview(table_network_data_sf_jit, zcol = "flags", burst = T)
 
-  rejitter <- TRUE
+  rejitter = TRUE
   while (rejitter) {
-    jitter_decision = robust_prompt_used("change the jitter factor and reijitter")
+    rejitter = robust_prompt_used("change the jitter factor and reijitter")
 
-    if (tolower(jitter_decision) == "t") {
+    if (rejitter) {
       jitter_factor = prompt_jitter_factor()
+
       table_network_data_sf_jit = table_network_data_sf %>%
         st_jitter(factor = jitter_factor)
 
-      mapview(table_network_data_sf_jit)
+      mapview(table_network_data_sf_jit, zcol = "flags", burst = T) %>%  print()
     }
   }
 
 
-  #sec: get and process links
   {
     link_selections = list(
       mvmnt_df$mvmnt_desc
@@ -300,25 +339,19 @@ query_replica_mvmnt_patterns <- function(network_table, trip_table, mode_type, c
         return(tmp_list_named)
       })
 
-    #manual functions
-    {
-      #manual save out and read in
-      # link_selections %>%  saveRDS(here::here("req_portland_205/data", 'link_selections.rds'))
-      # link_selections = readRDS(here::here("req_portland_205/data", 'link_selections.rds'))
-      }
-
     link_selections_df = link_selections %>%
       flatten() %>%
       flatten_named_list() %>%
       tidyr::separate(col = "name", into = c("intersection", "sequence"), sep = "\\.")
 
+    write_csv(link_selections_df, here::here(directory_path, 'link_selections.csv'))
+
     link_selections_index_pro = paste0("'", sort(unique(link_selections_df$value)), "'", collapse = ", ")
 
-
-    table_network_data_sf %>%
-      filter(stableEdgeId %in% unique(link_selections_df$value)) %>%
-      st_as_sf(wkt = "geometry", crs = 4326) %>%
-      mapview()
+    # table_network_data_sf %>%
+    #   filter(stableEdgeId %in% unique(link_selections_df$value)) %>%
+    #   st_as_sf(wkt = "geometry", crs = 4326) %>%
+    #   mapview()
 
     review_map = unique(link_selections_df$intersection) %>%
       map(~{
@@ -337,11 +370,12 @@ query_replica_mvmnt_patterns <- function(network_table, trip_table, mode_type, c
 
     #need to have a check here if we want to reselect one of them by name
 
+    message(str_glue("Completed link selection{gauntlet::strg_make_space_2(last  = F)}"))
   }
 
   #sec: table query
   {
-    #should be messages about what is going in
+    message(str_glue("{gauntlet::strg_make_space_2()}Starting data acquisition process....."))
 
     table = bigrquery::bq_project_query(
       customer_name
@@ -356,8 +390,6 @@ and mode in ('PRIVATE_AUTO')
 where 1 = 1
 and network_links in ({link_selections_index_pro});"))
 
-bigrquery::bq_table_nrow(table)
-
 table_pro = bigrquery::bq_project_query(
   customer_name
   ,stringr::str_glue("select
@@ -369,13 +401,23 @@ activity_id,mode, network_links,vehicle_type, link_ord
 from {replica_temp_tbl_name(table)}
 order by activity_id, link_ord;"))
 
+info(logger, str_glue("queired_mvmnt_trips: {replica_temp_tbl_name(table_pro)}"))
+
+message(str_glue("Query resulted in {bigrquery::bq_table_nrow(table_pro)} through identified movement patterns"))
+
+check_continue = robust_prompt_used("conntinue and download")
+stopifnot("Aborted" = check_continue)
+
 turning_links = bigrquery::bq_table_download(table_pro
                                              ,page_size = 1000,
                                              quiet = F)
+
   }
 
   #sec: perform QC and processing operation
   {
+    message(str_glue("{gauntlet::strg_make_space_2()}Starting data V&V process....."))
+
     processed_mvmnt_links = unique(link_selections_df$intersection) %>%
       map_df(~{
         link_sub = link_selections_df %>%
@@ -383,7 +425,7 @@ turning_links = bigrquery::bq_table_download(table_pro
 
         index_max_seq = max(parse_number(link_sub$sequence))
 
-        tl_sub = tl %>%
+        tl_sub = turning_links %>%
           filter(network_links %in% link_sub$value) %>%
           arrange(activity_id, seq_ord ) %>%
           group_by(activity_id) %>%
@@ -402,7 +444,7 @@ turning_links = bigrquery::bq_table_download(table_pro
                                            filter(parse_number(sequence) == .x) %>%
                                            pull(value))) %>%
               pull(activity_id)
-          })
+          }, .progress = "Checking link sequences")
 
         index_activity = index_order_checks[[1]]
 
@@ -419,8 +461,7 @@ turning_links = bigrquery::bq_table_download(table_pro
           arrange(activity_id, seq_ord) %>%
           select(activity_id, mode, network_links, seq_ord)
 
-        index_seq = unique(tmp_tl$seq_ord) %>%
-          sort()
+        index_seq = unique(tmp_tl$seq_ord) %>% sort()
 
         tmp_tl_agg = tmp_tl %>%
           pivot_wider(names_from = "seq_ord", values_from = "network_links") %>%
@@ -432,7 +473,7 @@ turning_links = bigrquery::bq_table_download(table_pro
         tmp_tl_agg_comb_sf = tmp_tl_agg %>%
           merge_cols() %>%
           bind_cols_prefix() %>%
-          merge(table_network_data %>%
+          merge(table_network_data[[2]] %>%
                   select(stableEdgeId, geometry), .
                 ,by.x = "stableEdgeId", by.y = "link_id") %>%
           mutate(label = str_glue("<b>{mvmnt_desc_fl}</b><br>Full Link List: {mvmnt_desc}<br>Count: {count}<br>Street Name: {streetName}<br>Link Order: {order}")
@@ -442,6 +483,9 @@ turning_links = bigrquery::bq_table_download(table_pro
           arrange(mvmnt_desc, count, order)
       }, .progress = "Perfroming intersection quality checks")
   }
+
+
+  write_sf(processed_mvmnt_links, here::here(directory_location, 'processed_mvmnt_links.gpkg'))
 
   return(processed_mvmnt_links)
 }
@@ -460,10 +504,10 @@ turning_links = bigrquery::bq_table_download(table_pro
 #' @import magritter
 #'
 #' @examples
-#' order_map(data)
+#' map_replica_movements(data)
 #'
 #' @export
-order_map <- function(data) {
+map_replica_movements <- function(data) {
    unique(data$flag_grp) %>%
     map(~{
       data %>%

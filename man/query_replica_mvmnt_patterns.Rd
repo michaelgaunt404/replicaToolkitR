@@ -9,7 +9,8 @@ query_replica_mvmnt_patterns(
   trip_table,
   mode_type,
   customer_name,
-  jitter_factor
+  jitter_factor,
+  mvmnt_df
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ query_replica_mvmnt_patterns(
 \item{customer_name}{A character string specifying the name of the customer}
 
 \item{jitter_factor}{A numeric value specifying the amount of jitter to apply to the network display}
+
+\item{mvmnt_df}{A dataframe describing the turning movements the query will acquire data for and the number of discrete links needed for each movement.}
 }
 \value{
 A processed data frame of movement patterns
