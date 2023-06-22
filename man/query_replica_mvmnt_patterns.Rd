@@ -10,7 +10,8 @@ query_replica_mvmnt_patterns(
   mode_type,
   customer_name,
   jitter_factor,
-  mvmnt_df
+  mvmnt_df,
+  save_location
 )
 }
 \arguments{
