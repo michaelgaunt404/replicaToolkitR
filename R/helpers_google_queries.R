@@ -83,7 +83,7 @@ query_network_trip_using_bbox = function(
 
   #init_error_logging_and_setup
   {
-    query_start = gauntlet::clean_datetime()
+    query_start = gauntlet::strg_clean_datetime()
     folder = here::here(file_destination, stringr::str_glue("data_{query_start}"))
     stopifnot("Folder location exists already, stop and prevent overwriting files" = (dir.exists(folder) != T))
     dir.create(folder)
@@ -158,56 +158,56 @@ where highway in ({links_pro})
 where flag_contains = TRUE")
       )
 
-      temp_query = stringr::str_glue("SELECT highway, count(*) as count
+temp_query = stringr::str_glue("SELECT highway, count(*) as count
                       from {replica_temp_tbl_name(table_network)}
                       group by highway
                       order by count;")
 
-      table_network_link_count = bigrquery::bq_project_query(
-        customer_name
-        ,temp_query
-      )
+table_network_link_count = bigrquery::bq_project_query(
+  customer_name
+  ,temp_query
+)
 
-      project_dataset = stringr::str_glue("{table_network_link_count$project}.{table_network_link_count$dataset}")
+project_dataset = stringr::str_glue("{table_network_link_count$project}.{table_network_link_count$dataset}")
 
-      log4r::info(logger, stringr::str_glue("Replica project and dataset are: {project_dataset}"))
+log4r::info(logger, stringr::str_glue("Replica project and dataset are: {project_dataset}"))
 
-      highway_counts = bigrquery::bq_table_download(table_network_link_count)
+highway_counts = bigrquery::bq_table_download(table_network_link_count)
 
-      if ((nrow(highway_counts) == 0)){
-        mes_fatal = "Number of returned links was zero\n...change bounding box\n...stopping...."
-        log4r::fatal(logger, mes_fatal)
-        stopifnot("Number of returned links was zero\n...change bounding box\n...stopping...." = F)
-      } else {
-        str_glue("{make_space()}\nNon-empty data returned, Good\nQuery continued...\nIn total {sum(highway_counts$count)} links\n{str_glue('-{highway_counts$count} ({100*gauntlet::dgt2(highway_counts$count/sum({highway_counts$count}))})% {highway_counts$highway}') %>%
+if ((nrow(highway_counts) == 0)){
+  mes_fatal = "Number of returned links was zero\n...change bounding box\n...stopping...."
+  log4r::fatal(logger, mes_fatal)
+  stopifnot("Number of returned links was zero\n...change bounding box\n...stopping...." = F)
+} else {
+  str_glue("{make_space()}\nNon-empty data returned, Good\nQuery continued...\nIn total {sum(highway_counts$count)} links\n{str_glue('-{highway_counts$count} ({100*gauntlet::dgt2(highway_counts$count/sum({highway_counts$count}))})% {highway_counts$highway}') %>%
                 paste0(collapse = '\n')}") %>%
-          gauntlet::log_and_info(., logger)
+    gauntlet::log_and_info(., logger)
 
-        index_empty_highways = query_links[-which(query_links %in% highway_counts$highway)]
+  index_empty_highways = query_links[-which(query_links %in% highway_counts$highway)]
 
-        if (length(index_empty_highways) == 0){
-          gauntlet::log_and_info(stringr::str_glue("All requested link types returned with some number of links\nnone empty.... GOOD"),logger)
-        } else {
-          gauntlet::log_and_warn(
-            str_glue("{make_space()}\nThe following link types were requested but not found in bounding box:\n{paste0(index_empty_highways, collapse = '\n')}"),logger)
-        }
-      }
+  if (length(index_empty_highways) == 0){
+    gauntlet::log_and_info(stringr::str_glue("All requested link types returned with some number of links\nnone empty.... GOOD"),logger)
+  } else {
+    gauntlet::log_and_warn(
+      str_glue("{make_space()}\nThe following link types were requested but not found in bounding box:\n{paste0(index_empty_highways, collapse = '\n')}"),logger)
+  }
+}
 
-      log4r::info(logger,stringr::str_glue("table_network: {replica_temp_tbl_name(table_network)}"))
+log4r::info(logger,stringr::str_glue("table_network: {replica_temp_tbl_name(table_network)}"))
 
-      check_network_links_TF = F
-      while (check_network_links_TF == F) {
-        check_network_links  = readline("Would you like to continue the function exectuion? (Y/N) ")
-        check_network_links_TF = (check_network_links %in% c("y", "n", "Y", "N"))
-        if (!check_network_links_TF){
-          message("Not a valid input... try again")
-        }
-      }
+check_network_links_TF = F
+while (check_network_links_TF == F) {
+  check_network_links  = readline("Would you like to continue the function exectuion? (Y/N) ")
+  check_network_links_TF = (check_network_links %in% c("y", "n", "Y", "N"))
+  if (!check_network_links_TF){
+    message("Not a valid input... try again")
+  }
+}
 
-      if (check_network_links %in% c("n", "N")) {
-        log4r::warn(logger, "You have elected to terminate function run..." )
-        stopifnot("You have elected to terminate function run..." = F)
-      }
+if (check_network_links %in% c("n", "N")) {
+  log4r::warn(logger, "You have elected to terminate function run..." )
+  stopifnot("You have elected to terminate function run..." = F)
+}
 
 
     }
@@ -224,7 +224,6 @@ where flag_contains = TRUE")
 
       table_sa_poly_index = bigrquery::bq_project_query(
         "replica-customer"
-        # ,qs_table_sa_poly_index()
         ,stringr::str_glue("select * from (
 select *,
 ST_INTERSECTS(
@@ -259,7 +258,7 @@ where
 1 = 1
 and network_link_ids in (select stableEdgeId from {replica_temp_tbl_name(table_network)});"))
 
-      log4r::info(logger,stringr::str_glue("table_trip_network_match: {replica_temp_tbl_name(table_trip_network_match)}"))
+log4r::info(logger,stringr::str_glue("table_trip_network_match: {replica_temp_tbl_name(table_trip_network_match)}"))
     }
 
     ###CREATE: thruzone trips----
@@ -276,7 +275,7 @@ and network_link_ids in (select stableEdgeId from {replica_temp_tbl_name(table_n
       #   AND ((origin_bgrp in (select raw_id from {replica_temp_tbl_name(table_sa_poly_index)})) OR
       #                      (destination_bgrp in (select raw_id from {replica_temp_tbl_name(table_sa_poly_index)})))"))
 
-      table_trips_from_spec_polys = bigrquery::bq_project_query(
+      table_trips_thru_zone = bigrquery::bq_project_query(
         customer_name
         ,stringr::str_glue("select *
 ,case
@@ -322,7 +321,7 @@ from `{trip_table}`
       #      ,origin_poly, flag_sa_origin
       # ,destination_poly, flag_sa_destination;"))
 
-      log4r::info(logger,stringr::str_glue("table_simple_origin_destination: {replica_temp_tbl_name(table_simple_origin_destination)}"))
+      # log4r::info(logger,stringr::str_glue("table_simple_origin_destination: {replica_temp_tbl_name(table_simple_origin_destination)}"))
 
       table_ordered_trip_links = bigrquery::bq_project_query(
         customer_name
@@ -333,7 +332,7 @@ from `{trip_table}`
     ,network_link_ids_unnested
     ,ROW_NUMBER ()
     OVER (PARTITION BY activity_id) AS index
-    from {replica_temp_tbl_name(table_trips_from_spec_polys)}
+    from {replica_temp_tbl_name(table_trips_thru_zone)}
                           ,unnest(network_link_ids) as network_link_ids_unnested;"))
 
       log4r::info(logger,stringr::str_glue("table_ordered_trip_links: {replica_temp_tbl_name(table_ordered_trip_links)}"))
@@ -413,7 +412,7 @@ where network_link_ids_unnested in
 
         #message here to reduce the size of the network!
         gauntlet::log_and_info(
-          str_glue("{make_space()}\nUser supplied inputs resulted in {gauntlet::pretty_num(sum(summary_table_link_counts$count))} records in link aggregation table....\nSee the following table:{make_space('-', 30)}\n{paste0(capture.output(summary_table_link_counts), collapse = '\n')}{make_space('-', 30)}\nBy default, links with less than 5 counts on them are removed\n---this would result in downloading {summary_table_link_counts[[3, 6]]} records....\n---An ideal MAXIMUM number of records is ~500,000{gauntlet::make_space('-')}")
+          str_glue("{make_space()}\nUser supplied inputs resulted in {gauntlet::strg_pretty_num(sum(summary_table_link_counts$count))} records in link aggregation table....\nSee the following table:{make_space('-', 30)}\n{paste0(capture.output(summary_table_link_counts), collapse = '\n')}{make_space('-', 30)}\nBy default, links with less than 5 counts on them are removed\n---this would result in downloading {summary_table_link_counts[[3, 6]]} records....\n---An ideal MAXIMUM number of records is ~500,000{gauntlet::make_space('-')}")
           ,logger)
         message(stringr::str_glue("If your selection has resulted in too many records, you can............
          1) Decrease the study area layer resulting in less originating polys
@@ -424,7 +423,7 @@ where network_link_ids_unnested in
         check_threshold_TF = F
         while (check_threshold_TF == F) {
           check_threshold  = readline("Would you like to increase link volume limit to minimize data download? (Y/N)? ")
-          check_threshold_TF = (check_threshold %in% c("y", "n", "Y", "N"))
+          check_threshold_TF = (check_threshold %in% c("y", "n", "Y", "N", "zz_backdoor"))
           if (!check_threshold_TF){
             message("Not a valid input... try again")
           }
@@ -440,6 +439,17 @@ where network_link_ids_unnested in
                     where count >= 5"))
 
           log4r::info(logger,stringr::str_glue("table_agg_by_link_subset_limited: {replica_temp_tbl_name(table_agg_by_link_subset_limited)}"))
+        } else if (check_threshold == "zz_backdoor") {
+          message(stringr::str_glue("Backdoor access granted. No link count threshold will be applied..."))
+          log4r::warn(logger, "Backdoor access granted. No link count threshold will be applied..." )
+
+          table_agg_by_link_subset_limited = bigrquery::bq_project_query(
+            customer_name,
+            stringr::str_glue("select *
+                    from {replica_temp_tbl_name(table_agg_by_link_subset)}")
+          )
+
+          log4r::info(logger, stringr::str_glue("table_agg_by_link_subset_limited: {replica_temp_tbl_name(table_agg_by_link_subset_limited)}"))
         } else {
 
           check_threshold_count_TF = F
@@ -463,19 +473,17 @@ where network_link_ids_unnested in
                     where count >= {check_threshold_count}"))
 
           log4r::info(logger,stringr::str_glue("table_agg_by_link_subset_limited: {replica_temp_tbl_name(table_agg_by_link_subset_limited)}"))
+        }
       }
-
 
     }
 
+    log4r::info(logger,stringr::str_glue("table_agg_by_link_subset: {replica_temp_tbl_name(table_agg_by_link_subset)}"))
+    log4r::info(logger,stringr::str_glue("table_agg_by_link_subset_limited: {replica_temp_tbl_name(table_agg_by_link_subset_limited)}"))
+
+    message(stringr::str_glue("Link aggreations complete....{make_space()}"))
+
   }
-
-  log4r::info(logger,stringr::str_glue("table_agg_by_link_subset: {replica_temp_tbl_name(table_agg_by_link_subset)}"))
-  log4r::info(logger,stringr::str_glue("table_agg_by_link_subset_limited: {replica_temp_tbl_name(table_agg_by_link_subset_limited)}"))
-
-  message(stringr::str_glue("Link aggreations complete....{make_space()}"))
-
-}
 
   #data_download
   {
@@ -521,8 +529,7 @@ where network_link_ids_unnested in
         , file = ., row.names = F)
 
     message("All data downloaded.....")
-}
-
+  }
 
   #perform checks
   {
@@ -535,7 +542,7 @@ where network_link_ids_unnested in
 
     here(folder, "replica_network_links_without_trip_volumes.csv") %>%
       write.csv(link_merge_check
-        ,file = ., row.names = F)
+                ,file = ., row.names = F)
 
   }
 
