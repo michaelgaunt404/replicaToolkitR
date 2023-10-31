@@ -1,7 +1,12 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 .Rmd
+.csv
+.zip
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
 ^\.github$
+code/
+data/req_zz/
+data/req_dev/

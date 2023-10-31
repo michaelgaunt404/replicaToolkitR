@@ -9,3 +9,7 @@ docs/
 req_dev/
 
 data/req_zz/
+
+*.zip
+
+data/texas_gas_oneoff_20230707.csv
