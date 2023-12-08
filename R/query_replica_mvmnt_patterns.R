@@ -153,11 +153,11 @@ query_replica_mvmnt_patterns <- function(
     filter(!is.na(streetName)) %>% #this needs to be a selection
     st_jitter(factor = jitter_factor)
 
-  mapview(table_network_data_sf_jit, zcol = "flags", burst = T)
+  mapview(table_network_data_sf_jit, zcol = "flags", burst = T) %>% print()
 
   rejitter = TRUE
   while (rejitter) {
-    rejitter = robust_prompt_used("change the jitter factor and reijitter")
+    rejitter = robust_prompt_used("change the jitter factor and rejitter")
 
     if (rejitter) {
       message(str_glue("Previous jitter used was {jitter_factor}"))
@@ -230,9 +230,6 @@ query_replica_mvmnt_patterns <- function(
         return(tmp_list_named)
       })
 
-    #NOTE: should put something here that allows me to skip to this location if I supply this object
-    data.table::fwrite(link_selections_df, here::here(directory_path, 'link_selections_df.csv'))
-
     link_selections_df = link_selections %>%
       flatten() %>%
       flatten_named_list() %>%
@@ -241,6 +238,8 @@ query_replica_mvmnt_patterns <- function(
       mutate(index_sel_seq = row_number()) %>%
       ungroup()
 
+    #NOTE: should put something here that allows me to skip to this location if I supply this object
+    data.table::fwrite(link_selections_df, here::here(directory_path, 'link_selections_df.csv'))
 
     link_selections_index_pro = paste0("'", sort(unique(link_selections_df$value)), "'", collapse = ", ")
 

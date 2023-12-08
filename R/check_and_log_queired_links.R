@@ -36,7 +36,7 @@ check_and_log_queired_links <- function(counts_object, query_links, logger_objec
     }
   }
 
-  log4r::info(logger_object, stringr::str_glue("table_network: {replica_temp_tbl_name(table_network)}"))
+  # log4r::info(logger_object, stringr::str_glue("table_network: df{replica_temp_tbl_name(table_network)}"))
 
   if (gauntlet::robust_prompt_used("to continue the function execution") == FALSE) {
     log4r::warn(logger_object, "You have elected to terminate function run...")
