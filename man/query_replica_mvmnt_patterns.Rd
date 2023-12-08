@@ -5,23 +5,50 @@
 \title{Query movement patterns for a replica network}
 \usage{
 query_replica_mvmnt_patterns(
-  network_table,
-  trip_table,
-  mode_type,
-  customer_name,
-  jitter_factor,
-  mvmnt_df,
-  save_location
+  data_set_location = "south_atlantic",
+  data_set_period = "2023_Q2",
+  data_set_day = "thursday",
+  query_links = c("primary", "secondary"),
+  query_links_net = c("highway", "corridor", "road", "motorway", "motorway_link",
+    "trunk", "primary", "secondary"),
+  mode_type = c("COMMERCIAL", "PRIVATE_AUTO"),
+  bb_sa_layer,
+  bb_network_layer,
+  prefix_origin = "origin",
+  prefix_dest = "destination",
+  max_record = Inf,
+  customer_name = "replica-customer",
+  save_location = "data/req_zz/tampa_mvmnt_custom",
+  jitter_factor = 0.003,
+  mvmnt_df
 )
 }
 \arguments{
-\item{network_table}{A character string specifying the name of the table containing network data}
+\item{data_set_location}{a string indicating the region or location table to use, e.g., "northwest."}
 
-\item{trip_table}{A character string specifying the name of the table containing trip data}
+\item{data_set_period}{a string in year_quarter format, e.g., "2023_Q1."}
 
-\item{mode_type}{A character string specifying the type of mode to query}
+\item{data_set_day}{a string that should be either "thursday" or "saturday."}
 
-\item{customer_name}{A character string specifying the name of the customer}
+\item{query_links}{a vector of character strings detailing which type of network links to use when defining movement patterns. Trips that use these links as defined by each movement pattern will be queried.}
+
+\item{query_links_net}{a vector of character strings detailing which type of network links to use in the query. These will be used to depict any network link volume graphics and to filter trips. For the latter, any trip that uses these roads within the study area will be included in any reporting.}
+
+\item{mode_type}{a vector of character strings detailing which mode to query, e.g., 'PASSENGER_CAR', 'PRIVATE_AUTO', 'COMMERCIAL', etc.}
+
+\item{bb_sa_layer}{a string of the relative path to the bounding box object detailing the extent of the study area. This will be used to perform aggregations. This should be made using sf::st_bbox(). This input is generally larger or identical to [bb_network_layer].}
+
+\item{bb_network_layer}{a string of the relative path to the bounding box object detailing the extent of the road network. This will be used to query trips with. This should be made using sf::st_bbox().}
+
+\item{prefix_origin}{a string defining the prefix for Latin long coordinates for each record for the origin (e.g., "origin").}
+
+\item{prefix_dest}{a string defining the prefix for Latin long coordinates for each record for the destination (e.g., "destination").}
+
+\item{max_record}{an integer indicating the maximum number of records to be written out for each data acquired by Google. The default is 1000. Use Inf if you do not want to limit the download. This is useful if you want to check the data before downloading large amounts of data. Google tables are still made in full so they can be manually acquired without rerunning this function (see log files).}
+
+\item{customer_name}{a character string indicating the Google account that will be billed.}
+
+\item{save_location}{a character string indicating a directory where you want log files and data to be saved in CSV format. A new folder containing function outputs will be created there, named using the convention 'data_[sys.datetime].'}
 
 \item{jitter_factor}{A numeric value specifying the amount of jitter to apply to the network display}
 
@@ -38,6 +65,7 @@ display the network, prompts the user to select links for each movement, perform
 performs quality control and processing operations.
 }
 \examples{
+
 query_replica_mvmnt_patterns(network_table = "network_data", trip_table = "trip_data",
                              mode_type = "PRIVATE_AUTO", customer_name = "ACME",
                              jitter_factor = 0.05)

@@ -8,14 +8,15 @@
 #'
 #' @return A message indicating the aggregation process.
 #'
-createODBlockgroupTable <- function(customer_name, table_trips_thru_zone) {
+createODBlockgroupTable <- function(customer_name, table_trips_thru_zone, mvmnt_query = F) {
   message(stringr::str_glue("{make_space()}\nOrigin and Destination aggregations commencing...."))
 
-  query = stringr::str_glue("select mode, vehicle_type, origin_poly, flag_sa_origin,
-                      destination_poly, flag_sa_destination, count(*) as count
+  cols = str_glue("mode, vehicle_type, origin_poly, flag_sa_origin,
+                      destination_poly, flag_sa_destination {ifelse(  mvmnt_query, ', mvmnt, mvmnt_seq', '') }")
+
+query = stringr::str_glue("select {cols}, count(*) as count
                       from {replica_temp_tbl_name(table_trips_thru_zone)}
-                      group by mode, vehicle_type, origin_poly, flag_sa_origin,
-                      destination_poly, flag_sa_destination;")
+                      group by {cols};")
 
   table_simple_origin_destination = bigrquery::bq_project_query(
     customer_name, query)

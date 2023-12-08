@@ -58,6 +58,8 @@ This function takes a bounding box and Google Big Query inputs and returns data 
 Function currently only works for data using block groups as it is hardcoded in some of the queries. Changes can be made to the query such that other polygon shapes can be used.
 
 This function creates a log file that records inputs, the query sent to Google, and IDs for each Google table that is created in the multi-step query. All of this information can be accessed at later points in time. Table IDs in the log file can be used for auditing purposes or copied and pasted for use in the Google Big Query console GUI.
+
+Reprinted: 20231107
 }
 \examples{
 

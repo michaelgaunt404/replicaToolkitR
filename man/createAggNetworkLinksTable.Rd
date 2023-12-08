@@ -4,7 +4,12 @@
 \alias{createAggNetworkLinksTable}
 \title{Aggregate network links by mode, vehicle type, and origin/destination classification.}
 \usage{
-createAggNetworkLinksTable(customer_name, table_trips_thru_zone, table_network)
+createAggNetworkLinksTable(
+  customer_name,
+  table_trips_thru_zone,
+  table_network,
+  mvmnt_query = F
+)
 }
 \arguments{
 \item{customer_name}{The name of the BigQuery customer project.}

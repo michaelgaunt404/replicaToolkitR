@@ -15,7 +15,7 @@
 #' @examples
 #' queryTripsThruZone("your_project_name", "your_trip_table", c("mode1", "mode2"))
 #'
-createTripsThruZoneTable <- function(customer_name, trip_table, table_sa_poly_index, mode_type_pro) {
+sql_createTripsThruZoneTable_mvmntPat = function(customer_name, trip_table, table_sa_poly_index, activity_id_pro, table_activity_mvmnt_seq_list_comb) {
   message(stringr::str_glue("{make_space()}\nCreating trips through zone table now...."))
 
 
@@ -36,11 +36,11 @@ createTripsThruZoneTable <- function(customer_name, trip_table, table_sa_poly_in
     when destination_bgrp in (select raw_id from {replica_temp_tbl_name(table_sa_poly_index)}) then 'internal'
     else 'external'
     end as flag_sa_destination
-    from `{trip_table}`
+    from (select * from `{trip_table}`
     where 1=1
-    AND mode in ({mode_type_pro})
-    AND ((origin_bgrp in (select raw_id from `{replica_temp_tbl_name(table_sa_poly_index)}`) OR
-          destination_bgrp in (select raw_id from `{replica_temp_tbl_name(table_sa_poly_index)}`)))")
+    AND activity_id in ({activity_id_pro})) as data_1
+    right join {replica_temp_tbl_name(table_activity_mvmnt_seq_list_comb)} as data_2 on
+data_1.activity_id = data_2.activity_id_duplicate")
 
   table_trips_thru_zone <- bigrquery::bq_project_query(customer_name, query)
 

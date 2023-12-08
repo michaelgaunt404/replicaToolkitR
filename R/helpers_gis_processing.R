@@ -89,11 +89,11 @@ make_network_centroid_layer = function(location, folder, auto_save = F, network_
     message("Centroids were made using spatial links from file and location...")
     replica_queried_network = here::here(location, folder, "replica_queried_network_links.gpkg") %>%
       sf::read_sf()
-    replica_queried_network_cntds = gauntlet::st_true_midpoint(replica_queried_network) %>%
+    replica_queried_network_cntds = gauntletMap::st_true_midpoint(replica_queried_network) %>%
       select(!c(merge_id))
   } else {
     message("Centroids were made using supplied spatial links network object...")
-    replica_queried_network_cntds = gauntlet::st_true_midpoint(network_object) %>%
+    replica_queried_network_cntds = gauntletMap::st_true_midpoint(network_object) %>%
       select(!c(merge_id))
   }
 

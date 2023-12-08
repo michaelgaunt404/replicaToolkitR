@@ -5,6 +5,7 @@
 #'
 #' This function creates a log file that records inputs, the query sent to Google, and IDs for each Google table that is created in the multi-step query. All of this information can be accessed at later points in time. Table IDs in the log file can be used for auditing purposes or copied and pasted for use in the Google Big Query console GUI.
 #'
+#' Reprinted: 20231107
 #'
 #' @param bb_network_layer a string of the relative path to the bounding box object detailing the extent of the road network. This will be used to query trips with. This should be made using sf::st_bbox().
 #' @param bb_sa_layer a string of the relative path to the bounding box object detailing the extent of the study area. This will be used to perform aggregations. This should be made using sf::st_bbox(). This input is generally larger or identical to [bb_network_layer].
@@ -129,7 +130,6 @@ query_network_trip_using_bbox = function(
         ,query_links = links_pro
         ,logger_object = logger
       )
-
 
     }
 
@@ -309,7 +309,7 @@ query_network_trip_using_bbox = function(
 
   #perform checks
   {
-    message("Perfroming data checks now.....")
+    message("Performing data checks now.....")
 
     link_merge_check = check_links_download(
       location = file_destination

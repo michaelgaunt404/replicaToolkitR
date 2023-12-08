@@ -2,7 +2,7 @@
 % Please edit documentation in R/view_replica_study_area_network.R
 \name{view_replica_study_area_network}
 \alias{view_replica_study_area_network}
-\title{Query Replica's roadway network given a user defined study area}
+\title{Query Replica's roadway network given a user defined map extent}
 \usage{
 view_replica_study_area_network(network_table, customer_name, links_pro = NA)
 }

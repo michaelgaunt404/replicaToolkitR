@@ -9,7 +9,7 @@
 #'
 #' @import dplyr
 #' @import mapview
-#' @import magritter
+#' @import magrittr
 #'
 #' @examples
 #' map_replica_movements(data)

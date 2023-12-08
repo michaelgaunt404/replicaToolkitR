@@ -1,4 +1,4 @@
-#' Query Replica's roadway network given a user defined study area
+#' Query Replica's roadway network given a user defined map extent
 #'
 #' This function prompts the user to draw a study area using the \code{mapedit::drawFeatures()} function, and returns a data frame of the roadway network data that intersects with the study area.
 #'
@@ -58,8 +58,8 @@ view_replica_study_area_network = function(network_table
       paste0("'", ., "'", collapse = ", ")
   }
 
-
-  study_area = mapedit::drawFeatures() %>% st_transform(4326)
+  # study_area = mapedit::drawFeatures() %>% st_transform(4326)
+  study_area = gauntletMap::mapedit_robust_draw()
   study_area_wkt = wellknown::sf_convert(st_union(study_area))
 
   table_network = bigrquery::bq_project_query(
@@ -70,13 +70,13 @@ view_replica_study_area_network = function(network_table
                       ST_GEOGFROMTEXT('{study_area_wkt}')
                       ,geometry) as flag_contains
                       from `{network_table}`
-                      where highway in ({links_pro})
+                      where highway in ({links_response})
                       )
                       where flag_contains = TRUE"))
 
   table_network_count = bigrquery::bq_table_nrow(table_network)
 
-  message(str_glue("{table_network_count} links were returned... \nwould you like to continue and download or abort and try again"))
+  message(str_glue("{table_network_count} links were returned... \nWould you like to continue query execution or abort run completely..."))
   check_continue = robust_prompt_used("continue")
   stopifnot("Aborted" = check_continue)
 

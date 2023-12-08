@@ -12,36 +12,29 @@
 #' @examples
 #' queryAggNetworkLinks("your_project_name", "your_trips_thru_zone_table", "your_network_table")
 #'
-createAggNetworkLinksTable <- function(customer_name, table_trips_thru_zone, table_network) {
+createAggNetworkLinksTable <- function(customer_name, table_trips_thru_zone, table_network, mvmnt_query = F) {
   message(stringr::str_glue("{make_space()}\nLink aggreations commencing...."))
 
   message(stringr::str_glue("Only links that fit user supplied criteria will be filtered"))
 
   #TODO - this can be potentially be optimized to take a string to define attributes to aggregate on
 
-  query <- str_glue("select
-    mode, vehicle_type,
-    origin_poly, flag_sa_origin,
-    flag_sa_destination,
-    network_link_ids_unnested,
-    count(*) as count
+  cols_outter = str_glue("mode, vehicle_type, origin_poly, flag_sa_origin, flag_sa_destination,
+    network_link_ids_unnested {ifelse(mvmnt_query, ', mvmnt, mvmnt_seq', '') }")
+
+  cols_inner = str_glue("activity_id, mode, vehicle_type, origin_bgrp, origin_poly, flag_sa_origin, destination_bgrp, destination_poly, flag_sa_destination
+                        ,network_link_ids_unnested {ifelse(mvmnt_query, ', mvmnt, mvmnt_seq', '') }")
+
+  query <- str_glue("select {cols_outter}, count(*) as count
     from (
-    select
-        activity_id, mode, vehicle_type,
-        origin_bgrp, origin_poly, flag_sa_origin,
-        destination_bgrp, destination_poly, flag_sa_destination,
-        network_link_ids_unnested,
+    select {cols_inner},
         ROW_NUMBER() OVER (PARTITION BY activity_id) AS index
     from {replica_temp_tbl_name(table_trips_thru_zone)}
         ,unnest(network_link_ids) as network_link_ids_unnested
     )
     where network_link_ids_unnested in
              (select distinct stableEdgeId from {replica_temp_tbl_name(table_network)})
-    group by
-    mode, vehicle_type,
-    origin_poly, flag_sa_origin,
-    flag_sa_destination,
-    network_link_ids_unnested")
+    group by {cols_outter}")
 
   table_agg_network_links <- bigrquery::bq_project_query(customer_name, query)
 
@@ -49,3 +42,4 @@ createAggNetworkLinksTable <- function(customer_name, table_trips_thru_zone, tab
 
   return(table_agg_network_links)
 }
+

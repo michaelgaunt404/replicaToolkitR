@@ -4,7 +4,7 @@
 \alias{createODBlockgroupTable}
 \title{Perform Origin and Destination Aggregations}
 \usage{
-createODBlockgroupTable(customer_name, table_trips_thru_zone)
+createODBlockgroupTable(customer_name, table_trips_thru_zone, mvmnt_query = F)
 }
 \arguments{
 \item{customer_name}{The customer's name.}

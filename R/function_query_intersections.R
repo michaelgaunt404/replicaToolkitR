@@ -51,7 +51,7 @@ prompt_jitter_factor <- function() {
 #' @export
 #'
 #' @import dplyr
-#' @importFrom glue str_glue
+#' @importFrom stringr str_glue
 #' @importFrom rlang parse_expr
 #'
 merge_cols <- function(data) {
