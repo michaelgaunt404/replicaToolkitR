@@ -8,6 +8,7 @@
 #'
 #' @return A message indicating the aggregation process.
 #'
+#' @export
 createODBlockgroupTable <- function(customer_name, table_trips_thru_zone, mvmnt_query = F) {
   message(stringr::str_glue("{make_space()}\nOrigin and Destination aggregations commencing...."))
 

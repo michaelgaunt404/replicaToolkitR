@@ -19,7 +19,7 @@
 #' }
 #'
 #' @importFrom data.table fread
-#' @importFrom dplyr select mutate arrange group_by summarise unique
+#' @importFrom dplyr select mutate arrange group_by summarise
 #' @importFrom here here
 #'
 #' @export
@@ -63,10 +63,10 @@ mvmnt_pattern_vmt_smmry = function(
     mutate(distance_mm = distance
            ,distance_ft = distance/304.8
            ,distance_mile = distance_ft/5280)  %>%
-    select(intersection,  sequence, streetName, index_sel_seq, value
+    select(mvmnt,  sequence, streetName, index_sel_seq, value
            ,everything()) %>%
     rename(network_links = value
-           ,mvmnt = intersection
+           # ,mvmnt = intersection
            ,mvmnt_seq = sequence) %>%
     arrange(mvmnt, mvmnt_seq, index_sel_seq) %>%
     group_by(mvmnt, mvmnt_seq) %>%

@@ -12,6 +12,7 @@
 #' @examples
 #' queryAggNetworkLinks("your_project_name", "your_trips_thru_zone_table", "your_network_table")
 #'
+#' @export
 createAggNetworkLinksTable <- function(customer_name, table_trips_thru_zone, table_network, mvmnt_query = F) {
   message(stringr::str_glue("{make_space()}\nLink aggreations commencing...."))
 

@@ -19,6 +19,7 @@
 #' layer_name <- "Study Area Layer"
 #' converted_layer <- convert_to_wkt(layer, layer_name)
 #'
+#' @export
 layer_extent_loadUnionWkt <- function(layer, layer_name) {
   message(stringr::str_glue("{make_space()}\nStarting extent layer processing...."))
 

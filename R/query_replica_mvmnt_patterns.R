@@ -589,42 +589,55 @@ where activity_id in ({pulled_activity_id_pro_mrg}));"))
 
   #data_download
   {
-    message("Starting data download now.....")
+    tryCatch({
 
-    if (gauntlet::robust_prompt_used("download the network links")){
-      here(directory_path, "replica_queried_network.csv") %>%
-        data.table::fread(
-          bigrquery::bq_table_download(table_network, n_max = max_record)
+      message("Starting data download now.....")
+
+      if (gauntlet::robust_prompt_used("download the network links")){
+        here(directory_path, "replica_queried_network.csv") %>%
+          write.csv(
+            bigrquery::bq_table_download(table_network, n_max = max_record)
+            , file = ., row.names = F)
+      } else {
+        gauntlet::log_and_warn("User did not elect to download the network at function runtime.....")
+      }
+
+      message("Starting data download now..... replica_sa_poly_index")
+      here(directory_path, "replica_sa_poly_index.csv") %>%
+        write.csv(
+          bigrquery::bq_table_download(table_sa_poly_index, n_max = max_record)
+          , file = .)
+
+      #aggregated network link volumes
+      message("Starting data download now..... table_agg_by_link_subset_limited")
+      here(directory_path, "table_agg_by_link_subset_limited.csv") %>%
+        write.csv(
+          bigrquery::bq_table_download(table_agg_by_link_subset_limited, n_max = max_record)
           , file = ., row.names = F)
-    } else {
-      gauntlet::log_and_warn("User did not elect to download the network at function runtime.....")
-    }
 
-    here(directory_path, "replica_sa_poly_index.csv") %>%
-      write.csv(
-        bigrquery::bq_table_download(table_sa_poly_index, n_max = max_record)
-        , file = .)
+      #writing out simple OD matix based on block groups
+      message("Starting data download now..... replica_trip_origin_destination")
+      here(directory_path, "replica_trip_origin_destination.csv") %>%
+        write.csv(
+          bigrquery::bq_table_download(table_simple_origin_destination, n_max = max_record)
+          , file = ., row.names = F)
 
-    #aggregated network link volumes
-    here(directory_path, "table_agg_by_link_subset_limited.csv") %>%
-      write.csv(
-        bigrquery::bq_table_download(table_agg_by_link_subset_limited, n_max = max_record)
-        , file = ., row.names = F)
-
-    #writing out simple OD matix based on block groups
-    here(directory_path, "replica_trip_origin_destination.csv") %>%
-      write.csv(
-        bigrquery::bq_table_download(table_simple_origin_destination, n_max = max_record)
-        , file = ., row.names = F)
-
-    #raw trip mvmnt/seq table
-    here(directory_path, "replica_trip_mvmnt_seq_table.csv") %>%
-      write.csv(
-        processed_link_ods_pro
-        , file = ., row.names = F)
+      #raw trip mvmnt/seq table
+      message("Starting data download now..... replica_trip_mvmnt_seq_table")
+      here(directory_path, "replica_trip_mvmnt_seq_table.csv") %>%
+        write.csv(
+          processed_link_ods_pro
+          , file = ., row.names = F)
 
 
-    message("All data downloaded.....")
+      message("All data downloaded.....")
+
+    }, error = function(e) {
+      message(paste("Error occured in data download:\n",
+                    e$message))
+      return(NA)
+    })
+
   }
 
   #perform checks

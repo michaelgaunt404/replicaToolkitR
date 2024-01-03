@@ -703,7 +703,7 @@ viz_static_ntwrk_map_anlt = function(spatial_agg_object
                 ,color = y
                 ,layer.name = x
                 ,lwd = 'lwd_rescale'
-                ,popup = popup_tbl_pretty(temp %>%  select(-c(label, lwd_rescale)))
+                ,popup = leaflet_popup_tbl_pretty(temp %>%  select(-c(label, lwd_rescale)))
                 ,homebutton = F)
     }) %>%
     reduce(`+`)
@@ -769,7 +769,7 @@ viz_static_ntwrk_map_anlto_grp = function(spatial_agg_object, poi_list, return_l
                   ,color = y
                   ,layer.name = paste0(x[[2]], "_", x[[1]])
                   ,lwd = 'lwd_rescale'
-                  ,popup = popup_tbl_pretty(temp %>%  select(-c(label, lwd_rescale)))
+                  ,popup = leaflet_popup_tbl_pretty(temp %>%  select(-c(label, lwd_rescale)))
                   ,homebutton = F)
       }
     }) %>%
@@ -837,7 +837,7 @@ viz_static_ntwrk_map_anlto = function(spatial_agg_object, poi_list, return_leafl
                   ,color = y
                   ,layer.name = paste0(x[[2]], "_", x[[1]])
                   ,lwd = 'lwd_rescale'
-                  ,popup = popup_tbl_pretty(temp %>%  select(-c(label, lwd_rescale)))
+                  ,popup = leaflet_popup_tbl_pretty(temp %>%  select(-c(label, lwd_rescale)))
                   ,homebutton = F)
       }
     }) %>%
@@ -895,7 +895,7 @@ viz_static_ntwrk_map_anltpt = function(spatial_agg_object, return_leaflet){
                 ,color = y
                 ,layer.name = x
                 ,lwd = 'lwd_rescale'
-                ,popup = popup_tbl_pretty(temp %>%  select(-c(label, lwd_rescale)))
+                ,popup = leaflet_popup_tbl_pretty(temp %>%  select(-c(label, lwd_rescale)))
                 ,homebutton = F)
     }) %>%
     reduce(`+`)
@@ -942,7 +942,7 @@ viz_static_ntwrk_map_anl = function(spatial_agg_object, return_leaflet){
     mapview(label = "label"
             ,layer.name = "Network Link Volumes"
             ,lwd = 'lwd_rescale'
-            ,popup = popup_tbl_pretty(data %>%  select(-c(label, lwd_rescale)))
+            ,popup = leaflet_popup_tbl_pretty(data %>%  select(-c(label, lwd_rescale)))
             ,homebutton = F)
 
   if (return_leaflet){

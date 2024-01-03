@@ -15,6 +15,7 @@
 #' @examples
 #' queryTripsThruZone("your_project_name", "your_trip_table", c("mode1", "mode2"))
 #'
+#' @export
 sql_createTripsThruZoneTable_mvmntPat = function(customer_name, trip_table, table_sa_poly_index, activity_id_pro, table_activity_mvmnt_seq_list_comb) {
   message(stringr::str_glue("{make_space()}\nCreating trips through zone table now...."))
 

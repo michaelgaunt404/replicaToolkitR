@@ -12,6 +12,7 @@
 #' @examples
 #' queryAggByLinkSumSubset("your_project_name", "your_agg_by_link_subset_table")
 #'
+#' @export
 createAggByLinkSumSubsetTable <- function(customer_name, table_agg_by_link_subset) {
 
   message(stringr::str_glue("{make_space()}\nCounting number of links by their total volume..."))

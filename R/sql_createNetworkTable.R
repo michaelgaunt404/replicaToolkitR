@@ -14,6 +14,7 @@
 #' @examples
 #' createNetworkTable("your_project_name", "your_network_table", c("highway", "street"), list_of_wkt_objects)
 #'
+#' @export
 createNetworkTable <- function(customer_name
                                ,network_table = network_table
                                ,links_pro = links_pro

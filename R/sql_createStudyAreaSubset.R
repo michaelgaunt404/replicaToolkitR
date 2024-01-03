@@ -10,6 +10,7 @@
 #' wkt_geometry <- "POLYGON((x1 y1, x2 y2, x3 y3, x4 y4, x1 y1))"
 #' study_area_subset <- create_study_area_subset(wkt_geometry)
 #'
+#' @export
 createStudyAreaSubset <- function(customer_name, wkt_geometry) {
   message(stringr::str_glue("{make_space()}\nCreating study area subset now...."))
 
