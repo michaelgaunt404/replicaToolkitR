@@ -73,7 +73,7 @@ query_network_trip_using_bbox = function(
     network_table = str_glue("{customer_name}.{data_set_location}.{data_set_location}_{data_set_period}_network_segments")
     trip_table = str_glue("{customer_name}.{data_set_location}.{data_set_location}_{data_set_period}_{data_set_day}_trip")
 
-    checkValidTableConnections(
+    rplc_checkValidTableConnections(
       prefix_origin = prefix_origin, prefix_dest = prefix_dest
       ,network_table = network_table, trip_table = trip_table)
 
@@ -103,7 +103,7 @@ query_network_trip_using_bbox = function(
     list_wkt_objects = list(
       list(bb_network_layer, bb_sa_layer)
       ,list("network_layer", "sa_layer")) %>%
-      pmap(layer_extent_loadUnionWkt)
+      pmap(rplc_layer_extent_loadUnionWkt)
 
   }
 

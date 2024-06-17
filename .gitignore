@@ -13,3 +13,7 @@ data/req_zz/
 *.zip
 
 data/texas_gas_oneoff_20230707.csv
+
+*.txt
+
+work_collection/cluster_analysis_dashboard_20220929.html
