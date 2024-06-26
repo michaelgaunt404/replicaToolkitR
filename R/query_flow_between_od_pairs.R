@@ -202,9 +202,6 @@ table_custom_poly_list_data_noLinks = bigrquery::bq_project_query(
 )
 
 
-
-
-
 ###CREATE: Volume tables---
 #subset network count
 {
@@ -213,8 +210,7 @@ table_custom_poly_list_data_noLinks = bigrquery::bq_project_query(
     ,table_trips_thru_zone = table_custom_poly_list_data
     ,table_network = table_network)
 
-  log4r::info(logger,stringr::str_glue("table_agg_by_link_subset: {replica_temp_tbl_name(table_agg_by_link_subset)}"))
-
+  log4r::info(logger, stringr::str_glue("table_agg_by_link_subset: {replica_temp_tbl_name(table_agg_by_link_subset)}"))
 
   summary_table_link_counts = createAggByLinkSumSubsetTable(
     customer_name = customer_name
