@@ -76,7 +76,7 @@ query_replica_mvmnt_patterns <- function(
     list_wkt_objects = list(
       list(bb_network_layer, bb_sa_layer)
       ,list('network_layer', 'sa_layer')) %>%
-      pmap(layer_extent_loadUnionWkt)
+      pmap(rplc_layer_extent_loadUnionWkt)
   }
 
   #NOTE: example data inputs

@@ -1,5 +1,3 @@
-
-
  #' Function to download sample network and trip tables, perform validity checks, and notify users of errors.
  #'
  #' This function downloads a sample of both network and trip tables, puts them into temporary tables, and checks for errors in the data.
@@ -27,7 +25,7 @@
  #' @import bigrquery
  #'
  #' @export
- checkValidTableConnections <- function(prefix_origin, prefix_dest, network_table, trip_table) {
+ rplc_checkValidTableConnections <- function(prefix_origin, prefix_dest, network_table, trip_table) {
 
    message(stringr::str_glue("{make_space()}\nPerfroming Replica connection test\nValidating user supplied inputs"))
 
@@ -52,6 +50,4 @@
    }
 
    message(str_glue("Table connections validated"))
-
-
  }
