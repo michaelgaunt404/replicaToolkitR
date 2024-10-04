@@ -13,7 +13,7 @@
 #' @examples
 #'
 #' #none
-check_links_download = function(location, folder){
+check_links_download <- function(location, folder){
   # location = "data/req_dev"
   # folder = "data_20230112_143236"
 

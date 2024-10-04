@@ -9,13 +9,13 @@
 #' @return A message indicating the aggregation process.
 #'
 #' @export
-createODBlockgroupTable <- function(customer_name, table_trips_thru_zone, mvmnt_query = F) {
+sql_createODBlockgroupTable = function(customer_name, table_trips_thru_zone, mvmnt_query = F) {
   message(stringr::str_glue("{make_space()}\nOrigin and Destination aggregations commencing...."))
 
   cols = str_glue("mode, vehicle_type, origin_poly, flag_sa_origin,
                       destination_poly, flag_sa_destination {ifelse(  mvmnt_query, ', mvmnt, mvmnt_seq', '') }")
 
-query = stringr::str_glue("select {cols}, count(*) as count
+  query = stringr::str_glue("select {cols}, count(*) as count
                       from {replica_temp_tbl_name(table_trips_thru_zone)}
                       group by {cols};")
 

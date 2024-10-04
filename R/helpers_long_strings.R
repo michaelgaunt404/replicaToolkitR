@@ -151,23 +151,23 @@
 #          (select distinct stableEdgeId from {replica_temp_tbl_name(table_network)})")
 # }
 
-qs_table_agg_by_link_sum = function(table){
-str_glue("
-select flag_link, count(*) as count
-from (
-select *,
-case
-when count = 1 then '1 count'
-when count = 2 then '2 count'
-when count = 3 then '3 count'
-when count = 4 then '4 count'
-when count = 5 then '5 count'
-when count <= 10 then '6-10 count'
-else '11 or greater' end as flag_link
-from {replica_temp_tbl_name(table)}
-) group by flag_link
-order by count")
-}
+# qs_table_agg_by_link_sum = function(table){
+# str_glue("
+# select flag_link, count(*) as count
+# from (
+# select *,
+# case
+# when count = 1 then '1 count'
+# when count = 2 then '2 count'
+# when count = 3 then '3 count'
+# when count = 4 then '4 count'
+# when count = 5 then '5 count'
+# when count <= 10 then '6-10 count'
+# else '11 or greater' end as flag_link
+# from {replica_temp_tbl_name(table)}
+# ) group by flag_link
+# order by count")
+# }
 
 # mes_network_size = function(){
 #   str_glue("{make_space()}\nUser supplied inputs resulted in {gauntlet::pretty_num(sum(summary_table_link_counts$count))} records in link aggregation table....\nSee the following table:{make_space('-', 30)}\n{paste0(capture.output(summary_table_link_counts), collapse = '\n')}{make_space('-', 30)}\nBy default, links with less than 5 counts on them are removed\n---this would result in downloading {summary_table_link_counts[[3, 6]]} records....\n---An ideal number of records is ~500,000")
