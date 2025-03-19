@@ -12,7 +12,7 @@
 #' queryNetworkLinkCount("your_project_name", "your_temp_table_name")
 #'
 #' @export
-createNetworkLinkCountTable <- function(customer_name, table_network = table_network) {
+sql_createNetworkLinkCountTable <- function(customer_name, table_network = table_network) {
 
   query <- stringr::str_glue("SELECT highway, count(*) as count
                             from `{replica_temp_tbl_name(table_network)}`

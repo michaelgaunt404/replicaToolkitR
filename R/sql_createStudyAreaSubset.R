@@ -11,8 +11,8 @@
 #' study_area_subset <- create_study_area_subset(wkt_geometry)
 #'
 #' @export
-createStudyAreaSubset <- function(customer_name, wkt_geometry) {
-  message(stringr::str_glue("{make_space()}\nCreating study area subset now...."))
+sql_createStudyAreaSubset <- function(customer_name, wkt_geometry) {
+  message(stringr::str_glue("{strg_make_space_2()}Creating study area subset now...."))
 
   query <- stringr::str_glue("select * from (
       select *,

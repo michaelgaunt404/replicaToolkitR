@@ -16,8 +16,8 @@
 #' queryTripsThruZone("your_project_name", "your_trip_table", c("mode1", "mode2"))
 #'
 #' @export
-createTripsThruZoneTable <- function(customer_name, trip_table, table_sa_poly_index, mode_type_pro) {
-  message(stringr::str_glue("{make_space()}\nCreating trips through zone table now...."))
+sql_createTripsThruZoneTable <- function(customer_name, trip_table, table_sa_poly_index, mode_type_pro) {
+  message(stringr::str_glue("{strg_make_space_2()}Creating trips through zone table now...."))
 
 
   query <- stringr::str_glue("select *,
@@ -45,7 +45,7 @@ createTripsThruZoneTable <- function(customer_name, trip_table, table_sa_poly_in
 
   table_trips_thru_zone <- bigrquery::bq_project_query(customer_name, query)
 
-  message(stringr::str_glue("Completed{make_space()}"))
+  message(stringr::str_glue("Completed{strg_make_space_2()}"))
 
   return(table_trips_thru_zone)
 }

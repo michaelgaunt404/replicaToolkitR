@@ -21,7 +21,7 @@
 #'
 #' @export
 rplc_layer_extent_loadUnionWkt = function(layer, layer_name) {
-  message(stringr::str_glue("{make_space()}\nStarting extent layer processing...."))
+  message(stringr::str_glue("{strg_make_space_2()}\nStarting extent layer processing...."))
 
   if (is.character(layer)) {
     message(stringr::str_glue("String detected for {layer_name}\nReading file now...."))
@@ -40,7 +40,8 @@ rplc_layer_extent_loadUnionWkt = function(layer, layer_name) {
     temp_object <- sf::st_transform(temp_object, crs = 4326)
   }
 
-  temp_wkt <- wellknown::sf_convert(sf::st_union(temp_object))
+  # temp_wkt <- wellknown::sf_convert(sf::st_union(temp_object))
+  temp_wkt <- st_as_text(sf::st_union(temp_object))
 
   message("Done")
 

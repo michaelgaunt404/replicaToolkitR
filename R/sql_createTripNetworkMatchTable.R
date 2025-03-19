@@ -14,11 +14,11 @@
 #' queryTripNetworkMatch("your_project_name", "your_trip_table", c("mode1", "mode2"))
 #'
 #' @export
-createTripNetworkMatchTable <- function(customer_name
+sql_createTripNetworkMatchTable <- function(customer_name
                                         ,trip_table = trip_table
                                         ,mode_type_pro = mode_type_pro
                                         ,table_network = table_network) {
-  message(stringr::str_glue("{make_space()}\nFiltering trips that only use queried network now....\nStep involves unnesting trips' links and then using table subset to filter on"))
+  message(stringr::str_glue("{strg_make_space_2()}Filtering trips that only use queried network now....\nStep involves unnesting trips' links and then using table subset to filter on"))
 
 
   query <- stringr::str_glue("select distinct activity_id
@@ -36,7 +36,7 @@ createTripNetworkMatchTable <- function(customer_name
 
   table_trip_network_match <- bigrquery::bq_project_query(customer_name, query)
 
-  message(stringr::str_glue("Completed{make_space()}"))
+  message(stringr::str_glue("Completed{strg_make_space_2()}"))
 
   return(table_trip_network_match)
 }

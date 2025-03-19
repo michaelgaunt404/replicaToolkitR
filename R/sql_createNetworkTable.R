@@ -15,11 +15,11 @@
 #' createNetworkTable("your_project_name", "your_network_table", c("highway", "street"), list_of_wkt_objects)
 #'
 #' @export
-createNetworkTable <- function(customer_name
+sql_createNetworkTable <- function(customer_name
                                ,network_table = network_table
                                ,links_pro = links_pro
                                ,wkt_object) {
-  message(stringr::str_glue("{make_space()}\nCreating network table now...."))
+  message(stringr::str_glue("{strg_make_space_2()}Creating network table now...."))
 
   query <- stringr::str_glue("select * from (
     select *,

@@ -68,7 +68,7 @@ query_network_trip_using_bbox = function(
 
   #init_error_logging_and_setup
   {
-    message(stringr::str_glue("{make_space()}{make_space()}\nREPLICATOOLKITR: Initializing function run............"))
+    message(stringr::str_glue("{strg_make_space_2()}{strg_make_space_2()}REPLICATOOLKITR: Initializing function run............"))
 
     network_table = str_glue("{customer_name}.{data_set_location}.{data_set_location}_{data_set_period}_network_segments")
     trip_table = str_glue("{customer_name}.{data_set_location}.{data_set_location}_{data_set_period}_{data_set_day}_trip")
@@ -88,12 +88,12 @@ query_network_trip_using_bbox = function(
     mode_type_pro = paste0("'", mode_type, "'", collapse = ", ")
 
     log4r::info(logger,
-                stringr::str_glue("{make_space()}\nLogging Query Inputs\nPath to network boundary file: {bb_network_layer}\nPath to study area boundary file: {bb_sa_layer}\nCutsomer Name: {customer_name}\nSchema Table: {trip_table}\nLinks Provided:{make_space('-', n = 10)}\n{paste0(stringr::str_glue('{sort(query_links)}'),collapse = '\n')}{make_space('-', n = 10)}"))
+                stringr::str_glue("{strg_make_space_2()}\nLogging Query Inputs\nPath to network boundary file: {bb_network_layer}\nPath to study area boundary file: {bb_sa_layer}\nCutsomer Name: {customer_name}\nSchema Table: {trip_table}\nLinks Provided:{strg_make_space_2('-', n = 10)}\n{paste0(stringr::str_glue('{sort(query_links)}'),collapse = '\n')}{strg_make_space_2('-', n = 10)}"))
 
     links_pro = paste0("'", query_links, "'", collapse = ", ")
     links_where_statement = stringr::str_glue("where highway in ({links_pro})")
 
-    message("Initial set up complete\nNo fatal errors detected{make_space()}")
+    message(str_glue("Initial set up complete\nNo fatal errors detected{strg_make_space_2(last = F)}"))
   }
 
   #load_process_boundary_object
@@ -113,14 +113,14 @@ query_network_trip_using_bbox = function(
 
     ##create network table and perfrom checks
     {
-      table_network = createNetworkTable(
+      table_network = sql_createNetworkTable(
         customer_name = customer_name
         ,network_table = network_table
         ,links_pro = links_pro
         ,wkt_object = list_wkt_objects[[1]]
       )
 
-      highway_counts = createNetworkLinkCountTable(
+      highway_counts = sql_createNetworkLinkCountTable(
         customer_name = customer_name
         ,table_network = table_network
       )
@@ -135,7 +135,7 @@ query_network_trip_using_bbox = function(
 
     ##create polygon table for block groups given study area
     {
-      table_sa_poly_index = createStudyAreaSubset(
+      table_sa_poly_index = sql_createStudyAreaSubset(
         customer_name = customer_name
         ,wkt_geometry = list_wkt_objects[[2]]
       )
@@ -147,7 +147,7 @@ query_network_trip_using_bbox = function(
     #returns only trips that have a network link in subset of links
     #performs big cross=reference/filtering operation
     {
-      table_trip_network_match = createTripNetworkMatchTable(
+      table_trip_network_match = sql_createTripNetworkMatchTable(
         customer_name = customer_name
         ,trip_table = trip_table
         ,mode_type_pro = mode_type_pro
@@ -158,7 +158,7 @@ query_network_trip_using_bbox = function(
 
     ###CREATE: thruzone trips---
     {
-      table_trips_thru_zone = createTripsThruZoneTable(
+      table_trips_thru_zone = sql_createTripsThruZoneTable(
         customer_name = customer_name
         ,trip_table = trip_table
         ,mode_type_pro = mode_type_pro
@@ -166,7 +166,7 @@ query_network_trip_using_bbox = function(
 
       log4r::info(logger,stringr::str_glue("table_trips_thru_zone: {replica_temp_tbl_name(table_trips_thru_zone)}"))
 
-      message(stringr::str_glue("{make_space()}\nInitial queries complete, starting aggregation queries now...."))
+      message(stringr::str_glue("{strg_make_space_2()}\nInitial queries complete, starting aggregation queries now...."))
     }
 
     ###CREATE: OD tables---
@@ -182,12 +182,12 @@ query_network_trip_using_bbox = function(
 
     ###CREATE: Volume tables---
     {
-      # message(stringr::str_glue("{make_space()}\nOrigin and Destination aggreations commencing...."))
+      # message(stringr::str_glue("{strg_make_space_2()}\nOrigin and Destination aggreations commencing...."))
 
 
       #subset network count
       {
-        table_agg_by_link_subset = createAggNetworkLinksTable(
+        table_agg_by_link_subset = sql_createAggNetworkLinksTable(
           customer_name = customer_name
           ,table_trips_thru_zone = table_trips_thru_zone
           ,table_network = table_network)
@@ -203,7 +203,7 @@ query_network_trip_using_bbox = function(
 
         #message here to reduce the size of the network!
         gauntlet::log_and_info(
-          str_glue("{make_space()}\nUser supplied inputs resulted in {gauntlet::strg_pretty_num(sum(summary_table_link_counts$count))} records in link aggregation table....\nSee the following table:{make_space('-', 30)}\n{paste0(capture.output(summary_table_link_counts), collapse = '\n')}{make_space('-', 30)}\nBy default, links with less than 5 counts on them are removed\n---this would result in downloading {summary_table_link_counts[[3, 6]]} records....\n---An ideal MAXIMUM number of records is ~500,000{gauntlet::make_space('-')}")
+          str_glue("{strg_make_space_2()}\nUser supplied inputs resulted in {gauntlet::strg_pretty_num(sum(summary_table_link_counts$count))} records in link aggregation table....\nSee the following table:{strg_make_space_2('-', 30)}\n{paste0(capture.output(summary_table_link_counts), collapse = '\n')}{strg_make_space_2('-', 30)}\nBy default, links with less than 5 counts on them are removed\n---this would result in downloading {summary_table_link_counts[[3, 6]]} records....\n---An ideal MAXIMUM number of records is ~500,000{gauntlet::strg_make_space_2('-')}")
           ,logger)
         message(stringr::str_glue("If your selection has resulted in too many records, you can............
          1) Decrease the study area layer resulting in less originating polys
@@ -271,7 +271,7 @@ query_network_trip_using_bbox = function(
 
     log4r::info(logger,stringr::str_glue("table_agg_by_link_subset: {replica_temp_tbl_name(table_agg_by_link_subset)}"))
     log4r::info(logger,stringr::str_glue("table_agg_by_link_subset_limited: {replica_temp_tbl_name(table_agg_by_link_subset_limited)}"))
-    message(stringr::str_glue("Link aggreations complete....{make_space()}"))
+    message(stringr::str_glue("Link aggreations complete....{strg_make_space_2()}"))
 
   }
 

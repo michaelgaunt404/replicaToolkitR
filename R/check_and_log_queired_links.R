@@ -18,7 +18,7 @@ check_and_log_queired_links <- function(counts_object, query_links, logger_objec
     stopifnot("Number of returned links was zero\n...change bounding box\n...stopping...." = FALSE)
   } else {
     message <- str_glue(
-      "{make_space()}\nNon-empty data returned, Good\nQuery continued...\nIn total {sum(counts_object$count)} links\n",
+      "{strg_make_space_2()}Non-empty data returned, Good\nQuery continued...\nIn total {sum(counts_object$count)} links\n",
       str_glue('-{counts_object$count} ({100 * gauntlet::dgt2(counts_object$count / sum({counts_object$count}))})% {counts_object$highway}') %>%
         paste0(collapse = '\n')
     )
@@ -30,7 +30,7 @@ check_and_log_queired_links <- function(counts_object, query_links, logger_objec
       gauntlet::log_and_info(stringr::str_glue("All requested link types returned with some number of links\nnone empty.... GOOD"), logger_object)
     } else {
       gauntlet::log_and_warn(
-        str_glue("{make_space()}\nThe following link types were requested but not found in the bounding box:\n{paste0(index_empty_highways, collapse = '\n')}"),
+        str_glue("{strg_make_space_2()}The following link types were requested but not found in the bounding box:\n{paste0(index_empty_highways, collapse = '\n')}"),
         logger_object
       )
     }

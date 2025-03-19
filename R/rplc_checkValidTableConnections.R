@@ -27,7 +27,7 @@
  #' @export
  rplc_checkValidTableConnections <- function(prefix_origin, prefix_dest, network_table, trip_table) {
 
-   message(stringr::str_glue("{make_space()}\nPerfroming Replica connection test\nValidating user supplied inputs"))
+   message(stringr::str_glue("{strg_make_space_2()}Perfroming Replica connection test\nValidating user supplied inputs"))
 
 
    if (!bigrquery::bq_table_exists(network_table) || !bigrquery::bq_table_exists(trip_table)) {
