@@ -24,7 +24,9 @@ make_network_link_layer = function(location, folder, auto_save = F, network_obje
 
   if (is.null(network_object)){
     message("Spatial links were made using CSV from file and location...")
-    replica_queried_network = here::here(location, folder, "replica_queried_network.csv") %>%
+    replica_queried_network = here::here(location, folder) %>%
+      list.files(full.names = T, pattern = "csv") %>%
+      .[str_detect(., "replica_network|replica_queried_network")] %>%
       data.table::fread()
     replica_queried_network = sf::st_as_sf(replica_queried_network, wkt = "geometry", crs = 4326)
   } else {
@@ -36,12 +38,12 @@ make_network_link_layer = function(location, folder, auto_save = F, network_obje
   stopifnot("ERROR: Nerwork object must be LINESTRING, please review and fix...." = (unique(st_geometry_type(replica_queried_network))[[1]] %in% c("LINESTRING")))
 
   replica_queried_network = replica_queried_network %>%
-    mutate(flag_highway = case_when(
+    mutate(flag_highway = dplyr::case_when(
       (str_detect(streetName, "^US") |
          str_detect(streetName, "^I [[:digit:]]+") |
          str_detect(streetName, "^SR [[:digit:]]+") |
-         str_detect(streetName, "State Route") |
-         str_detect(streetName, str_glue("^({paste0(pull(tigris::states(), STUSPS), collapse = '|')}) [[:digit:]]+"))
+         str_detect(streetName, "State Route") #|
+         # str_detect(streetName, str_glue("^({paste0(pull(tigris::states(), STUSPS), collapse = '|')}) [[:digit:]]+"))
       )~"Flagged Highway"
       ,T~"Not a Highway")) %>%
     mutate(stableEdgeId = str_trunc(stableEdgeId , 14, "right", "")) %>%
@@ -135,6 +137,8 @@ make_network_centroid_layer = function(location, folder, auto_save = F, network_
 make_trip_origin_point_layer = function(location, folder, auto_save = F
                                         ,first_links_object = NULL){
 
+  #NOTE!~!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  #' @OBSOLETE i dont even get this data anymore
   # location = "data/req_dev"
   # folder = 'data_20230117_092037'
 
@@ -223,7 +227,7 @@ get_tigris_polys_from_replica_index = function(
     capture.output() %>%
     paste0(collapse = "\n")
 
-  stringr::str_glue("{make_space('-')}\n1 - 1 combinations indicate good matches") %>%  message()
+  stringr::str_glue("{gauntlet::strg_make_space_2()}1 - 1 combinations indicate good matches") %>%  message()
   stringr::str_glue("Anything else indicates bad poly matches") %>%  message()
   stringr::str_glue("The following query resulted in the following matches...\n{check_match}") %>%  message()
 
@@ -231,7 +235,7 @@ get_tigris_polys_from_replica_index = function(
     filter(flag_poly_merge == "Both Tirgris and Replica") %>%
     select(!c(flag_blkgrps, flag_index, flag_poly_merge))
 
-  stringr::str_glue("Replica query acquired {nrow(replica_queried_network)} polygons\nPolygon query returning {nrow(block_groups_sub)} polygons\n{100*nrow(block_groups_sub)/nrow(replica_queried_network)}% match{make_space('-')}") %>%  message()
+  stringr::str_glue("Replica query acquired {nrow(replica_queried_network)} polygons\nPolygon query returning {nrow(block_groups_sub)} polygons\n{100*nrow(block_groups_sub)/nrow(replica_queried_network)}% match{gauntlet::strg_make_space_2()}") %>%  message()
 
   if (auto_save) {
     sf::write_sf(block_groups_sub, here::here(location, folder, "acquired_sa_polys.gpkg"))
@@ -309,17 +313,21 @@ aggregate_network_links = function(location, folder, auto_save = F
 
   #perform aggregations
   {
-    message(stringr::str_glue("{make_space()}\nStarting aggreagtion by link and study area destination flag...."))
+    message(stringr::str_glue("{gauntlet::strg_make_space_2()}Starting aggreagtion by link and study area destination flag...."))
 
-    #ANL
+    #ANL - agg network by link ids
     {
-      message(str_glue("{make_space()}\nStarting aggreagtion by link...."))
+      message(str_glue("{gauntlet::strg_make_space_2()}Starting aggreagtion by link...."))
 
       agg_link = network_links %>%
-        count_percent_zscore(
-          grp_c = c('network_link_ids_unnested')
-          ,grp_p = c()
-          ,col = count, rnd = 2) %>%
+        group_by(network_link_ids_unnested) %>%
+        summarise(count = sum(count)) %>%
+        mutate(pct = round(count/sum(count), 2)) %>%
+        ungroup() %>%
+        # gauntlet::count_percent_zscore(
+        #   grp_c = c('network_link_ids_unnested')
+        #   ,grp_p = c()
+        #   ,col = count, rnd = 2) %>%
         mutate(count_nrm_prank_ttl = gauntlet::dgt2(percent_rank(count))
                ,count_nrm_mmax_ttl = gauntlet::dgt2(normalize_min_max(count)))
 
@@ -336,15 +344,20 @@ aggregate_network_links = function(location, folder, auto_save = F
       message("Aggregation complete....")
     }
 
-    #ANLT
+    #ANLT - agg network by link and vehcile type
     {
-      message(str_glue("{make_space()}\nStarting aggreagtion by link and vehicle type...."))
+      message(str_glue("{gauntlet::strg_make_space_2()}Starting aggreagtion by link and vehicle type...."))
 
       agg_link_vehicle_type = network_links %>%
-        count_percent_zscore(
-          grp_c = c('network_link_ids_unnested', 'vehicle_type')
-          ,grp_p = c('network_link_ids_unnested')
-          ,col = count, rnd = 2) %>%
+        group_by(network_link_ids_unnested, vehicle_type) %>%
+        summarise(count = sum(count)) %>%
+        group_by(network_link_ids_unnested) %>%
+        mutate(pct = round(count/sum(count), 2)) %>%
+        ungroup() %>%
+        # count_percent_zscore(
+        #   grp_c = c('network_link_ids_unnested', 'vehicle_type')
+        #   ,grp_p = c('network_link_ids_unnested')
+        #   ,col = count, rnd = 2) %>%
         group_by(network_link_ids_unnested) %>%
         mutate(ttl_count_link = sum(count)) %>%
         ungroup() %>%
@@ -371,13 +384,18 @@ aggregate_network_links = function(location, folder, auto_save = F
       message("Aggregation complete....")
     }
 
-    #ANLTT
+    #ANLTT - agg netowrk by link trip type
     {
       agg_link_flag = network_links %>%
-        count_percent_zscore(
-          grp_c = c('network_link_ids_unnested', 'flag_trip_type')
-          ,grp_p = c('network_link_ids_unnested')
-          ,col = count, rnd = 2) %>%
+        group_by(network_link_ids_unnested, flag_trip_type) %>%
+        summarise(count = sum(count)) %>%
+        group_by(network_link_ids_unnested) %>%
+        mutate(pct = round(count/sum(count), 2)) %>%
+        ungroup() %>%
+        # count_percent_zscore(
+        #   grp_c = c('network_link_ids_unnested', 'flag_trip_type')
+        #   ,grp_p = c('network_link_ids_unnested')
+        #   ,col = count, rnd = 2) %>%
         group_by(network_link_ids_unnested) %>%
         mutate(ttl_count_link = sum(count)) %>%
         ungroup() %>%
@@ -406,50 +424,55 @@ aggregate_network_links = function(location, folder, auto_save = F
     }
 
     #ANLTO
-    {
-      message(str_glue("{make_space()}\nStarting aggreagtion by link, vehicle type, and originating poly....{gauntlet::make_space('-')}"))
-      message("INFO:\nBy default external-external and external-internal trips are removed before aggregation")
-      message("This is because origin based visualizations and calcultions display locations WITHIN/INTERNAL TO the user provided study area...")
-      message(str_glue("Prefiltering makes processing faster and limits size of data object{gauntlet::make_space('-')}"))
-#NOTE: total link volume calculated here will be less than previous
-      #--this is because it only counts int-int, and int-ext trips
-
-
-      agg_link_vehicle_type_origin = network_links %>%
-        filter(!is.na(vehicle_type)) %>%
-        filter(origin_poly != "out of study area") %>%
-        count_percent_zscore(
-          grp_c = c('network_link_ids_unnested', 'vehicle_type', "origin_poly")
-          ,grp_p = c('network_link_ids_unnested', "origin_poly")
-          ,col = count, rnd = 2) %>%
-        group_by(network_link_ids_unnested) %>%
-        mutate(ttl_count_link = sum(count)) %>%
-        ungroup() %>%
-        mutate(count_nrm_prank_ttl = gauntlet::dgt2(percent_rank(ttl_count_link))
-               ,count_nrm_mmax_ttl = gauntlet::dgt2(normalize_min_max(ttl_count_link))) %>%
-        group_by(origin_poly, vehicle_type) %>%
-        mutate(count_nrm_prank = dgt2(percent_rank(count))
-               ,count_nrm_mmax = dgt2(normalize_min_max(count))) %>%
-        ungroup()
-
-      agg_link_vehicle_type_origin_mrg = merge(
-        network_object, agg_link_vehicle_type_origin
-        ,by.x = "stableEdgeId", by.y = "network_link_ids_unnested", all = T)
-
-      nrow(filter(agg_link_flag_mrg, is.na(flag_trip_type)))
-      (nrow(filter(agg_link_flag_mrg, is.na(stableEdgeId))) == 0)
-
-      agg_link_vehicle_type_origin_mrg_pro = agg_link_vehicle_type_origin_mrg %>%
-        filter(!is.na(origin_poly)) %>%
-        mutate(label = str_glue(
-          "Origin: {origin_poly}
-          <br>Link name: {streetName} ({highway})
-          <br>Link Volume: {ttl_count_link} (int-int/ext trips)
-          <hr>
-          Metrics Adj for Origin and Vehicle Type: {vehicle_type}
-          <br>Link Volume: {count} - {100*count_nrm_mmax}% (Min-Max norm.)"))
-
-      message("Aggregation complete....")}
+#     {
+#       message(str_glue("{gauntlet::strg_make_space_2()}Starting aggreagtion by link, vehicle type, and originating poly....{gauntlet::strg_make_space_2()}"))
+#       message("INFO:\nBy default external-external and external-internal trips are removed before aggregation")
+#       message("This is because origin based visualizations and calcultions display locations WITHIN/INTERNAL TO the user provided study area...")
+#       message(str_glue("Prefiltering makes processing faster and limits size of data object{gauntlet::strg_make_space_2()}"))
+# #NOTE: total link volume calculated here will be less than previous
+#       #--this is because it only counts int-int, and int-ext trips
+#
+#
+#       agg_link_vehicle_type_origin = network_links %>%
+#         filter(!is.na(vehicle_type)) %>%
+#         filter(origin_poly != "out of study area") %>%
+#         group_by(network_link_ids_unnested, vehicle_type, origin_poly) %>%
+#         summarise(count = sum(count)) %>%
+#         group_by(network_link_ids_unnested, origin_poly) %>%
+#         mutate(pct = round(count/sum(count), 2)) %>%
+#         ungroup() %>%
+#         # count_percent_zscore(
+#         #   grp_c = c('network_link_ids_unnested', 'vehicle_type', "origin_poly")
+#         #   ,grp_p = c('network_link_ids_unnested', "origin_poly")
+#         #   ,col = count, rnd = 2) %>%
+#         group_by(network_link_ids_unnested) %>%
+#         mutate(ttl_count_link = sum(count)) %>%
+#         ungroup() %>%
+#         mutate(count_nrm_prank_ttl = gauntlet::dgt2(percent_rank(ttl_count_link))
+#                ,count_nrm_mmax_ttl = gauntlet::dgt2(normalize_min_max(ttl_count_link))) %>%
+#         group_by(origin_poly, vehicle_type) %>%
+#         mutate(count_nrm_prank = dgt2(percent_rank(count))
+#                ,count_nrm_mmax = dgt2(normalize_min_max(count))) %>%
+#         ungroup()
+#
+#       agg_link_vehicle_type_origin_mrg = merge(
+#         network_object, agg_link_vehicle_type_origin
+#         ,by.x = "stableEdgeId", by.y = "network_link_ids_unnested", all = T)
+#
+#       nrow(filter(agg_link_flag_mrg, is.na(flag_trip_type)))
+#       (nrow(filter(agg_link_flag_mrg, is.na(stableEdgeId))) == 0)
+#
+#       agg_link_vehicle_type_origin_mrg_pro = agg_link_vehicle_type_origin_mrg %>%
+#         filter(!is.na(origin_poly)) %>%
+#         mutate(label = str_glue(
+#           "Origin: {origin_poly}
+#           <br>Link name: {streetName} ({highway})
+#           <br>Link Volume: {ttl_count_link} (int-int/ext trips)
+#           <hr>
+#           Metrics Adj for Origin and Vehicle Type: {vehicle_type}
+#           <br>Link Volume: {count} - {100*count_nrm_mmax}% (Min-Max norm.)"))
+#
+#       message("Aggregation complete....")}
   }
 
   #save out
@@ -457,7 +480,8 @@ aggregate_network_links = function(location, folder, auto_save = F
     list_objects = list(agg_link = agg_link_mrg_pro
                         ,agg_link_flag = agg_link_flag_mrg_pro
                         ,agg_link_vehicle_type = agg_link_vehicle_type_mrg_pro
-                        ,agg_link_vehicle_type_origin = agg_link_vehicle_type_origin_mrg_pro)
+                        # ,agg_link_vehicle_type_origin = agg_link_vehicle_type_origin_mrg_pro
+                        )
 
     if (auto_save) {
       message("You elected to automatically save the returned list object!")
@@ -523,7 +547,7 @@ make_agg_network_shapefile_links = function(location, folder, auto_save = F
     network_object = network_link_object
   }
 
-  message(str_glue("Making shapefiles by merging data centroids with aggregated count data{make_space('-')}"))
+  message(str_glue("Making shapefiles by merging data centroids with aggregated count data\n{gauntlet::strg_make_space_2()}"))
   message("This may take awhile depending on the size of the network and count data")
 
   temp_object = c("agg_link_flag", "agg_link_vehicle_type", "agg_link_vehicle_type_origin") %>%
@@ -631,7 +655,7 @@ make_agg_network_shapefile_centroids = function(location, folder, auto_save = F
     network_centroid_object = network_centroid_object
   }
 
-  message(str_glue("Making shapefiles by merging data centroids with aggregated count data{make_space('-')}"))
+  message(str_glue("Making shapefiles by merging data centroids with aggregated count data\n{gauntlet::strg_make_space_2()}"))
   message("This may take awhile depending on the size of the network and count data")
 
   temp_object = c("agg_link_flag", "agg_link_vehicle_type", "agg_link_vehicle_type_origin") %>%

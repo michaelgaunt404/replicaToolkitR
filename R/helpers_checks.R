@@ -38,7 +38,7 @@ check_links_download <- function(location, folder){
             unique()
           ,by.x = 'stableEdgeId', by.y = "network_link_ids_unnested", all = T)
 
-  str_glue("The replica network link volume table returned {check_subset_agg} unique network links\nThe network subset download returned {check_subset} unique network links{make_space('-')}\n{100*dgt3(check_subset_agg/check_subset)}% of queried links have trip counts associated with them{make_space('-')}") %>%
+  str_glue("The replica network link volume table returned {check_subset_agg} unique network links\nThe network subset download returned {check_subset} unique network links\n{gauntlet::strg_make_space_2()}{100*dgt3(check_subset_agg/check_subset)}% of queried links have trip counts associated with them\n{gauntlet::strg_make_space_2()}") %>%
     message()
 
   message(

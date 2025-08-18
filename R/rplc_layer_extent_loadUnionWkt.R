@@ -21,7 +21,7 @@
 #'
 #' @export
 rplc_layer_extent_loadUnionWkt = function(layer, layer_name) {
-  message(stringr::str_glue("{strg_make_space_2()}\nStarting extent layer processing...."))
+  message(stringr::str_glue("{gauntlet::strg_make_space_2()}Starting extent layer processing...."))
 
   if (is.character(layer)) {
     message(stringr::str_glue("String detected for {layer_name}\nReading file now...."))

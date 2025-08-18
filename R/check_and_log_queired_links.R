@@ -11,7 +11,7 @@
 #' @return None.
 #'
 #' @export
-check_and_log_queired_links <- function(counts_object, query_links, logger_object) {
+check_and_log_queired_links = function(counts_object, query_links, logger_object) {
   if (nrow(counts_object) == 0) {
     mes_fatal <- "Number of returned links was zero\n...change bounding box\n...stopping...."
     log4r::fatal(logger_object, mes_fatal)

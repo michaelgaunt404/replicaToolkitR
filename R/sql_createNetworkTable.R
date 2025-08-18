@@ -18,8 +18,12 @@
 sql_createNetworkTable <- function(customer_name
                                ,network_table = network_table
                                ,links_pro = links_pro
-                               ,wkt_object) {
+                               ,wkt_object
+                               ,highway_regrex = NULL) {
   message(stringr::str_glue("{strg_make_space_2()}Creating network table now...."))
+
+  if(is.null(highway_regrex)){
+    message("No regrex provided for by user - will not perfrom roadway name string subsetting...")
 
   query <- stringr::str_glue("select * from (
     select *,
@@ -31,6 +35,25 @@ sql_createNetworkTable <- function(customer_name
     where highway in ({links_pro})
   )
   where flag_contains = TRUE")
+  } else {
+    message("Regrex provided for by user - will perfrom roadway name string subsetting...")
+
+    temp_filter = paste0("CONTAINS_SUBSTR(streetName, '", highway_regrex, "')", collapse = " OR ")
+
+    query <- stringr::str_glue("select * from (
+    select *,
+    ST_INTERSECTS(
+      ST_GEOGFROMTEXT('{wkt_object}'),
+      geometry
+    ) as flag_contains
+    from `{network_table}`
+    where highway in ({links_pro})
+  )
+  where flag_contains = TRUE
+  and ({temp_filter})")
+
+
+  }
 
   table_network <- bigrquery::bq_project_query(customer_name, query)
   return(table_network)

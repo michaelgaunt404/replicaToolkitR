@@ -13,9 +13,9 @@
 #' queryAggByLinkSumSubset("your_project_name", "your_agg_by_link_subset_table")
 #'
 #' @export
-createAggByLinkSumSubsetTable <- function(customer_name, table_agg_by_link_subset) {
+sql_createAggByLinkSumSubsetTable <- function(customer_name, table_agg_by_link_subset) {
 
-  message(stringr::str_glue("{make_space()}\nCounting number of links by their total volume..."))
+  message(stringr::str_glue("{gauntlet::strg_make_space_2()}Counting number of links by their total volume..."))
 
   query <- str_glue("select flag_link, count(*) as count
     from (
@@ -48,7 +48,7 @@ createAggByLinkSumSubsetTable <- function(customer_name, table_agg_by_link_subse
     mutate(count_rm = cumsum(count)
            ,percent_rm = cumsum(percent))
 
-  message(stringr::str_glue("Completed{make_space()}"))
+  message(stringr::str_glue("Completed\n{gauntlet::strg_make_space_2()}"))
 
   return(table_dl_pro)
 }

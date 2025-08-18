@@ -1,6 +1,6 @@
 query_flow_between_od_pairs = function(
     poly_gen_att
-    ,bb_sa_layer
+    ,bb_network_layer
     ,query_links = c('highway','corridor','road'
                      ,'motorway','motorway_link'
                      ,'trunk','trunk_link'
@@ -19,14 +19,14 @@ query_flow_between_od_pairs = function(
     ,prefix_dest = "destination"
     ,input_folder_write
     # ,query_network = T
-    # ,max_record = 1000
+    ,max_record = 1000
 ){
 
   #mk: standard_init========~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   {
-    message(stringr::str_glue("{strg_make_space_2()}{strg_make_space_2()}REPLICATOOLKITR: Initializing function run..."))
-    query_start = gauntlet::strg_clean_date()
+    message(stringr::str_glue("{gauntlet::strg_make_space_2()}{gauntlet::strg_make_space_2()}REPLICATOOLKITR: Initializing function run..."))
+    query_start = gauntlet::strg_clean_datetime(strip = T)
     network_table = str_glue("{customer_name}.{data_set_location}.{data_set_location}_{data_set_period}_network_segments")
     trip_table = str_glue("{customer_name}.{data_set_location}.{data_set_location}_{data_set_period}_{data_set_day}_trip")
     mode_type_pro = paste0("'", mode_type, "'", collapse = ", ")
@@ -39,7 +39,7 @@ query_flow_between_od_pairs = function(
 
     #create_run_storage_location
     #note: don't need to do this is everything is stored in a single qs object
-    folder = here::here(input_folder_write, stringr::str_glue("data_{query_start}"))
+    folder = here::here(input_folder_write, stringr::str_glue("data_od_flow_{query_start}"))
     stopifnot("Folder location exists already, stop and prevent overwriting files" = (dir.exists(folder) != T))
     dir.create(folder)
 
@@ -47,30 +47,28 @@ query_flow_between_od_pairs = function(
     #note: how i save the contents of file out has implications if I have a log file I think
     #potentially make a temp file - then readlines and then save out with qs
     #i think tho you need a hard copy since that will be there even if there is a failed run
-    log_file = here::here(input_folder_write, stringr::str_glue("data_{query_start}/log_file.txt"))
+    log_file = here::here(folder, "log_file.txt")
     logger = log4r::logger("DEBUG", appenders = log4r::file_appender(log_file))
     log4r::info(logger, "Query started")
     message(stringr::str_glue('Query started at {query_start}\nFile path to log file:\n{log_file}'))
     #i do think this is redundant - this all can be written in a qs object
     # log4r::info(logger,
-    #             stringr::str_glue("{make_space()}\nLogging Query Inputs\nPath to network boundary file: {bb_network_layer}\nPath to study area boundary file: {bb_sa_layer}\nCutsomer Name: {customer_name}\nSchema Table: {trip_table}\nLinks Provided:{make_space('-', n = 10)}\n{paste0(stringr::str_glue('{sort(query_links)}'),collapse = '\n')}{make_space('-', n = 10)}"))
+    #             stringr::str_glue("{make_space()}\nLogging Query Inputs\nPath to network boundary file: {bb_network_layer}\nPath to study area boundary file: {bb_network_layer}\nCutsomer Name: {customer_name}\nSchema Table: {trip_table}\nLinks Provided:{make_space('-', n = 10)}\n{paste0(stringr::str_glue('{sort(query_links)}'),collapse = '\n')}{make_space('-', n = 10)}"))
 
-    message(str_glue("Initial set up complete\nNo fatal errors detected{strg_make_space_2(last = F)}"))
+    message(str_glue("Initial set up complete\nNo fatal errors detected{gauntlet::strg_make_space_2(last = F)}"))
   }
-
-
 
   #mk: wkt instances of code~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   {
     message("Loading and processing boundary objects")
     list_wkt_objects = list(
-      list(bb_sa_layer, poly_gen_att)
-      ,list("sa_layer", "poly_gen_att")
+      list(bb_network_layer, poly_gen_att)
+      ,list("network_layer", "poly_gen_att")
     ) %>%
       pmap(rplc_layer_extent_loadUnionWkt)
 
-    sa_wkt = list_wkt_objects[[1]]
+    network_wkt = list_wkt_objects[[1]]
     poly_wkt = list_wkt_objects[[2]]
   }
 
@@ -80,13 +78,15 @@ query_flow_between_od_pairs = function(
   #note: creates subset of network using study area extent
   #----- returns all roads in study area and then filters only for requested link types
   {
-    table_network = createNetworkTable(
+    table_network = sql_createNetworkTable(
       customer_name = customer_name
       ,network_table = network_table
       ,links_pro = links_pro
-      ,wkt_object = sa_wkt)
+      ,wkt_object = list_wkt_objects[[1]]
+      ,highway_regrex = input_highway_regrex
+    )
 
-    highway_counts = createNetworkLinkCountTable(
+    highway_counts = sql_createNetworkLinkCountTable(
       customer_name = customer_name
       ,table_network = table_network)
 
@@ -111,10 +111,10 @@ query_flow_between_od_pairs = function(
       from (
   select *
   ,ST_CONTAINS(
-  ST_GEOGFROMTEXT('{sa_wkt}')
+  ST_GEOGFROMTEXT('{poly_wkt}')
   ,ST_GEOGPOINT({prefix_origin}_lng, {prefix_origin}_lat)) as flag_origin_in_sa
   ,ST_CONTAINS(
-  ST_GEOGFROMTEXT('{sa_wkt}')
+  ST_GEOGFROMTEXT('{poly_wkt}')
   ,ST_GEOGPOINT({prefix_dest}_lng, {prefix_dest}_lat)) as flag_dest_in_sa
   from `{trip_table}`
   where 1=1
@@ -124,16 +124,18 @@ query_flow_between_od_pairs = function(
   and (flag_origin_in_sa = TRUE
   or flag_dest_in_sa = TRUE);"))
 
-
   #mk: query_expand_grid_pairs~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #TODO: this needs to be more robust, issues with this as an input
   #note: mg20240613 I dont really remember what this means
   query_grid = expand.grid(
-    generator = poly_gen_att %>% filter(group == "generator") %>% pull(Name)
-    ,terminal = poly_gen_att %>% filter(group == "terminal") %>% pull(Name)) %>%
+    generator = poly_gen_att %>% filter(str_detect(group, "generator")) %>% pull(Name)
+    ,terminal = poly_gen_att %>% filter(str_detect(group, "terminal")) %>% pull(Name)) %>%
     mutate(across(c(everything()), as.character)) %>%
-    unique()
+    unique() %>%
+    filter(generator != terminal)
+
+
 
   #TODO: you can make the TRUE inputs at the end of sql to FALSE to get
   #---only emanating or leaving trips
@@ -146,17 +148,24 @@ query_flow_between_od_pairs = function(
 
       # browser()
 
+      # temp_origin = query_grid$generator[1]
+      # temp_destination = query_grid$terminal[1]
+
       temp_origin = .x
       temp_destination = .y
 
       #TODO:this needs a try catch
       #especially if query limits are hit
       #need to print and write out tables to script
-      message(str_glue("{strg_make_space_2()}Querying {temp_origin} to {temp_destination}"))
+      message(str_glue("{gauntlet::strg_make_space_2()}Querying {temp_origin} to {temp_destination}"))
 
       poly_gen_att_unique = poly_gen_att %>% select(Name) %>%  unique()
       origin_wkt = wellknown::sf_convert(poly_gen_att_unique %>%  filter(Name == temp_origin))
       destination_wkt = wellknown::sf_convert(poly_gen_att_unique %>%  filter(Name == temp_destination))
+
+
+      # --from `{replica_temp_tbl_name(table_trip_subset)}`
+# --from `{replica_temp_tbl_name(table_trip_subset)}`
 
       table = bigrquery::bq_project_query(
         customer_name
@@ -171,13 +180,14 @@ ST_GEOGFROMTEXT('{origin_wkt}')
 ,ST_CONTAINS(
 ST_GEOGFROMTEXT('{destination_wkt}')
 ,ST_GEOGPOINT(end_lng, end_lat)) as flag_contains_destination
-from `{replica_temp_tbl_name(table_trip_subset)}`
+from {trip_table}
 where 1=1
 and mode in ({mode_type_pro})
 )
 where 1=1
 and flag_contains_origin = TRUE
-and flag_contains_destination = TRUE;"))
+and flag_contains_destination = TRUE
+        ;"))
 
   count = bigrquery::bq_table_nrow(table)
 
@@ -201,18 +211,27 @@ table_custom_poly_list_data_noLinks = bigrquery::bq_project_query(
   ,stringr::str_glue('select * except(network_link_ids, transit_route_ids) from {replica_temp_tbl_name(table_custom_poly_list_data)};')
 )
 
+table_custom_poly_list_data_noLinks_all_persons = bigrquery::bq_project_query(
+  customer_name
+  ,stringr::str_glue('select * except (network_link_ids, transit_route_ids)
+from {trip_table}
+where 1 = 1
+and person_id in (
+  select DISTINCT person_id from {replica_temp_tbl_name(table_custom_poly_list_data_noLinks)}
+);')
+)
 
 ###CREATE: Volume tables---
 #subset network count
 {
-  table_agg_by_link_subset = createAggNetworkLinksTable_flow_btwn_od(
+  table_agg_by_link_subset = sql_createAggNetworkLinksTable_flow_btwn_od(
     customer_name = customer_name
     ,table_trips_thru_zone = table_custom_poly_list_data
     ,table_network = table_network)
 
   log4r::info(logger, stringr::str_glue("table_agg_by_link_subset: {replica_temp_tbl_name(table_agg_by_link_subset)}"))
 
-  summary_table_link_counts = createAggByLinkSumSubsetTable(
+  summary_table_link_counts = sql_createAggByLinkSumSubsetTable(
     customer_name = customer_name
     ,table_agg_by_link_subset = table_agg_by_link_subset
   )
@@ -220,7 +239,7 @@ table_custom_poly_list_data_noLinks = bigrquery::bq_project_query(
 
   #message here to reduce the size of the network!
   gauntlet::log_and_info(
-    str_glue("{make_space()}\nUser supplied inputs resulted in {gauntlet::strg_pretty_num(sum(summary_table_link_counts$count))} records in link aggregation table....\nSee the following table:{make_space('-', 30)}\n{paste0(capture.output(summary_table_link_counts), collapse = '\n')}{make_space('-', 30)}\nBy default, links with less than 5 counts on them are removed\n---this would result in downloading {summary_table_link_counts[[3, 6]]} records....\n---An ideal MAXIMUM number of records is ~500,000{gauntlet::make_space('-')}")
+    str_glue("{gauntlet::strg_make_space_2()}User supplied inputs resulted in {gauntlet::strg_pretty_num(sum(summary_table_link_counts$count))} records in link aggregation table....\nSee the following table:{paste0(capture.output(summary_table_link_counts), collapse = '\n')}\n{gauntlet::strg_make_space_2()}By default, links with less than 5 counts on them are removed\n---this would result in downloading {summary_table_link_counts[[3, 6]]} records....\n---An ideal MAXIMUM number of records is ~500,000{gauntlet::strg_make_space_2(last = F)}")
     ,logger)
   message(stringr::str_glue("If your selection has resulted in too many records, you can............
          1) Decrease the study area layer resulting in less originating polys
@@ -284,36 +303,27 @@ table_custom_poly_list_data_noLinks = bigrquery::bq_project_query(
   }
 }
 
+#sec: data_extraction====================================================
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+list(
+  list(table_network, "replica_network")
+  ,list(table_custom_poly_list_data_noLinks, "table_trips_subset")
+  ,list(table_custom_poly_list_data_noLinks_all_persons, "table_trips_subset_all_person_trips")
+  ,list(table_agg_by_link_subset_limited, "table_agg_network_vols")
+) %>%
+  map(~{
+    # browser()
+    temp_table = .x[[1]]
+    temp_name = .x[[2]]
 
-#data_download
-{
-  message("Starting data download now.....")
-
-  if (gauntlet::robust_prompt_used("download the network links")){
-    here(folder, "replica_queried_network.csv") %>%
-      write.csv(
-        bigrquery::bq_table_download(
-          table_network, n_max = max_record)
-        ,file = ., row.names = F)
-  } else {
-    gauntlet::log_and_warn("User did not elect to download the network at function runtime.....")
-  }
-
-  #this one is good
-  here(folder, "table_agg_by_link_subset_limited.csv") %>%
-    write.csv(
-      bigrquery::bq_table_download(table_agg_by_link_subset_limited, n_max = max_record)
-      , file = ., row.names = F)
-
-  here(folder, "table_raw_trip.csv") %>%
-    write.csv(
-      bigrquery::bq_table_download(
-        table_custom_poly_list_data_noLinks, n_max = max_record
-      )
-      , file = ., row.names = F)
-
-  message("All data downloaded.....")
-}
-
-
+    check_to_download_bqtable(
+      bq_table = temp_table
+      ,file_name = temp_name
+      ,table_name = temp_name
+      ,max_record = max_record
+      ,folder = folder
+      ,return_obj = F
+      ,write_format = c("both")
+    )
+  })
 }

@@ -14,7 +14,7 @@
 #'
 #' @export
 sql_createAggNetworkLinksTable <- function(customer_name, table_trips_thru_zone, table_network, mvmnt_query = F) {
-  message(stringr::str_glue("{strg_make_space_2()}Link aggreations commencing...."))
+  message(stringr::str_glue("{gauntlet::strg_make_space_2()}Link aggreations commencing...."))
 
   message(stringr::str_glue("Only links that fit user supplied criteria will be filtered"))
 
@@ -42,7 +42,7 @@ sql_createAggNetworkLinksTable <- function(customer_name, table_trips_thru_zone,
 
   table_agg_network_links <- bigrquery::bq_project_query(customer_name, query)
 
-  message(stringr::str_glue("Completed{strg_make_space_2()}"))
+  message(stringr::str_glue("Completed{gauntlet::strg_make_space_2()}"))
 
   return(table_agg_network_links)
 }

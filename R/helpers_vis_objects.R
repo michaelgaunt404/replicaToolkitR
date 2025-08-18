@@ -27,7 +27,7 @@ inspect_queried_network = function(location,folder,network_links_object = NULL){
   # network_links_object = NULL
   # auto_save = F
 
-  message(stringr::str_glue("{gauntlet::make_space('-')}\nW A R N I N G{gauntlet::make_space('-')}\nNetwork links are converted to LINK CENTROIDS and displayed in the map....\nPolylines cannot be filtered using the packages that create this feature{gauntlet::make_space()}"))
+  message(stringr::str_glue("{gauntlet::strg_make_space_2()}W A R N I N G\n{gauntlet::strg_make_space_2()}\nNetwork links are converted to LINK CENTROIDS and displayed in the map....\nPolylines cannot be filtered using the packages that create this feature\n{gauntlet::strg_make_space_2()}"))
 
   if (is.null(network_links_object)){
     message("Map being created from spatial links object given file and location...")
