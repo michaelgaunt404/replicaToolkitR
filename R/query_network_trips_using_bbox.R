@@ -50,7 +50,8 @@ query_network_trip_using_bbox = function(
     ,input_folder_write
     ,input_folder_suffix = NULL
     ,max_record = 1000
-    ,input_highway_regrex = NULL){
+    ,input_highway_regrex = NULL
+    ,check_aux_tables = NULL){
 
   #commented out inputs
   {
@@ -353,7 +354,10 @@ from {replica_temp_tbl_name(table_trips_thru_zone)};'))
 
   # table_trips_thru_zone
 
-  check_aux_tables = gauntlet::robust_prompt_used("Create/download demo and trip chain tables?")
+  if(is.null(check_aux_tables)){
+    check_aux_tables = gauntlet::robust_prompt_used("Create/download demo and trip chain tables?")
+  }
+
 
   if(check_aux_tables){
     table_pop_demo  = bigrquery::bq_project_query(
