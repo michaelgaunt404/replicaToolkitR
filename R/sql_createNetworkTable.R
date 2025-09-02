@@ -55,6 +55,8 @@ sql_createNetworkTable <- function(customer_name
 
   }
 
+  # browser()
+
   table_network <- bigrquery::bq_project_query(customer_name, query)
   return(table_network)
 }

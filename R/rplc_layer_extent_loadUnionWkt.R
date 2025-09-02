@@ -20,7 +20,7 @@
 #' converted_layer <- convert_to_wkt(layer, layer_name)
 #'
 #' @export
-rplc_layer_extent_loadUnionWkt = function(layer, layer_name) {
+rplc_layer_extent_loadUnionWkt = function(layer, layer_name, use_s2 = T) {
   message(stringr::str_glue("{gauntlet::strg_make_space_2()}Starting extent layer processing...."))
 
   if (is.character(layer)) {
@@ -41,7 +41,21 @@ rplc_layer_extent_loadUnionWkt = function(layer, layer_name) {
   }
 
   # temp_wkt <- wellknown::sf_convert(sf::st_union(temp_object))
-  temp_wkt <- st_as_text(sf::st_union(temp_object))
+  # temp_wkt <- st_as_text(sf::st_union(temp_object))
+
+
+  if(use_s2){
+    message("SF method used to produce WKT")
+
+    temp_wkt <- st_as_text(sf::st_union(temp_object))
+
+  } else {
+    message("S2 method used to produce WKT")
+
+    temp_s2 <- s2::s2_geog_from_wkb(st_as_binary(st_geometry(temp_object)))
+    temp_s2 <- s2::s2_union(g)    # handles overlaps and cleans edges
+    temp_wkt = s2::s2_as_text(temp_s2)
+  }
 
   message("Done")
 
