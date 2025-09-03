@@ -61,9 +61,9 @@ check_to_download_bqtable <- function(
     if (dl_check) {
       message("User elected to download this table")
 
-
-      bq_table <- bigrquery::bq_table_download(bq_table, n_max = max_record
-                                               ,page_size = 2000)
+      bq_table <- bigrquery::bq_table_download(
+        bq_table, n_max = max_record
+        ,page_size = 2000)
 
       path_base <- here::here(folder, file_name)
 

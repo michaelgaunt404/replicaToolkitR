@@ -12,20 +12,20 @@
 #' @return A temporary BigQuery table containing filtered network data.
 #'
 #' @examples
-#' createNetworkTable("your_project_name", "your_network_table", c("highway", "street"), list_of_wkt_objects)
+#' sql_createNetworkTable("your_project_name", "your_network_table", c("highway", "street"), list_of_wkt_objects)
 #'
 #' @export
 sql_createNetworkTable <- function(customer_name
-                               ,network_table = network_table
-                               ,links_pro = links_pro
-                               ,wkt_object
-                               ,highway_regrex = NULL) {
-  message(stringr::str_glue("{strg_make_space_2()}Creating network table now...."))
+                                   ,network_table = network_table
+                                   ,links_pro = links_pro
+                                   ,wkt_object
+                                   ,highway_regrex = NULL) {
+  message(stringr::str_glue("{gauntlet::strg_make_space_2()}Creating network table now...."))
 
   if(is.null(highway_regrex)){
     message("No regrex provided for by user - will not perfrom roadway name string subsetting...")
 
-  query <- stringr::str_glue("select * from (
+    query <- stringr::str_glue("select * from (
     select *,
     ST_INTERSECTS(
       ST_GEOGFROMTEXT('{wkt_object}'),

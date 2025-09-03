@@ -20,16 +20,16 @@ sql_createAggNetworkLinksTable <- function(customer_name, table_trips_thru_zone,
 
   #TODO - this can be potentially be optimized to take a string to define attributes to aggregate on
 
-  cols_outter = str_glue("mode, vehicle_type, flag_sa_origin, flag_sa_destination,
+  cols_outter = stringr::str_glue("mode, vehicle_type, flag_sa_origin, flag_sa_destination,
     network_link_ids_unnested {ifelse(mvmnt_query, ', mvmnt, mvmnt_seq', '') }")
 
   # cols_outter = str_glue("mode, vehicle_type, origin_poly, flag_sa_origin, flag_sa_destination,
   #   network_link_ids_unnested {ifelse(mvmnt_query, ', mvmnt, mvmnt_seq', '') }")
 
-  cols_inner = str_glue("activity_id, mode, vehicle_type, origin_bgrp, origin_poly, flag_sa_origin, destination_bgrp, destination_poly, flag_sa_destination
+  cols_inner = stringr::str_glue("activity_id, mode, vehicle_type, origin_bgrp, origin_poly, flag_sa_origin, destination_bgrp, destination_poly, flag_sa_destination
                         ,network_link_ids_unnested {ifelse(mvmnt_query, ', mvmnt, mvmnt_seq', '') }")
 
-  query <- str_glue("select {cols_outter}, count(*) as count
+  query <- stringr::str_glue("select {cols_outter}, count(*) as count
     from (
     select {cols_inner},
         ROW_NUMBER() OVER (PARTITION BY activity_id) AS index
@@ -40,7 +40,7 @@ sql_createAggNetworkLinksTable <- function(customer_name, table_trips_thru_zone,
              (select distinct stableEdgeId from {replica_temp_tbl_name(table_network)})
     group by {cols_outter}")
 
-  table_agg_network_links <- bigrquery::bq_project_query(customer_name, query)
+  table_agg_network_links = bigrquery::bq_project_query(customer_name, query)
 
   message(stringr::str_glue("Completed{gauntlet::strg_make_space_2()}"))
 

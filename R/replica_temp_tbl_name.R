@@ -19,7 +19,7 @@
 #'
 #'replica_temp_tbl_name(temp)
 replica_temp_tbl_name = function(object) {
-  str_glue("{object[[1]]}.{object[[2]]}.{object[[3]]}")
+  stringr::str_glue("{object[[1]]}.{object[[2]]}.{object[[3]]}")
 }
 
 

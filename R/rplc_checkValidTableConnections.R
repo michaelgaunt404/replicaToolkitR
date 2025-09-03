@@ -25,29 +25,29 @@
  #' @import bigrquery
  #'
  #' @export
- rplc_checkValidTableConnections <- function(prefix_origin, prefix_dest, network_table, trip_table) {
+rplc_checkValidTableConnections <- function(prefix_origin, prefix_dest, network_table, trip_table) {
 
-   message(stringr::str_glue("{strg_make_space_2()}Perfroming Replica connection test\nValidating user supplied inputs"))
+  message(stringr::str_glue("{gauntlet::strg_make_space_2()}Perfroming Replica connection test\nValidating user supplied inputs"))
 
 
-   if (!bigrquery::bq_table_exists(network_table) || !bigrquery::bq_table_exists(trip_table)) {
-     stop("Error: One or more of the specified network or trip tables does not exist")
-   }
+  if (!bigrquery::bq_table_exists(network_table) || !bigrquery::bq_table_exists(trip_table)) {
+    stop("Error: One or more of the specified network or trip tables does not exist")
+  }
 
-   temp_network_table_dl <- bigrquery::bq_table_download(network_table, n_max = 1)
-   temp_trip_table_dl <- bigrquery::bq_table_download(trip_table, n_max = 1)
+  temp_network_table_dl <- bigrquery::bq_table_download(network_table, n_max = 1)
+  temp_trip_table_dl <- bigrquery::bq_table_download(trip_table, n_max = 1)
 
-   if (nrow(temp_network_table_dl) == 0 || nrow(temp_trip_table_dl) == 0) {
-     stop("Error: Downloaded table(s) have no records. Either the network, trip or both tables were incorrectly specified")
-   }
+  if (nrow(temp_network_table_dl) == 0 || nrow(temp_trip_table_dl) == 0) {
+    stop("Error: Downloaded table(s) have no records. Either the network, trip or both tables were incorrectly specified")
+  }
 
-   valid_origin_col <- paste0(prefix_origin, c("_lat", "_lng"))
-   valid_dest_col <- paste0(prefix_dest, c("_lat", "_lng"))
+  valid_origin_col <- paste0(prefix_origin, c("_lat", "_lng"))
+  valid_dest_col <- paste0(prefix_dest, c("_lat", "_lng"))
 
-   if (!all(valid_origin_col %in% colnames(temp_trip_table_dl)) ||
-       !all(valid_dest_col %in% colnames(temp_trip_table_dl))) {
-     stop("Error: Invalid column names in the downloaded trip table.")
-   }
+  if (!all(valid_origin_col %in% colnames(temp_trip_table_dl)) ||
+      !all(valid_dest_col %in% colnames(temp_trip_table_dl))) {
+    stop("Error: Invalid column names in the downloaded trip table.")
+  }
 
-   message(str_glue("Table connections validated"))
- }
+  message(stringr::str_glue("Table connections validated"))
+}

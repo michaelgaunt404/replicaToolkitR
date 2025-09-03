@@ -27,6 +27,13 @@
 #' @examples
 #'
 #' #none
+#'
+#' @importFrom bigrquery bq_project_query
+#' @importFrom here here
+#' @importFrom log4r file_appender info logger warn
+#' @importFrom purrr map pmap
+#' @importFrom stringr str_glue
+#' @importFrom magrittr %>%
 query_network_trip_using_bbox = function(
     bb_network_layer
     ,bb_sa_layer
@@ -53,23 +60,6 @@ query_network_trip_using_bbox = function(
     ,input_highway_regrex = NULL
     ,check_aux_tables = NULL){
 
-  #commented out inputs
-  {
-    # input_folder_write = "req_test/data"
-    # data_set_location = "northwest"
-    # data_set_period = "2021_Q4"
-    # data_set_day = "thursday"
-    # customer_name = "replica-customer"
-    # mode_type = c('BIKING')
-    # query_links = c("primary", "secondary", "tertiary", "footway")
-    # prefix_origin = "origin"v
-    # prefix_dest = "destination"
-    # bb_sa_layer = mapedit::drawFeatures() %>% st_transform(4326)
-    # bb_network_layer = mapedit::drawFeatures() %>% st_transform(4326)
-
-  }
-
-
   #sec: Initialization Block====================================================
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   {
@@ -77,9 +67,9 @@ query_network_trip_using_bbox = function(
     message(stringr::str_glue("{gauntlet::strg_make_space_2()}{gauntlet::strg_make_space_2()}REPLICATOOLKITR: Initializing function run............"))
 
     # ── Create references to tables in BigQuery ──
-    network_table <- str_glue("{customer_name}.{data_set_location}.{data_set_location}_{data_set_period}_network_segments")
-    trip_table    <- str_glue("{customer_name}.{data_set_location}.{data_set_location}_{data_set_period}_{data_set_day}_trip")
-    person_table  <- str_glue("{customer_name}.{data_set_location}.{data_set_location}_{data_set_period}_population")
+    network_table <- stringr::str_glue("{customer_name}.{data_set_location}.{data_set_location}_{data_set_period}_network_segments")
+    trip_table    <- stringr::str_glue("{customer_name}.{data_set_location}.{data_set_location}_{data_set_period}_{data_set_day}_trip")
+    person_table  <- stringr::str_glue("{customer_name}.{data_set_location}.{data_set_location}_{data_set_period}_population")
 
     # ── Validate access to required tables ──
     rplc_checkValidTableConnections(
@@ -94,9 +84,9 @@ query_network_trip_using_bbox = function(
 
     # ── Construct the folder path where results/logs will be written ──
     folder <- if (is.null(input_folder_suffix)) {
-      here::here(input_folder_write, str_glue("data_thru_bbox_{query_start}"))
+      here::here(input_folder_write, stringr::str_glue("data_thru_bbox_{query_start}"))
     } else {
-      here::here(input_folder_write, str_glue("data_thru_bbox_{query_start}_{input_folder_suffix}"))
+      here::here(input_folder_write, stringr::str_glue("data_thru_bbox_{query_start}_{input_folder_suffix}"))
     }
 
     # ── Prevent overwriting an existing folder ──
@@ -107,7 +97,7 @@ query_network_trip_using_bbox = function(
     log_file <- here::here(folder, "log_file.txt")  # fixed missing quotes around log_file.txt
     logger <- log4r::logger("DEBUG", appenders = log4r::file_appender(log_file))
     log4r::info(logger, "Query started")
-    message(str_glue('Query started at {query_start}\nFile path to log file:\n{log_file}'))
+    message(stringr::str_glue('Query started at {query_start}\nFile path to log file:\n{log_file}'))
 
     # ── Construct SQL 'WHERE' clause components from vectors ──
     mode_type_pro <- paste0("'", mode_type, "'", collapse = ", ")
@@ -115,7 +105,7 @@ query_network_trip_using_bbox = function(
     links_where_statement <- stringr::str_glue("where highway in ({links_pro})")
 
     # ── Final message indicating successful setup ──
-    message(str_glue("Initial set up complete\nNo fatal errors detected{gauntlet::strg_make_space_2(last = F)}"))
+    message(stringr::str_glue("Initial set up complete\nNo fatal errors detected{gauntlet::strg_make_space_2(last = F)}"))
 
     # ── Optional: Uncomment this block for detailed query logging ──
     # log4r::info(logger, stringr::str_glue(
@@ -124,9 +114,9 @@ query_network_trip_using_bbox = function(
     #   "Path to study area boundary file: {bb_sa_layer}\n" %>%
     #   "Customer Name: {customer_name}\n" %>%
     #   "Schema Table: {trip_table}\n" %>%
-    #   "Links Provided:{strg_make_space_2('-', n = 10)}\n" %>%
+    #   "Links Provided:{gauntlet::strg_make_space_2('-', n = 10)}\n" %>%
     #   "{paste0(stringr::str_glue('{sort(query_links)}'), collapse = '\n')}" %>%
-    #   "{strg_make_space_2('-', n = 10)}"
+    #   "{gauntlet::strg_make_space_2('-', n = 10)}"
     # ))
   }
 
@@ -140,7 +130,7 @@ query_network_trip_using_bbox = function(
     list_wkt_objects = list(
       list(bb_network_layer, bb_sa_layer)
       ,list("network_layer", "sa_layer")) %>%
-      pmap(rplc_layer_extent_loadUnionWkt)
+      purrr::pmap(rplc_layer_extent_loadUnionWkt)
 
   }
 
@@ -205,7 +195,7 @@ query_network_trip_using_bbox = function(
 
     log4r::info(logger,stringr::str_glue("table_trips_thru_zone: {replica_temp_tbl_name(table_trips_thru_zone)}"))
 
-    message(stringr::str_glue("{strg_make_space_2()}Initial queries complete, starting aggregation queries now...."))
+    message(stringr::str_glue("{gauntlet::strg_make_space_2()}Initial queries complete, starting aggregation queries now...."))
 
     table_trips_subset = bigrquery::bq_project_query(
       customer_name
@@ -228,7 +218,7 @@ from {replica_temp_tbl_name(table_trips_thru_zone)};'))
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ###CREATE: Volume tables---
   {
-    # message(stringr::str_glue("{strg_make_space_2()}\nOrigin and Destination aggreations commencing...."))
+    # message(stringr::str_glue("{gauntlet::strg_make_space_2()}\nOrigin and Destination aggreations commencing...."))
 
 
     #subset network count
@@ -248,7 +238,7 @@ from {replica_temp_tbl_name(table_trips_thru_zone)};'))
 
       #message here to reduce the size of the network!
       gauntlet::log_and_info(
-        str_glue("{strg_make_space_2()}\nUser supplied inputs resulted in {gauntlet::strg_pretty_num(sum(summary_table_link_counts$count))} records in link aggregation table....\nSee the following table:{strg_make_space_2('-', 30)}\n{paste0(capture.output(summary_table_link_counts), collapse = '\n')}{strg_make_space_2('-', 30)}\nBy default, links with less than 5 counts on them are removed\n---this would result in downloading {summary_table_link_counts[[3, 6]]} records....\n---An ideal MAXIMUM number of records is ~500,000{gauntlet::strg_make_space_2('-')}")
+        stringr::str_glue("{strg_make_space_2()}\nUser supplied inputs resulted in {gauntlet::strg_pretty_num(sum(summary_table_link_counts$count))} records in link aggregation table....\nSee the following table:{strg_make_space_2('-', 30)}\n{paste0(capture.output(summary_table_link_counts), collapse = '\n')}{strg_make_space_2('-', 30)}\nBy default, links with less than 5 counts on them are removed\n---this would result in downloading {summary_table_link_counts[[3, 6]]} records....\n---An ideal MAXIMUM number of records is ~500,000{gauntlet::strg_make_space_2('-')}")
         ,logger)
       message(stringr::str_glue("If your selection has resulted in too many records, you can............
          1) Decrease the study area layer resulting in less originating polys
@@ -317,7 +307,7 @@ from {replica_temp_tbl_name(table_trips_thru_zone)};'))
 
   log4r::info(logger,stringr::str_glue("table_agg_by_link_subset: {replica_temp_tbl_name(table_agg_by_link_subset)}"))
   log4r::info(logger,stringr::str_glue("table_agg_by_link_subset_limited: {replica_temp_tbl_name(table_agg_by_link_subset_limited)}"))
-  message(stringr::str_glue("Link aggreations complete....{strg_make_space_2()}"))
+  message(stringr::str_glue("Link aggreations complete....{gauntlet::strg_make_space_2()}"))
 
 
 
@@ -333,7 +323,7 @@ from {replica_temp_tbl_name(table_trips_thru_zone)};'))
     ,list(table_agg_by_link_subset_limited, "table_agg_network_vols")
     ,list(table_trips_subset, "table_trips_subset")
   ) %>%
-    map(~{
+    purrr::map(~{
       # browser()
 
       temp_table = .x[[1]]
@@ -403,7 +393,7 @@ and person_id in (
     )
   }
 
-  message(str_glue("Reminder - data saved to this folder: {basename(folder)}"))
+  message(stringr::str_glue("Reminder - data saved to this folder: {basename(folder)}"))
 
   # #perform checks
   # {
@@ -414,7 +404,7 @@ and person_id in (
   #     ,folder = stringr::str_glue("data_{query_start}")
   #   )
   #
-  #   here(folder, "replica_network_links_without_trip_volumes.csv") %>%
+  #   here::here(folder, "replica_network_links_without_trip_volumes.csv") %>%
   #     write.csv(link_merge_check
   #               ,file = ., row.names = F)
   #

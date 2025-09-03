@@ -12,7 +12,7 @@
 sql_createODBlockgroupTable = function(customer_name, table_trips_thru_zone, mvmnt_query = F) {
   message(stringr::str_glue("{gauntlet::strg_make_space_2()}Origin and Destination aggregations commencing...."))
 
-  cols = str_glue("mode, vehicle_type, origin_poly, flag_sa_origin,
+  cols = stringr::str_glue("mode, vehicle_type, origin_poly, flag_sa_origin,
                       destination_poly, flag_sa_destination {ifelse(  mvmnt_query, ', mvmnt, mvmnt_seq', '') }")
 
   query = stringr::str_glue("select {cols}, count(*) as count

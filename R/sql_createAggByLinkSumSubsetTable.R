@@ -17,7 +17,7 @@ sql_createAggByLinkSumSubsetTable <- function(customer_name, table_agg_by_link_s
 
   message(stringr::str_glue("{gauntlet::strg_make_space_2()}Counting number of links by their total volume..."))
 
-  query <- str_glue("select flag_link, count(*) as count
+  query <- stringr::str_glue("select flag_link, count(*) as count
     from (
     select *,
     case
@@ -37,16 +37,19 @@ sql_createAggByLinkSumSubsetTable <- function(customer_name, table_agg_by_link_s
   table_dl = bigrquery::bq_table_download(table_agg_by_link_sum_subset)
 
   table_dl_pro = table_dl %>%
-    mutate(flag_link = forcats::fct_relevel(flag_link,
-                                            c("1 count", "2 count", "3 count"
-                                              ,"4 count", '5 count', "6-10 count", "11 or greater"))) %>%
-    arrange(flag_link) %>%
-    mutate(percent = 100*gauntlet::dgt3(count/sum(count))
-           ,count_cum = cumsum(count)
-           ,percent_cum = 100*gauntlet::dgt3(count_cum/sum(count))) %>%
-    arrange(desc(flag_link)) %>%
-    mutate(count_rm = cumsum(count)
-           ,percent_rm = cumsum(percent))
+    dplyr::mutate(flag_link = forcats::fct_relevel(
+      flag_link,
+      c("1 count", "2 count", "3 count"
+        ,"4 count", '5 count', "6-10 count", "11 or greater"))) %>%
+    dplyr::arrange(flag_link) %>%
+    dplyr::mutate(
+      percent = 100*gauntlet::dgt3(count/sum(count))
+      ,count_cum = cumsum(count)
+      ,percent_cum = 100*gauntlet::dgt3(count_cum/sum(count))) %>%
+    dplyr::arrange(desc(flag_link)) %>%
+    dplyr::mutate(
+      count_rm = cumsum(count)
+      ,percent_rm = cumsum(percent))
 
   message(stringr::str_glue("Completed\n{gauntlet::strg_make_space_2()}"))
 

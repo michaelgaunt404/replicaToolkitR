@@ -18,7 +18,7 @@ sql_createTripNetworkMatchTable <- function(customer_name
                                         ,trip_table = trip_table
                                         ,mode_type_pro = mode_type_pro
                                         ,table_network = table_network) {
-  message(stringr::str_glue("{strg_make_space_2()}Filtering trips that only use queried network now....\nStep involves unnesting trips' links and then using table subset to filter on"))
+  message(stringr::str_glue("{gauntlet::strg_make_space_2()}Filtering trips that only use queried network now....\nStep involves unnesting trips' links and then using table subset to filter on"))
 
 
   query <- stringr::str_glue("select distinct activity_id

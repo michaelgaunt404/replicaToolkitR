@@ -33,26 +33,26 @@ rplc_layer_extent_loadUnionWkt = function(layer, layer_name, use_s2 = T) {
     temp_object <- layer
   }
 
-  message(str_glue("Converting {layer_name} to WKT format\nExtent will be unioned to prevent sending multi-polygon..."))
+  message(stringr::str_glue("Converting {layer_name} to WKT format\nExtent will be unioned to prevent sending multi-polygon..."))
 
-  if (!(st_crs(temp_object)$input %in% c("EPSG:4326", "WGS 84"))) {
+  if (!(sf::st_crs(temp_object)$input %in% c("EPSG:4326", "WGS 84"))) {
     message("CRS for the bounding layer is not set to EPSG:4326; converting...")
     temp_object <- sf::st_transform(temp_object, crs = 4326)
   }
 
   # temp_wkt <- wellknown::sf_convert(sf::st_union(temp_object))
-  # temp_wkt <- st_as_text(sf::st_union(temp_object))
+  # temp_wkt <- sf::st_as_text(sf::st_union(temp_object))
 
 
   if(use_s2){
     message("SF method used to produce WKT")
 
-    temp_wkt <- st_as_text(sf::st_union(temp_object))
+    temp_wkt <- sf::st_as_text(sf::st_union(temp_object))
 
   } else {
     message("S2 method used to produce WKT")
 
-    temp_s2 <- s2::s2_geog_from_wkb(st_as_binary(st_geometry(temp_object)))
+    temp_s2 <- s2::s2_geog_from_wkb(sf::st_as_binary(sf::st_geometry(temp_object)))
     temp_s2 <- s2::s2_union(g)    # handles overlaps and cleans edges
     temp_wkt = s2::s2_as_text(temp_s2)
   }
