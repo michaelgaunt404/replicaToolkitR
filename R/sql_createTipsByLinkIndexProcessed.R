@@ -10,15 +10,15 @@
 #' @examples
 #' \dontrun{
 #' # Example usage
-#' result <- createTipsByLinkIndexProcessed("your_project_name", "your_trip_table_with_links")
+#' result <- sql_createTipsByLinkIndexProcessed("your_project_name", "your_trip_table_with_links")
 #' }
 #'
 #' @importFrom bigrquery bq_project_query
 #' @importFrom stringr str_glue
 #'
 #' @export
-createTipsByLinkIndexProcessed <- function(customer_name, table_trips_that_use_links) {
-  message(stringr::str_glue("{make_space()}\nPorcessing tips table...."))
+sql_createTipsByLinkIndexProcessed <- function(customer_name, table_trips_that_use_links) {
+  message(stringr::str_glue("{gauntlet::strg_make_space_2()}\nPorcessing tips table...."))
 
   query <- stringr::str_glue("select
 activity_id, mode, network_links,vehicle_type, link_ord
@@ -32,7 +32,7 @@ order by activity_id, link_ord;")
 
   tmp_object <- bigrquery::bq_project_query(customer_name, query)
 
-  message(stringr::str_glue("Completed{make_space()}"))
+  message(stringr::str_glue("Completed{gauntlet::strg_make_space_2()}"))
 
   return(tmp_object)
 }

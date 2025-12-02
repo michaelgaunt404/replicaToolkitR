@@ -12,15 +12,15 @@
 #' @examples
 #' \dontrun{
 #' # Example usage
-#' result <- createTipsByLinkIndex("your_project_name", "your_trip_table", c("COMMERCIAL", "PRIVATE_AUTO"), c(1, 2, 3))
+#' result <- sql_createTipsByLinkIndex("your_project_name", "your_trip_table", c("COMMERCIAL", "PRIVATE_AUTO"), c(1, 2, 3))
 #' }
 #'
 #' @importFrom bigrquery bq_project_query
 #' @importFrom stringr str_glue
 #'
 #' @export
-createTipsByLinkIndex <- function(customer_name, trip_table, mode_type_pro, link_selections_index_pro) {
-  message(stringr::str_glue("{make_space()}\nFiltering for trips that use specified links...."))
+sql_createTipsByLinkIndex <- function(customer_name, trip_table, mode_type_pro, link_selections_index_pro) {
+  message(stringr::str_glue("{gauntlet::strg_make_space_2()}\nFiltering for trips that use specified links...."))
 
   query <- stringr::str_glue("select * from (
     select * except(network_link_ids)
@@ -35,10 +35,9 @@ createTipsByLinkIndex <- function(customer_name, trip_table, mode_type_pro, link
 
   tmp_object <- bigrquery::bq_project_query(customer_name, query)
 
-  message(stringr::str_glue("Completed{make_space()}"))
+  message(stringr::str_glue("Completed{gauntlet::strg_make_space_2()}"))
 
   return(tmp_object)
 }
-
 
 

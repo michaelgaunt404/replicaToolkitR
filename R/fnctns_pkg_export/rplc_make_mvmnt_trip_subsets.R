@@ -2,7 +2,9 @@ rplc_make_mvmnt_trip_subsets =  function(link_selections_df
                                          ,customer_name
                                          ,trip_table
                                          ,mode_type_pro
-                                         ,logger){
+                                         ,logger
+                                         ,page_size = NULL
+                                         ,page_limit = Inf){
 
   link_selections_index_pro = paste0(
     "'", sort(unique(link_selections_df$stableEdgeId)), "'", collapse = ", ")
@@ -14,7 +16,7 @@ rplc_make_mvmnt_trip_subsets =  function(link_selections_df
   #----- removes any trips that does not have any links in index
   #----- this is the expensive one
   #----- --thing always about 120 GB since interacting with the big table
-  table_trips_that_use_links = createTipsByLinkIndex(
+  table_trips_that_use_links = sql_createTipsByLinkIndex2(
     customer_name = customer_name
     ,trip_table = trip_table
     ,mode_type_pro = mode_type_pro
@@ -22,7 +24,7 @@ rplc_make_mvmnt_trip_subsets =  function(link_selections_df
 
   #note: this query processes the data in the above table
   #spec: it creates link order attributes
-  table_pro = createTipsByLinkIndexProcessed(
+  table_pro = sql_createTipsByLinkIndexProcessed(
     customer_name = customer_name
     ,table_trips_that_use_links = table_trips_that_use_links
   )
@@ -35,9 +37,7 @@ rplc_make_mvmnt_trip_subsets =  function(link_selections_df
   stopifnot("Aborted" = check_continue)
 
   turning_links = bigrquery::bq_table_download(
-    table_pro
-    ,page_size = 1000,
-    quiet = F)
+    table_pro, page_size = page_size, quiet = F, n_max = page_limit )
 
   return(
     list(
