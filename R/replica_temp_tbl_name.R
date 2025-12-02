@@ -6,7 +6,9 @@
 #'
 #' Function is helpful when making mulitstepped queries where temporary tables are created and subsequently interacted with.
 #'
-#' @param object
+#' @param object]
+#'
+#' @importFrom stringr str_glue
 #'
 #' @return a character string
 #' @export
