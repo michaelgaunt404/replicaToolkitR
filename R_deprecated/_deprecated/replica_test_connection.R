@@ -32,23 +32,23 @@ replica_test_connection = function(network_table = network_table
 
   #NOTE: I think that this is now captured in checkValidTableConnections which is in the replica package
   #this script does need a replica_test_connection
-
-  test_outcome =
-    c(network_table,trip_table
-  ) %>%
-    map(~{
-      temp_table = .x
-
-      outcome = tryCatch({
-        table_check = bigrquery::bq_table_exists(temp_table)
-        return(table_check)
-      },  error = function(e) {
-        # error_message <- paste("An error occurred while querying the trip table:\n", e$message)
-
-        return(NA)
-      })
-
-    })
-
-  stopifnot("One or more of the Replica tables could not be connected to.... \nCheck Replica table inputs" = (any(is.na(unlist(test_outcome))) | any(unlist(test_outcome) == F))  == F)
+#
+#   test_outcome =
+#     c(network_table,trip_table
+#   ) %>%
+#     map(~{
+#       temp_table = .x
+#
+#       outcome = tryCatch({
+#         table_check = bigrquery::bq_table_exists(temp_table)
+#         return(table_check)
+#       },  error = function(e) {
+#         # error_message <- paste("An error occurred while querying the trip table:\n", e$message)
+#
+#         return(NA)
+#       })
+#
+#     })
+#
+#   stopifnot("One or more of the Replica tables could not be connected to.... \nCheck Replica table inputs" = (any(is.na(unlist(test_outcome))) | any(unlist(test_outcome) == F))  == F)
 }

@@ -329,7 +329,7 @@ from {replica_temp_tbl_name(table_trips_thru_zone)};'))
       temp_table = .x[[1]]
       temp_name = .x[[2]]
 
-      check_to_download_bqtable(
+      rplc_check_to_download_bqtable(
         bq_table = temp_table
         ,file_name = temp_name
         ,table_name = temp_name
@@ -361,7 +361,7 @@ and person_id in (
 
     temp_table = table_pop_demo
     temp_name = "table_pop_demo"
-    check_to_download_bqtable(
+    rplc_check_to_download_bqtable(
       bq_table = temp_table
       ,file_name = temp_name
       ,table_name = temp_name
@@ -382,7 +382,7 @@ and person_id in (
 
     temp_table = table_trips_subset_all_persons_trips
     temp_name = "table_trips_subset_all_persons_trips"
-    check_to_download_bqtable(
+    rplc_check_to_download_bqtable(
       bq_table = temp_table
       ,file_name = temp_name
       ,table_name = temp_name

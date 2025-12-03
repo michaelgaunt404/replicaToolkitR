@@ -17,7 +17,7 @@
 #' @examples
 #' # Example usage:
 #' # sf_network_link <- ... # Load your Spatial object with bearing attribute
-#' # replica_make_link_bearing_map(sf_network_link)
+#' # viz_network_link_bearing_map(sf_network_link)
 #'
 #' @import leaflet
 #' @import leafem
@@ -26,7 +26,7 @@
 #' @importFrom grDevices colorRamp
 #'
 #' @export
-replica_make_link_bearing_map = function(
+viz_network_link_bearing_map = function(
     sf_network_link){
   #makes parlette
   #note: attreibtues hard coded

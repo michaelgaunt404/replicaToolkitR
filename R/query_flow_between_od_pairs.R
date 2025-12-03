@@ -316,7 +316,7 @@ list(
     temp_table = .x[[1]]
     temp_name = .x[[2]]
 
-    check_to_download_bqtable(
+    rplc_check_to_download_bqtable(
       bq_table = temp_table
       ,file_name = temp_name
       ,table_name = temp_name

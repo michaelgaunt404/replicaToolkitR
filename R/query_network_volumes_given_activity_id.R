@@ -54,7 +54,7 @@
 #'     TRUE ~ "afternoon"
 #'   ))
 #'
-#' network_links = rplc_extract_networks_given_activity_id(
+#' network_links = query_network_volumes_given_activity_id(
 #'   raw_trip_table = trips_tagged,
 #'   col_to_split = "time_group",
 #'   avoid_str = "test",
@@ -65,7 +65,7 @@
 #'   customer_name = "replica_customer"
 #' )
 #' }
-rplc_extract_networks_given_activity_id = function(
+query_network_volumes_given_activity_id = function(
     raw_trip_table,
     col_to_split = NULL,
     avoid_str = "qqq",

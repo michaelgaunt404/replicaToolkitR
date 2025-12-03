@@ -175,7 +175,7 @@ query_replica_mvmnt_patterns <- function(
     #make leaflet object here
     map_default_selection = table_network_data_sf_jit %>%
       filter(str_detect(flags, "ALLOWS_CAR")) %>%
-      replica_make_link_bearing_map()
+      viz_network_link_bearing_map()
 
     link_selections = list(
       mvmnt_df$mvmnt_desc
@@ -209,7 +209,7 @@ query_replica_mvmnt_patterns <- function(
           map_bearing_selection = table_network_data_sf_jit %>%
             filter(str_detect(flags, "ALLOWS_CAR")) %>%
             filter(eval(parse(text = z))) %>%
-            replica_make_link_bearing_map()
+            viz_network_link_bearing_map()
 
           for (i in 1:y){
             message(str_glue("Select all links for {i} ({i}/{y}) movement pattern..."))
@@ -641,18 +641,16 @@ where activity_id in ({pulled_activity_id_pro_mrg}));"))
   }
 
   #perform checks
-  {
-    message("Performing data checks now.....")
-
-    # link_merge_check = check_links_download(
-    #   location = file_destination
-    #   ,folder = directory_path
-    # )
-
-    # here(directory_path, "replica_network_links_without_trip_volumes.csv") %>%
-    #   write.csv(link_merge_check
-    #             ,file = ., row.names = F)
-
-  }
+  # {
+  #   message("Performing data checks now.....")
+  #
+  #   link_merge_check = check_links_download(
+  #     location = file_destination
+  #     ,folder = directory_path
+  #   )
+  #   here(directory_path, "replica_network_links_without_trip_volumes.csv") %>%
+  #     write.csv(link_merge_check
+  #               ,file = ., row.names = F)
+  # }
 
 }

@@ -9,6 +9,8 @@
 #'
 #' @return a script in the location and with the name choosen by the user
 #' @export
+#' @importFrom here here
+#' @importFrom stringr str_glue
 #'
 #' @examples
 #' #none
