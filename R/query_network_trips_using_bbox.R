@@ -25,9 +25,11 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #'
 #' #none
 #'
+#' }
 #' @importFrom bigrquery bq_project_query
 #' @importFrom here here
 #' @importFrom log4r file_appender info logger warn
@@ -136,28 +138,40 @@ query_network_trip_using_bbox = function(
 
   gauntlet::log_and_info("Starting Google query now...", logger)
 
-  #create network table and perfrom checks
+  ###sub: network table=========================================================
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ##create network table and perform checks
   {
-    table_network = sql_createNetworkTable(
-      customer_name = customer_name
-      ,network_table = network_table
-      ,links_pro = links_pro
-      ,wkt_object = list_wkt_objects[[1]]
-      ,highway_regrex = input_highway_regrex
-    )
+    temp_table_object = rplc_make_network_tables(
+      logger, wkt_object = list_wkt_objects[[1]]
+      ,links_pro, customer_name, network_table)
 
-    highway_counts = sql_createNetworkLinkCountTable(
-      customer_name = customer_name
-      ,table_network = table_network
-    )
-
-    check_and_log_queired_links(
-      counts_object = highway_counts
-      ,query_links = links_pro
-      ,logger_object = logger
-    )
-
+    table_network = temp_table_object$table_network
+    highway_counts = temp_table_object$highway_counts
   }
+
+  #old
+  # {
+  #   table_network = sql_createNetworkTable(
+  #     customer_name = customer_name
+  #     ,network_table = network_table
+  #     ,links_pro = links_pro
+  #     ,wkt_object = list_wkt_objects[[1]]
+  #     ,highway_regrex = input_highway_regrex
+  #   )
+  #
+  #   highway_counts = sql_createNetworkLinkCountTable(
+  #     customer_name = customer_name
+  #     ,table_network = table_network
+  #   )
+  #
+  #   rplc_check_and_log_queired_links(
+  #     counts_object = highway_counts
+  #     ,query_links = links_pro
+  #     ,logger_object = logger
+  #   )
+  #
+  # }
 
   ##create polygon table for block groups given study area
   {

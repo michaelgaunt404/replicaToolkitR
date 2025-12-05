@@ -10,10 +10,12 @@
 #'
 #' @return A BigQuery result containing distinct activity IDs.
 #'
-#' @examples
-#' queryTripNetworkMatch("your_project_name", "your_trip_table", c("mode1", "mode2"))
-#'
 #' @export
+#' @examples
+#' \dontrun{
+#' # none
+#'
+#' }
 sql_createTripNetworkMatchTable <- function(customer_name
                                         ,trip_table = trip_table
                                         ,mode_type_pro = mode_type_pro

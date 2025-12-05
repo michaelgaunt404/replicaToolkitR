@@ -6,11 +6,12 @@
 #'
 #' @return A BigQuery result containing the study area subset.
 #'
-#' @examples
-#' wkt_geometry <- "POLYGON((x1 y1, x2 y2, x3 y3, x4 y4, x1 y1))"
-#' study_area_subset <- create_study_area_subset(wkt_geometry)
-#'
 #' @export
+#' @examples
+#' \dontrun{
+#' # none
+#'
+#' }
 sql_createStudyAreaSubset <- function(customer_name, wkt_geometry) {
   message(stringr::str_glue("{strg_make_space_2()}Creating study area subset now...."))
 

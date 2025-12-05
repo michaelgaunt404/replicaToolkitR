@@ -14,18 +14,20 @@
 #' The function assumes that the input object has a \code{bearing} attribute, and this attribute
 #' should be named exactly as "bearing" (hardcoded in the function).
 #'
-#' @examples
-#' # Example usage:
-#' # sf_network_link <- ... # Load your Spatial object with bearing attribute
-#' # viz_network_link_bearing_map(sf_network_link)
-#'
 #' @import leaflet
 #' @import leafem
 #' @importFrom purrr map
 #' @importFrom htmltools HTML
 #' @importFrom grDevices colorRamp
+#' @importFrom gauntletMap leaflet_default_tiles leaflet_default_tiles_index
 #'
 #' @export
+#' @examples
+#' \dontrun{
+#' # Example usage:
+#' # sf_network_link <- ... # Load your Spatial object with bearing attribute
+#' # viz_network_link_bearing_map(sf_network_link)
+#' }
 viz_network_link_bearing_map = function(
     sf_network_link){
   #makes parlette

@@ -8,10 +8,12 @@
 #'
 #' @return A BigQuery result containing the count of network links by highway type.
 #'
-#' @examples
-#' queryNetworkLinkCount("your_project_name", "your_temp_table_name")
-#'
 #' @export
+#' @examples
+#' \dontrun{
+#' # none
+#'
+#' }
 sql_createNetworkLinkCountTable <- function(customer_name, table_network = table_network) {
 
   query <- stringr::str_glue("SELECT highway, count(*) as count

@@ -14,12 +14,14 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #'
 #' temp = list(username = "replica_fake_name"
 #',dataset = "replica_temp_dataset"
 #',table = "replica_temp_table")
 #'
 #'replica_temp_tbl_name(temp)
+#' }
 replica_temp_tbl_name = function(object) {
   stringr::str_glue("{object[[1]]}.{object[[2]]}.{object[[3]]}")
 }

@@ -68,7 +68,7 @@
 #'         versions of the network.
 #' }
 #'
-#' @importFrom stringr stringr::str_glue
+#' @importFrom stringr str_glue
 #' @importFrom bigrquery bq_project_query bq_table_nrow bq_table_download
 #' @importFrom dplyr arrange
 #' @importFrom sf st_transform st_union st_as_sf st_as_text
@@ -104,7 +104,7 @@ viz_rplc_study_area_network = function(
     message(stringr::str_glue("You can draw multiple, discrete objects if you wish{gauntlet::strg_make_space_2(last = F)}"))
 
     # Use manual drawing method
-    study_area = mapedit_robust_draw_2()
+    study_area = mapedit_robust_draw2()
     study_area_wkt = sf::st_as_text(st_union(study_area))
 
   } else {

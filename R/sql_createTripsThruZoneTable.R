@@ -13,7 +13,7 @@
 #' and destination points.
 #'
 #' @examples
-#' queryTripsThruZone("your_project_name", "your_trip_table", c("mode1", "mode2"))
+#' # none
 #'
 #' @export
 sql_createTripsThruZoneTable <- function(customer_name, trip_table, table_sa_poly_index, mode_type_pro) {

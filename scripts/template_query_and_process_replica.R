@@ -40,7 +40,6 @@ library(SpatialKDE)
 library(stringr)
 library(tigris)
 library(tidyr)
-library(wellknown)
 
 library(replicaToolkitR)
 

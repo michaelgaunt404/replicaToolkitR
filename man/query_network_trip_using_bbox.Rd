@@ -18,9 +18,11 @@ query_network_trip_using_bbox(
   customer_name,
   prefix_origin = "origin",
   prefix_dest = "destination",
-  file_destination,
-  query_network = T,
-  max_record = 1000
+  input_folder_write,
+  input_folder_suffix = NULL,
+  max_record = 1000,
+  input_highway_regrex = NULL,
+  check_aux_tables = NULL
 )
 }
 \arguments{
@@ -44,11 +46,11 @@ query_network_trip_using_bbox(
 
 \item{prefix_dest}{a string defining the prefix for Latin long coordinates for each record for the destination (e.g., "destination").}
 
-\item{file_destination}{a character string indicating a directory where you want log files and data to be saved in CSV format. A new folder containing function outputs will be created there, named using the convention 'data_[sys.datetime].'}
-
-\item{query_network}{a boolean (T/F) indicating whether the network should be downloaded at function runtime. The default is 'T,' but it can be beneficial to wait and see how many links will be downloaded before downloading the network. The network can also be downloaded later as log files record big query table IDs.}
+\item{input_folder_write}{a character string indicating a directory where you want log files and data to be saved in CSV format. A new folder containing function outputs will be created there, named using the convention 'data_[sys.datetime].'}
 
 \item{max_record}{an integer indicating the maximum number of records to be written out for each data acquired by Google. The default is 1000. Use Inf if you do not want to limit the download. This is useful if you want to check the data before downloading large amounts of data. Google tables are still made in full so they can be manually acquired without rerunning this function (see log files).}
+
+\item{query_network}{a boolean (T/F) indicating whether the network should be downloaded at function runtime. The default is 'T,' but it can be beneficial to wait and see how many links will be downloaded before downloading the network. The network can also be downloaded later as log files record big query table IDs.}
 }
 \value{
 This function does not return any objects in R. It creates a log file and data in the folder destination in CSV format.
@@ -62,6 +64,9 @@ This function creates a log file that records inputs, the query sent to Google, 
 Reprinted: 20231107
 }
 \examples{
+\dontrun{
 
 #none
+
+}
 }
