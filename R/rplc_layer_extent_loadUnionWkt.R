@@ -8,7 +8,15 @@
 #'
 #' @return The layer converted to WKT format with a CRS of EPSG:4326.
 #'
+#' @importFrom gauntlet strg_make_space_2
+#' @importFrom here here
+#' @importFrom s2 s2_as_text s2_geog_from_wkb s2_union
+#' @importFrom sf st_as_binary st_as_text st_crs st_geometry st_union
+#' @importFrom stringr str_glue
+#' @importFrom magrittr %>%
+#'
 #' @examples
+#' \dontrun{
 #' # Using a file location
 #' layer <- "path/to/your_layer.shp"  # Replace with the actual file location
 #' layer_name <- "Network Layer"
@@ -18,6 +26,7 @@
 #' layer <- your_spatial_data_frame
 #' layer_name <- "Study Area Layer"
 #' converted_layer <- convert_to_wkt(layer, layer_name)
+#' }
 #'
 #' @export
 rplc_layer_extent_loadUnionWkt = function(layer, layer_name, use_s2 = T) {
@@ -39,10 +48,6 @@ rplc_layer_extent_loadUnionWkt = function(layer, layer_name, use_s2 = T) {
     message("CRS for the bounding layer is not set to EPSG:4326; converting...")
     temp_object <- sf::st_transform(temp_object, crs = 4326)
   }
-
-  # temp_wkt <- wellknown::sf_convert(sf::st_union(temp_object))
-  # temp_wkt <- sf::st_as_text(sf::st_union(temp_object))
-
 
   if(use_s2){
     message("SF method used to produce WKT")

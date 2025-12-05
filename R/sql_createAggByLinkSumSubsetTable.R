@@ -9,10 +9,19 @@
 #'
 #' @return A BigQuery result containing the count of links in different categories.
 #'
-#' @examples
-#' queryAggByLinkSumSubset("your_project_name", "your_agg_by_link_subset_table")
+#' @importFrom bigrquery bq_project_query bq_table_download
+#' @importFrom dplyr arrange mutate desc
+#' @importFrom forcats fct_relevel
+#' @importFrom gauntlet dgt3 strg_make_space_2
+#' @importFrom stringr str_glue
+#' @importFrom magrittr %>%
 #'
 #' @export
+#' @examples
+#' \dontrun{
+#' # none
+#'
+#' }
 sql_createAggByLinkSumSubsetTable <- function(customer_name, table_agg_by_link_subset) {
 
   message(stringr::str_glue("{gauntlet::strg_make_space_2()}Counting number of links by their total volume..."))
@@ -46,7 +55,7 @@ sql_createAggByLinkSumSubsetTable <- function(customer_name, table_agg_by_link_s
       percent = 100*gauntlet::dgt3(count/sum(count))
       ,count_cum = cumsum(count)
       ,percent_cum = 100*gauntlet::dgt3(count_cum/sum(count))) %>%
-    dplyr::arrange(desc(flag_link)) %>%
+    dplyr::arrange(dplyr::desc(flag_link)) %>%
     dplyr::mutate(
       count_rm = cumsum(count)
       ,percent_rm = cumsum(percent))

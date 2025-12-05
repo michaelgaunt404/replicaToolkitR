@@ -18,7 +18,8 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup, message = FALSE}
-library(replicaToolkitR)
+# library(replicaToolkitR)
+targets::tar_source()
 ```
 
 ## Intro 
@@ -31,51 +32,61 @@ This vignette is a deeper dive than the README  `replicaToolkitR`. The goal of t
 Here are the packages you'll need for this vignette. 
 
 ```{r message = FALSE, warning=FALSE}
+#for widgets
 library(crosstalk)
-library(data.table)
+library(reactable)
+
+#tidyverse packages
 library(dplyr)
 library(forcats)
-library(gauntlet) #https://github.com/michaelgaunt404/gauntlet 
 library(here)
+library(magrittr)
+library(purrr)
+library(readr)
+library(stringr)
+library(tidyr)
+
+#data manip
+library(data.table)
+library(log4r)
+library(gauntlet) #https://github.com/michaelgaunt404/gauntlet 
+
+#for mapping
 library(leafem)
 library(leaflet)
 library(leaflet.extras2)
-library(log4r)
-library(magrittr)
 library(mapview)
-library(purrr)
-library(reactable)
-library(readr)
+mapviewOptions(homebutton = F)
+
+#for spatial data
 library(sf)
 library(sfhotspot)
 library(SpatialKDE)
-library(stringr)
 library(tigris)
-library(tidyr)
-library(wellknown)
+
 ```
 
 ## Input Data Overview 
 
 In order to use (whether you are using it or requesting someone else for data), you will need three pieces of data. They are:
 
-+ A polygon layer (GPKG or SHP) detailing the extent of the network you want information on 
-  - This polygon is used to spatially filter the network and query trips that only use the network inside said area
-  - Any trip that uses the network within this poly will be acquired so
++ `Network Study Area:`A polygon layer (GPKG or SHP) detailing the extent of the network you want information for 
+  - This polygon is used to spatially filter the network and query trips that only use the network links within this boundary 
+  - Any trip that uses the network within this boundary will be acquired and tagged with one of the following labels:
     + `internal-to-internal`: study area to study area trips
     + `internal-to-external`: study area to external trips
     + `external-to-internal`: external to study area trips
     + `external-to-external`: external to external trips (through trips)
-+ A polygon layer (GPKG or SHP) detailing the extent of the origin polygons you want information on 
++ `Origin/Destination Study Area:` A polygon layer (GPKG or SHP) detailing the extent of the origin polygons you want information  
   - This polygon is used to define the **_study area_** of your analysis
-  - In the query process, a trip's origin and destination polygon will be classified as falling within or outside of the **_study area_**
-  - If it falls within the study area it will continue to be uniquely tracked, if not - it will be rolled up into one general  **_out of study area_** level
-+ A dataframe (CSV, TXT, XLSX, ETC) detailing which polygons with in the **_study area_** are considered important or POINTS-OF-INTEREST (POIs)
-  - This dataframe is mostly used later when the raw data is processed and aggregated, and aids in focusing the analysis and limiting the size of the data and R objects that are created
+  - In the query process, a trip's origin and destination polygon will be classified as falling within or outside of the **Origin/Destination study area**
+  - Polygons within this boundary will be uniquely tracked
+  - Polygons falling outside of this boundary will be tagged as **_out of study area_** and treated as one large polygon
   
 #### Examples
 
-The following is an example of the polygon that was used to create the `replicaToolkitR's` sample data and the data in this document. It was used both to filter the network as well as define the study area. 
+The following is an example of the polygon that was used to create the `replicaToolkitR's` sample data and the data in this document. 
+In this vignette it is simultaneously used as the `Network Study Area` and then `Origin/Destination Study Area`.
 
 ```{r fig.width=5, fig.height=4}
 data("study_area_network")
@@ -83,27 +94,14 @@ data("study_area_network")
 mapview(study_area_network)
 ```
 
-> **Note:** I genearally use the same polygon for defining both the network and study area. Occasionally, I make the latter larger. 
+> **Note:** These study area polygons can be as simple or complex as you like. One of the benefits of using this package, is that it enables the user to easly send complicated spatial geometries to Replica's backend database. This is hard to do and arduous via their web portal.
 
-> **Note:** These polygons can be as simple or complex as you like. One of the benefits of using this package, is that it is capable of making complicated spatial queries in their databases using your custom geometry, they don't let you do this in their web GUI. 
-
-> **Note:** Ideally, you want to make whatever polygon(s) as small as possible for you analysis. This is to: `1)` limit how much data you are pulling down from their database and your network (aka your internet bill) `2)` limit the size of the data objects that will be saved to your local computer and `3)` limit the size of some of the automated data visualiztions and other tools that are created from your queired data
-
-Below is an example of the POI list. You will need to have both the **id** and **group** attributes, as the code is hard coded to look for them. If you do not need groups, please repeat the IDs, respectively. 
-
-```{r}
-data("poi_list")
-
-poi_list %>%  
-  select(group, id) %>% 
-  reactable(bordered = TRUE, wrap = FALSE, style = list(minWidth = 300)
-            ,striped = TRUE, highlight = TRUE, fullWidth = F)
-```
+> **Note:** Ideally, study area polygon(s) should be as small as possible for you analysis. This is to: `1)` limit how much data you are pulling down from their database `2)` limit the size of the data objects that will be saved to your local computer and `3)` limit the size of some of the automated data visualiztions and other tools that are created from your queired data.
 
 
-## Peforming the Query
+## Extracting Replica Data
 
-The following code is the main function in `replicaToolkitR`. It performs the initial 
+The following code is the main function in `replicaToolkitR`. 
 
 What you are doing in this function:
 
@@ -117,16 +115,41 @@ What you are doing in this function:
 + What links you want returned to you 
 
 ```{r eval=F}
+seattle_study_area = study_area_network
+user_links = c(
+  "highway", "corridor"
+  ,"motorway", "motorway_link"
+  ,"trunk", "trunk_link"
+  ,"primary", "primary_link")
+user_modes = c('COMMERCIAL')
+
+user_location = "northwest"
+user_time = "2025_Q2"
+user_day = "saturday"
+
+user_path = tempdir()
+
 query_network_trip_using_bbox(
-  bb_network_layer = 'data/req_dev/study_network.gpkg'
-  ,bb_sa_layer = 'data/req_dev/study_area_poly.gpkg'
-  ,network_table = "replica-customer.northwest.northwest_2019_Q4_network_segments"
-  ,trip_table = "replica-customer.northwest.northwest_2019_Q4_thursday_trip"
+  input_folder_write = user_path
+  ,input_folder_suffix = "freight_pull"
+  
+  ,data_set_location = user_location
+  ,data_set_period = user_time
+  ,data_set_day = user_day
+  
+  ,bb_sa_layer = seattle_study_area
+  ,bb_network_layer = seattle_study_area
+  ,prefix_origin = "start"
+  ,prefix_dest = "end"
+  ,query_links = user_links
+  ,mode_type = user_modes
+  
   ,customer_name = "replica-customer"
-  ,file_destination = "data/req_dev"
   ,max_record = Inf
-  ,query_links = c("highway", "corridor", "road", "motorway", "motorway_link", "trunk")
+  ,check_aux_tables = F
 )
+
+
 ```
 
 > **Note:** I usually omit **_residential_** links as most freight analyses do not care about them and they dramtically increase the amount of data you will download. But your application may need them. 
@@ -148,85 +171,286 @@ It also logs your inputs so you can trace what the inputs where for a given anal
 ![Log file example](../man/figures/logfile_example.png){ width=100% }
 
 #### replica_queried_network
-This is the network that is defined by the spatial polygon you supplied for the network and the links you requested data for. You will have the option to automatically download it or not. Sometimes it is beneficial to not download it - e.g. if you have already done so or still figuring out what links you need for the full analysis. 
+The `replica_queried_network` files contain tabular data that can be used to reconstruct the network you queried via user supplied *network study area* and the *query link* vector. Again, this data is saved both in CSV and QS formats.
 
-It will be saved as a CSV with a Well-known Text (WKT) attribute that spatially defines the poly-lines.
+> **Note:** You will have the option to automatically download it or not. 
 
+```{r}
+data("seattleFreight_replica_network_qs")
+```
+
+##### Table {.tabset}
 ```{r echo=FALSE}
-data("replica_queried_network")
-
-replica_queried_network %>% 
+seattleFreight_replica_network_qs %>% 
+  st_as_sf(wkt = "geometry")
   head(10) %>% 
-  reactable(bordered = TRUE, wrap = FALSE, style = list(minWidth = 300)
-            ,striped = TRUE, highlight = TRUE, fullWidth = T, height = 300)
+  select(stableEdgeId, osmid, streetName, highway, lanes, speed ) %>% 
+  reactable(
+    defaultColDef = colDef(footerStyle = list(fontWeight = "bold"))
+    ,height = 250
+  ) %>% 
+  gauntletReactable::rctble_format_table(defaultPageSize = 10)
 ```
 
-#### replica_sa_poly_index
-This is a simple dataframe that records the IDs of the polygons that fall within the the study area defined by the user's input. Again, it is saved as a CSV with a Well-known Text (WKT) attribute that spatially defines the polygons.
-
-It is used later on to query the polygons using the [TIGRIS API](https://github.com/walkerke/tigris). These polygons are the same as the ones from Replica but have more meaningful attributes - e.g. land/water area of a polygon.  
-
+##### Map
 ```{r echo=FALSE}
-data("replica_sa_poly_index")
+inspect_queried_network(
+  network_links_object = seattleFreight_replica_network_qs %>% 
+    st_as_sf(wkt = "geometry", crs = 4326)
+)
+```
 
-replica_sa_poly_index %>% 
+{-}
+
+
+#### replica_study_area_polys
+The `replica_study_area_polys` files contain tabular data that can be used to reconstruct the uniquely defined polygons that fall within the  *origin/destination study area*. Again, this data is saved both in CSV and QS formats.
+
+```{r}
+data("seattleFreight_replica_study_area_polys_qs")
+```
+
+##### Table {.tabset}
+```{r echo=FALSE}
+seattleFreight_replica_study_area_polys_qs %>% 
   head(10) %>% 
-  reactable(bordered = TRUE, wrap = FALSE, style = list(minWidth = 300)
-            ,striped = TRUE, highlight = TRUE, fullWidth = T, height = 300)
+  reactable(
+    defaultColDef = colDef(footerStyle = list(fontWeight = "bold"))
+    ,height = 250
+  ) %>% 
+  gauntletReactable::rctble_format_table(defaultPageSize = 10)
 ```
 
-#### replica_trip_origin_destination
-
-A data frame of vehicle trips defined by origin, destination, mode and vehicle type. This is tabular data and needs to be combined with one a spatial polygon layer in order to map it. 
-
-Again, origins and destinations outside of the study area are collapsed into single level called `out of study area`.  
+##### Map
 ```{r echo=FALSE}
-data("replica_trip_origin_links")
+seattleFreight_replica_study_area_polys_qs %>% 
+    st_as_sf(wkt = "geom", crs = 4326) %>% 
+  mapview(z = "raw_id")
 
-replica_trip_origin_links %>% 
-            head(10) %>% 
-  reactable(bordered = TRUE, wrap = FALSE, style = list(minWidth = 300)
-            ,striped = TRUE, highlight = TRUE, fullWidth = T, height = 300)
 ```
 
-#### replica_trip_origin_links
+{-}
 
-This table is similar to the one above but goes a step further. It details the number of trips by mode, vehicle type, and **_starting trip link_**. This is much more precise than what Replica provides when the aggregate data or that the table above. 
+#### replica_trip_origin_destination   
 
-This is useful for a number of reasons. 
+The `replica_trip_origin_destination` contain a dataframe of total number vehicle trips aggregated by origin/destination polygon ID, mode and vehicle type. 
 
-+ The origins are at the link (link centroid level) and thus can be aggregated by any custom geometry you want provide - e.g. TAZs (which Replica also provides) or custom geometry. It is very hard to supply Replica custom geometry - this data makes it so you don't have to use them and you can do it yourself.  
-+ Analyses like kernel density estimates (KDEs) or hot/cold spot analyses will turn out much better using this more precise data rather than data aggregated to arbitrary polygons like block groups
+> **Note:** Again, origins and destinations outside of the *origin/destination study area* are collapsed into single level called `out of study area` and is not repersented with spatial geometry.  
+
+
+```{r}
+data("seattleFreight_replica_trip_origin_destination_qs")
+```
+
+##### Table {.tabset}
+```{r}
+seattleFreight_replica_trip_origin_destination_qs %>% 
+  reactable(
+    defaultColDef = colDef(footerStyle = list(fontWeight = "bold"))
+    ,height = 250
+  ) %>% 
+  gauntletReactable::rctble_format_table(defaultPageSize = 10)
+```
+
+
+##### Map {.tabset}
+```{r}
+seattleFreight_replica_trip_origin_destination_qs %>% 
+    filter(flag_sa_origin == "internal", flag_sa_destination== "internal"
+           ,origin_poly != destination_poly
+           ,origin_poly == "530330093003"
+           ,str_detect(vehicle_type, "MED")) %>% 
+  merge(seattleFreight_replica_study_area_polys_qs %>% st_as_sf(wkt = "geom", crs = 4326), .
+        ,by.x = "raw_id", by.y = "destination_poly") %>% 
+  mapview(z = "count", layer.name = "Total Trips")
+
+```
+
+{-}
+
+
+#### table_agg_network_vols
+The `table_agg_network_vols` files contain tabular detailing link volume aggregated by mode, vehicle type and movement type. 
+
+> **Note:** This table is intended to be a jumping off point for any analysis and provides and immediate high level view of network volumes given basic movement patterns for a particular study area. There are many different ways to aggregate the Replica trip table in order to produce different network usage layers. 
 
 ```{r echo=FALSE}
-data("replica_trip_origin_links")
-
-replica_trip_origin_links %>% 
-  head(10) %>% 
-  reactable(bordered = TRUE, wrap = FALSE, style = list(minWidth = 300)
-            ,striped = TRUE, highlight = TRUE, fullWidth = T, height = 300)
+data("seattleFreight_table_agg_network_vols_qs")
 ```
-   
-#### table_agg_by_link_subset_limited
 
-This table contains counts per network link given origin polygon, mode, and vehicle type. This table is used to create all network link volume tables during the data processing stage of this work flow. 
+##### Table {.tabset}
+```{r}
+seattleFreight_table_agg_network_vols_qs %>% 
+   mutate(vehicle_type = str_remove(vehicle_type, "_COMMERCIAL")) %>% 
+  reactable(
+    defaultColDef = colDef(footerStyle = list(fontWeight = "bold"))
+    ,height = 250
+  ) %>% 
+  gauntletReactable::rctble_format_table(defaultPageSize = 10)
+```
 
-Again, this table is a saved as a CSV and is merged with the queried network link table (once it is converted to a spatial format).
+##### Map {.tabset}
+```{r}
+seattleFreight_table_agg_network_vols_qs %>% 
+  mutate(vehicle_type = str_remove(vehicle_type, "_COMMERCIAL")) %>% 
+  mutate(trip_type = paste0(str_remove(flag_sa_origin, "ernal"), "-", str_remove(flag_sa_destination, "ernal"))) %>% 
+  merge(
+    seattleFreight_replica_network_qs %>% st_as_sf(wkt = "geometry", crs = 4326), .
+    ,by.x = "stableEdgeId", by.y = "network_link_ids_unnested"
+  ) %>% 
+  group_by(vehicle_type_1 = vehicle_type, trip_type_1 = trip_type) %>% 
+group_map(~{
+  
+  temp_data = .x
+  temp_v = unique(temp_data$vehicle_type)
+  temp_t = unique(temp_data$trip_type)
+  temp_ln = paste0(temp_v, " ", temp_t)
+  
+  mapview(temp_data, z = "count", lwd = "count", layer.name = temp_ln)
+}) %>% 
+  reduce(`+`)
+ 
+
+```
+
+{-}
+
+
+#### table_trips_subset
+
+The last main pair of files written out by `query_network_trip_using_bbox()` are the `table_trips_subset` tables. These files contain tabular data detailing every trip queried by `query_network_trip_using_bbox()` - effectively a subset of the entire data in the Replica database that meets the input criteria specified by the user. 
+
+Using this table, one can calculate any number of additional analysis statistics by aggregating this tables attributes. E.g. Number of unique trips per within a specified study area, etc.
+
+> **Note:** This is an important table that can be used to extend an analysis past the initial data query. As mentioned, it can be used to develop query level traffic statistics. Furthermore, it can be used to re-query Replica in order to acquire different network volume aggregation layers (see section).
+
 
 ```{r echo=FALSE}
-data("table_agg_by_link_subset_limited")
-
-table_agg_by_link_subset_limited %>% 
-  head(10) %>% 
-  reactable(bordered = TRUE, wrap = FALSE, style = list(minWidth = 300)
-            ,striped = TRUE, highlight = TRUE, fullWidth = T, height = 300)
+data("seattleFreight_table_trips_subset_qs")
 ```
 
-> **_NOTE:_** `table_agg_by_link_subset_limited` will likely be the focus of your analysis as it contains network links. `replicaToolkitR` provides helper functions that aggregate network links a number of pre-set ways but they may not help you in your analysis or you may want to aggregte them differently. 
+##### Table {.tabset}
+```{r}
+seattleFreight_table_trips_subset_qs %>% 
+  head(100) %>% 
+  reactable(
+    defaultColDef = colDef(footerStyle = list(fontWeight = "bold"))
+    ,height = 250
+  ) %>% 
+  gauntletReactable::rctble_format_table(defaultPageSize = 10)
+```
 
-## Data Processing
+##### Map {.tabset}
+```{r}
+seattleFreight_table_agg_network_vols_qs %>% 
+  mutate(vehicle_type = str_remove(vehicle_type, "_COMMERCIAL")) %>% 
+  mutate(trip_type = paste0(str_remove(flag_sa_origin, "ernal"), "-", str_remove(flag_sa_destination, "ernal"))) %>% 
+  merge(
+    seattleFreight_replica_network_qs %>% st_as_sf(wkt = "geometry", crs = 4326), .
+    ,by.x = "stableEdgeId", by.y = "network_link_ids_unnested"
+  ) %>% 
+  group_by(vehicle_type_1 = vehicle_type, trip_type_1 = trip_type) %>% 
+group_map(~{
+  
+  temp_data = .x
+  temp_v = unique(temp_data$vehicle_type)
+  temp_t = unique(temp_data$trip_type)
+  temp_ln = paste0(temp_v, " ", temp_t)
+  
+  mapview(temp_data, z = "count", lwd = "count", layer.name = temp_ln)
+}) %>% 
+  reduce(`+`)
+ 
 
-As eluded to above, the function `query_network_trip_using_bbox()` acquires, performs some initial processing on, and saves Replica data to your computer. `replicaToolkitR` provides additional helper functions that process the data further into a format that is more conducive to mapping and commonly performed analyses (OD analysis, etc.). 
+```
+
+{-}
+
+### Extending Your Analysis 
+
+
+#### Additional Network Layers
+
+As alluded to above, the `table_trips_subset` tables can be used to aquire additioanl network layers from Replcia's backend database.
+
+`table_trips_subset` contains a single record for each unique trip that meet the users query inputs and spatial study area criteria. Each trips is uniquely identified by a *activity_id*. The function `rplc_extract_networks_given_activity_id()` takes vectors of *activity_ids* and returns network link volumes for those particular *activity_ids*. This can be perfromed `N` number of times given the number of *activity_ids* groups the user makes.
+
+In the following example, the attribute `time_group` is made from the start time of each trip and relabeling them to 4 hour bins e.g. trips starting during 12AM-4AM, 4AM-8AM and so on.
+
+```{r}
+trips_tagged = seattleFreight_table_trips_subset_qs %>%
+  dplyr::mutate(time_group = gauntlet::floor_divide(start_local_hour, 4))
+
+unique(trips_tagged$time_group) %>% sort()
+```
+
+
+```{r}
+seattleFreight_replica_network_aux_layers = rplc_extract_networks_given_activity_id(
+  raw_trip_table = trips_tagged
+  ,col_to_split = "time_group"
+  ,avoid_str = "0|20"
+  ,add_context = "seattle weekend freight"
+  ,data_set_location = user_location
+  ,data_set_type = user_day
+  ,data_set_period = user_time
+  ,customer_name = "replica-customer"
+)
+
+```
+
+```{r}
+data(seattleFreight_replica_network_aux_layers)
+```
+
+
+```{r}
+trips_tagged = seattleFreight_table_trips_subset_qs %>%
+  dplyr::mutate(time_group = gauntlet::floor_divide(start_local_hour, 4))
+
+unique(trips_tagged$time_group) %>% sort()
+```
+
+The query is similar to `query_network_trip_using_bbox()` and the user mush point to the same dataset the *table_trips_subset* originally came from or the *activity_ids* will not match.
+
+In addition, the column which the function wil split on must be provided and if any level should not be queired. In this case, the *time_group* is idetified to the function as the column contained the groups we want to aquire network layers for and to not acquire data for trips starting between 12AM-4AM and 8PM-12PM.
+
+```{r eval = false}
+seattleFreight_replica_network_aux_layers = rplc_extract_networks_given_activity_id(
+  raw_trip_table = trips_tagged
+  ,col_to_split = "time_group"
+  ,avoid_str = "0|20"
+  ,add_context = "seattle weekend freight"
+  ,data_set_location = user_location
+  ,data_set_type = user_day
+  ,data_set_period = user_time
+  ,customer_name = "replica-customer"
+)
+
+```
+
+```{r}
+data(seattleFreight_replica_network_aux_layers)
+```
+
+```{r}
+seattleFreight_replica_network_aux_layers %>% 
+  merge(
+    seattleFreight_replica_network_qs %>% st_as_sf(wkt = "geometry", crs = 4326), .
+    ,by.x = "stableEdgeId", by.y = "network_link_ids_unnested"
+  ) %>% 
+  group_by(split_col_value_1 = split_col_value) %>% 
+  group_map(~{
+    temp_data = .x
+    temp_ln = unique(temp_data$split_col_value) %>% paste(., " hour")
+    
+    mapview(temp_data, z = "count", lwd = "count", layer.name = temp_ln)
+  }) %>% 
+  reduce(`+`)
+```
+
+
+As eluded to above, the function `query_network_trip_using_bbox()` extracts, pre, and saves Replica data to your computer. `replicaToolkitR` provides additional helper functions that process the data further into a format that is more conducive to mapping and commonly performed analyses (OD analysis, etc.). 
 
 These functions and the data processing workflow are described in this section.
 
@@ -234,53 +458,50 @@ These functions and the data processing workflow are described in this section.
 >
 > Additionally, each function can be told to automatically save the resulting processed data to the same location/folder as the raw data.
 
-#### acquired_sa_polys
 
-The first function you should run is `get_tigris_polys_from_replica_index()`. This function takes the raw data `replica_sa_poly_index` to acquire a detailed spatial polygon set of your study area's block groups. 
-
-It grabs the polygons within your study area using the TIGRIS API. These polygons are more detailed the ones from Replica and contain attributes such as land and water area which can help out when calculating trip densities for origin or destination polygons.
 
 ```{r eval=FALSE}
-data("replica_sa_poly_index")
 
-get_tigris_polys_from_replica_index(
-  network_object = replica_sa_poly_index
-  ,states = "WA"
-  ,auto_save = F
-)
+# #### Acquiring Study Area Polygons
+# 
+# This function `get_tigris_polys_from_replica_index()` takes the raw data `replica_sa_poly_index` and uses it to acquire more detailed versions of this from the US Census site. 
+# 
+# It grabs the polygons within your study area using the TIGRIS API. These polygons are more detailed the ones from Replica and contain attributes such as land and water area which can help out when calculating trip densities for origin or destination polygons.
+# data("replica_sa_poly_index")
+# 
+# yolo = get_tigris_polys_from_replica_index(
+#   network_object = replica_sa_poly_index
+#   ,states = "WA"
+#   ,auto_save = F
+# )
+
+# data("acquired_sa_polys")
+# 
+# mapview(acquired_sa_polys)
 ```
 
-```{r fig.width=5, fig.height=4}
-data("acquired_sa_polys")
+#### Network Processing
 
-mapview(acquired_sa_polys)
-```
+Producing different network layers is a vital component of the `ReplicaToolkitR` workflo but working with the raw network related tables can be tedious. `ReplicaToolkitR` provides a number of helper functions that process the tabular network data saved by `query_network_trip_using_bbox()` into a more useable format.
 
-#### replica_queried_network_cntds/_links
+`make_network_link_layer():` performs some basic reprocessing and attribute creation and produces a poline representation of the network.
+`make_network_centroid_layer():` performs some basic reprocessing and attribute creation and produces a point representation of the network.
 
-The functions `make_network_link_layer()` and `make_network_centroid_layer()` convert the Replica network links from tabular data to spatial polyline object and from a spatial polyline object to a spatial points object, respectively. 
-
-The network poly-lines object can be merged with the network volume data to create interactive maps. 
-
-The network points object is created by extracting the center-point of each polyline and then represents each network polyline using its center or mid-point. This is done because this package contains a number of helper functions that help visualize network volumes. These functions create interactive, filterable dashboards detailing network volumes and are only compatible with spatial points objects and not spatial poly-lines. 
+Why the difference - polyline networks are fundemental to network maps and repersent the network as it exists. However, polylines can not be used when making client-side, filterable and interactive crosstalk/leaflet widget unlike point. By repersenting the network by their link centroids, one can used the sweet of visualization tools provided by `ReplicaToolkitR` to create interactive leaflet maps displaying network usage.
 
 > **Note:** `make_network_link_layer()` must be ran before `make_network_centroid_layer()`. 
 
 ```{r eval=F}
-data("replica_queried_network")
-
+#note: both functions can be supplied a network obj or a folder to read network object from
+data("seattleFreight_replica_network_qs")
 make_network_link_layer(
-  network_object = replica_queried_network
-  ,auto_save = F
-)
+  network_object = seattleFreight_replica_network_qs
+  , auto_save = F)
 
-data("replica_queried_network_links")
-
+data("seattleFreight_replica_network_links")
 make_network_centroid_layer(
-  network_object = replica_queried_network_links
-  ,auto_save = F
-)
-
+  network_object = seattleFreight_replica_network_links
+  ,auto_save = F)
 ```
 
 ```{r echo=F}
@@ -290,12 +511,15 @@ data("replica_queried_network_cntds")
 
 Below is a sample of both the network link poly-lines and network link midpoints. 
 ```{r fig.width=5, fig.height=4}
-replica_queried_network_links_m = replica_queried_network_links %>%  
+replica_queried_network_links_m = seattleFreight_replica_network_links %>%  
   filter(highway == "motorway")
-replica_queried_network_cntds_m = replica_queried_network_cntds %>%  
+replica_queried_network_cntds_m = seattleFreight_replica_network_points %>%  
   filter(highway == "motorway")
 
-mapview(replica_queried_network_cntds_m) + mapview(replica_queried_network_links_m)
+mapview(replica_queried_network_cntds_m
+        ,layer.name = "Network Links") + 
+  mapview(replica_queried_network_links_m
+          ,layer.name = "Network Points")
 ```
 
 Once you create `replica_queried_network_links`, you can inspect it using the helper function `inspect_queried_network()`. It is often helpful to look at the links you acquired as Replica labels each link with their own **_highway_** tag which you may be unfamiliar with. 

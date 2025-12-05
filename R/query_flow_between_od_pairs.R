@@ -77,23 +77,35 @@ query_flow_between_od_pairs = function(
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #note: creates subset of network using study area extent
   #----- returns all roads in study area and then filters only for requested link types
+  #NOTE: mg20251203 - good to do replace all of this to rplc_make_network_tables
+  # {
+  #   table_network = sql_createNetworkTable(
+  #     customer_name = customer_name
+  #     ,network_table = network_table
+  #     ,links_pro = links_pro
+  #     ,wkt_object = list_wkt_objects[[1]]
+  #     ,highway_regrex = input_highway_regrex
+  #   )
+  #
+  #   highway_counts = sql_createNetworkLinkCountTable(
+  #     customer_name = customer_name
+  #     ,table_network = table_network)
+  #
+  #   rplc_check_and_log_queired_links(
+  #     counts_object = highway_counts
+  #     ,query_links = links_pro
+  #     ,logger_object = logger)
+  # }
+  #
+  #
+
   {
-    table_network = sql_createNetworkTable(
-      customer_name = customer_name
-      ,network_table = network_table
-      ,links_pro = links_pro
-      ,wkt_object = list_wkt_objects[[1]]
-      ,highway_regrex = input_highway_regrex
-    )
+    temp_table_object = rplc_make_network_tables(
+      logger, wkt_object = list_wkt_objects[[1]]
+      ,links_pro, customer_name, network_table)
 
-    highway_counts = sql_createNetworkLinkCountTable(
-      customer_name = customer_name
-      ,table_network = table_network)
-
-    check_and_log_queired_links(
-      counts_object = highway_counts
-      ,query_links = links_pro
-      ,logger_object = logger)
+    table_network = temp_table_object$table_network
+    highway_counts = temp_table_object$highway_counts
   }
 
 
@@ -160,8 +172,8 @@ query_flow_between_od_pairs = function(
       message(str_glue("{gauntlet::strg_make_space_2()}Querying {temp_origin} to {temp_destination}"))
 
       poly_gen_att_unique = poly_gen_att %>% select(Name) %>%  unique()
-      origin_wkt = wellknown::sf_convert(poly_gen_att_unique %>%  filter(Name == temp_origin))
-      destination_wkt = wellknown::sf_convert(poly_gen_att_unique %>%  filter(Name == temp_destination))
+      origin_wkt = sf::st_as_text(poly_gen_att_unique %>%  filter(Name == temp_origin))
+      destination_wkt = sf::st_as_text(poly_gen_att_unique %>%  filter(Name == temp_destination))
 
 
       # --from `{replica_temp_tbl_name(table_trip_subset)}`
@@ -316,7 +328,7 @@ list(
     temp_table = .x[[1]]
     temp_name = .x[[2]]
 
-    check_to_download_bqtable(
+    rplc_check_to_download_bqtable(
       bq_table = temp_table
       ,file_name = temp_name
       ,table_name = temp_name

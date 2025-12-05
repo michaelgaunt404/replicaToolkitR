@@ -6,18 +6,22 @@
 #'
 #' Function is helpful when making mulitstepped queries where temporary tables are created and subsequently interacted with.
 #'
-#' @param object
+#' @param object]
+#'
+#' @importFrom stringr str_glue
 #'
 #' @return a character string
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #'
 #' temp = list(username = "replica_fake_name"
 #',dataset = "replica_temp_dataset"
 #',table = "replica_temp_table")
 #'
 #'replica_temp_tbl_name(temp)
+#' }
 replica_temp_tbl_name = function(object) {
   stringr::str_glue("{object[[1]]}.{object[[2]]}.{object[[3]]}")
 }

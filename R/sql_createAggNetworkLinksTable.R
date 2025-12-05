@@ -9,10 +9,12 @@
 #'
 #' @return A BigQuery result containing aggregated network links.
 #'
-#' @examples
-#' queryAggNetworkLinks("your_project_name", "your_trips_thru_zone_table", "your_network_table")
-#'
 #' @export
+#' @examples
+#' \dontrun{
+#' # none
+#'
+#' }
 sql_createAggNetworkLinksTable <- function(customer_name, table_trips_thru_zone, table_network, mvmnt_query = F) {
   message(stringr::str_glue("{gauntlet::strg_make_space_2()}Link aggreations commencing...."))
 
