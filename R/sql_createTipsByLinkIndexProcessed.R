@@ -20,11 +20,15 @@
 sql_createTipsByLinkIndexProcessed <- function(customer_name, table_trips_that_use_links) {
   message(stringr::str_glue("{gauntlet::strg_make_space_2()}\nPorcessing tips table...."))
 
+  #note this function is somewhat superfluous
+  #previous sql function in replica function did not prefilter trip network links for only selected links
+  #that function now orders the network links and does not need to do it here
+  #this function used to make an attribute seq_ord but no longer does
+  #pretty much a glorified select statement function
+
   query <- stringr::str_glue("select
 activity_id, mode, network_links,vehicle_type, link_ord
 ,distance_miles,start_time, end_time, destination_bgrp, origin_bgrp,start_lng, start_lat, end_lng, end_lat
-,ROW_NUMBER ()
-    OVER (PARTITION BY activity_id) AS seq_ord
 ,count(*)
     OVER (PARTITION BY activity_id) AS act_link_count
 from {replica_temp_tbl_name(table_trips_that_use_links)}
