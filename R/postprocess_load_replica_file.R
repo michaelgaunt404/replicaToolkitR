@@ -19,7 +19,7 @@
 #' postprocess_load_replica_file("data/req_dev", "data_20230111_150315")
 #' postprocess_load_replica_file("data/req_dev", "data_20230111_150315", flag_qs = TRUE)
 #' }
-postprocess_load_replica_file <- function(location = location, folder = folder,
+postprocess_load_replica_file = function(location = location, folder = folder,
                               file_stem = "replica_trip_origin_destination",
                               flag_qs = FALSE) {
 

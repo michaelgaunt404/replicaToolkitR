@@ -8,5 +8,9 @@
 ^pkgdown$
 ^\.github$
 code/
+R_deprecated/
+R_hold/
+code/
+data_deprecated/
 data/req_zz/
 data/req_dev/

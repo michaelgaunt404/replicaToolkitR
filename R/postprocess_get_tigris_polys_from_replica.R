@@ -34,43 +34,70 @@
 #' \dontrun{
 #' # postprocess_get_tigris_polys_from_replica("data/req_dev", "data_20230111_150315")
 #' }
-
 postprocess_get_tigris_polys_from_replica = function(
-    location, folder, auto_save = F, network_object = NULL, year = 2010){
+    location, folder, auto_save = F
+    # ,network_object = NULL
+    ,year = 2010
+    ,input_file_use = "table_trips_subset"){
 
-  # location = "data/req_dev"
-  # folder = "data_20230111_150315"
-  # auto_save = F
-  # network_object = NULL
-  # states = "WA"
-  # year = 2010
+  auto_save = T
+
+  check_intputs = input_file_use %in% c("table_trips_subset", "replica_sa_poly_index")
+  stopifnot("Input variable 'input_file_use' not one of the acceptable values\nRequires either 'table_trips_subset' or 'replica_sa_poly_index'" = check_intputs)
+
+  tryCatch({
 
   #load_replica_poly_index
-  if (is.null(network_object)){
-    message("Study area index loaded using file and location...")
-    replica_queried_network = here::here(location, folder, "replica_sa_poly_index.csv") %>%
-      data.table::fread() %>%
-      dplyr::select(raw_id)
-  } else {
-    message("Study area index made using suplied network object...")
-    replica_queried_network = network_object %>%
-      dplyr::select(raw_id)
+  if (input_file_use == "table_trips_subset"){
+    message("Reading in 'trip subset' table from project folder...")
+    message("Using blockgroup attributes to build query")
+
+    temp_data = postprocess_load_replica_file(
+      location = location, folder = folder, flag_qs = T
+      ,file_stem = "table_trips_subset") %>%
+      data.table() %>%
+      select(ends_with("_bgrp")) %>%
+      mutate(index = 1) %>%
+      pivot_longer(cols = !index
+                   ,values_to = "GEOID") %>%
+      select(GEOID) %>%
+      unique()
+
+  } else if (is.null(network_object)){
+    message("Reading in 'SA Polygon Index' table from project folder...")
+    # message("Using blockgroup attributes to build query")
+
+    temp_data = postprocess_load_replica_file(
+      location = location, folder = folder, flag_qs = T
+      ,file_stem = "replica_sa_poly_index")  %>%
+      dplyr::select(raw_id) %>%
+      dplyr::rename(GEOID = raw_id)
+
   }
 
-  index_replica_queried_network = replica_queried_network %>%
+  }, error = function(err) {
+    message("An error orccured during file load")
+    print(err$message)
+  })
+
+
+  message("File loaded properly...")
+
+  temp_od_df = temp_data %>%
     dplyr::mutate(
-      states = raw_id %>%
+      states = GEOID %>%
         stringr::str_trunc(2, "right", ellipsis = "") %>%
         as.integer()
-      ,counties = raw_id %>%
+      ,counties = GEOID %>%
         stringr::str_trunc(5, "right", ellipsis = "") %>%
         stringr::str_trunc(3, "left", ellipsis = "") %>%
         as.integer()) %>%
     dplyr::select(states, counties) %>%
-    unique()
+    unique() %>%
+    dplyr::arrange(states, counties)
 
-  block_groups = list(index_replica_queried_network$states
-                      ,index_replica_queried_network$counties) %>%
+  block_groups = list(temp_od_df$states
+                      ,temp_od_df$counties) %>%
     pmap_df(~{
 
       tigris::block_groups(state = .x
@@ -116,5 +143,5 @@ postprocess_get_tigris_polys_from_replica = function(
     sf::write_sf(block_groups_sub, here::here(location, folder, "acquired_sa_polys.gpkg"))
   }
 
-  return(block_groups_sub)
+  # return(block_groups_sub)
 }

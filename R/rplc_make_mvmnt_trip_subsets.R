@@ -72,17 +72,18 @@ rplc_make_mvmnt_trip_subsets =  function(link_selections_df
 
   message(stringr::str_glue("Query resulted in {bigrquery::bq_table_nrow(table_pro)} trip/links identified via movement patterns"))
 
-  check_continue = gauntlet::robust_prompt_used("continue and download")
-  stopifnot("Aborted" = check_continue)
-
-  turning_links = bigrquery::bq_table_download(
-    table_pro, page_size = page_size, quiet = F, n_max = page_limit )
+  #note:gaunt20260218 - removed this wanted to download after function
+  # check_continue = gauntlet::robust_prompt_used("continue and download")
+  # stopifnot("Aborted" = check_continue)
+  #
+  # turning_links = bigrquery::bq_table_download(
+  #   table_pro, page_size = page_size, quiet = F, n_max = page_limit )
 
   return(
     list(
       table_trips_that_use_links = table_trips_that_use_links
       ,table_pro = table_pro
-      ,turning_links = turning_links
+      # ,turning_links = turning_links
       ,link_selections_index_pro = link_selections_index_pro
     )
   )

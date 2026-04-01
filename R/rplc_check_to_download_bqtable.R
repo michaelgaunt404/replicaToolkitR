@@ -49,13 +49,19 @@ rplc_check_to_download_bqtable <- function(
     folder,
     file_name,
     return_obj,
+    auto_table_download = F,
     write_format = c("csv", "qs", "both")) {
   write_format <- match.arg(write_format)
 
   temp_nrow <- bigrquery::bq_table_nrow(bq_table)
   message(stringr::str_glue("{gauntlet::strg_make_space_2()}There are {temp_nrow} records in the table:\n{table_name}"))
 
+  if (!auto_table_download){
   dl_check <- gauntlet::robust_prompt_used("download this table")
+  } else {
+    "User elected to automatically download tables"
+    dl_check = T
+  }
 
   tryCatch({
     if (dl_check) {

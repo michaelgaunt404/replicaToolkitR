@@ -76,7 +76,7 @@ query_network_volumes_given_activity_id = function(
     customer_name
 ) {
 
-    trip_table = stringr::str_glue(
+  trip_table = stringr::str_glue(
     "{customer_name}.{data_set_location}.{data_set_location}_{data_set_period}_{data_set_type}_trip"
   )
 
@@ -118,7 +118,6 @@ query_network_volumes_given_activity_id = function(
           paste0(collapse = ",")
 
         split_activity = rplc_split_long_string(index_activity_id, max_len = 5e5)
-        split_activity = rplc_split_long_string(index_activity_id, max_len = 50)
 
         message(stringr::str_glue("Activity vector split into {length(split_activity)} batches"))
 
